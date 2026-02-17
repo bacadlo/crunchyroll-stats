@@ -1,0 +1,46 @@
+# === OS ===
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# === IDEs / Editors ===
+.cursor/
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# === Environment variables ===
+.env
+.env.*
+!.env.example
+
+# === Node.js / Next.js (crunchyroll-stats-app) ===
+node_modules/
+.next/
+out/
+build/
+coverage/
+dist/
+*.tsbuildinfo
+next-env.d.ts
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+.eslintcache
+*.log
+.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+.vercel
+*.pem
+
+# === Rust (crunchyroll-stats-api) ===
+target/
+Cargo.lock
