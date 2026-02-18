@@ -2,7 +2,7 @@ use anyhow::Result;
 use futures_util::StreamExt;
 use crate::{
     auth::CrunchyrollClient,
-    models::WatchedItem,
+    models::HistoryEntry,
 };
 
 pub struct History<'a> {
@@ -14,7 +14,7 @@ impl<'a> History<'a> {
         Self { client }
     }
 
-    pub async fn fetch_history(&self, limit: Option<usize>) -> Result<Vec<WatchedItem>> {
+    pub async fn fetch_history(&self, limit: Option<usize>) -> Result<Vec<HistoryEntry>> {
         let mut history = Vec::new();
         let mut pagination = self.client.client.watch_history();
 
@@ -22,65 +22,54 @@ impl<'a> History<'a> {
             pagination.page_size(limit as u32);
         }
 
+        let mut index = 0usize;
         while let Some(entry) = pagination.next().await {
             let entry = entry?;
-            
-            let watched_item = match entry.panel {
-                crunchyroll_rs::MediaCollection::Episode(episode) => {
-                    let duration_secs = episode.duration.num_seconds() as f64;
-                    let playhead_secs = entry.playhead as f64;
 
-                    let progress = if duration_secs > 0.0 {
-                        (playhead_secs / duration_secs) * 100.0
-                    } else {
-                        0.0
-                    };
+            let history_entry = match entry.panel {
+                Some(crunchyroll_rs::MediaCollection::Episode(episode)) => {
+                    let duration_ms = episode.duration.num_milliseconds() as u64;
+                    let playhead_ms = (entry.playhead as u64) * 1000;
 
-                    
                     let thumbnail = episode.images
                         .iter()
                         .max_by_key(|img| img.width)
                         .map(|img| img.source.clone());
 
-                    WatchedItem {
+                    HistoryEntry {
+                        id: format!("item-{}", index),
                         title: episode.series_title,
                         episode_title: Some(episode.title),
-                        date_watched: entry.date_played,
-                        progress,
-                        fully_watched: entry.fully_watched,
+                        watched_at: Some(entry.date_played.to_rfc3339()),
+                        progress_ms: Some(playhead_ms),
+                        duration_ms: Some(duration_ms),
                         thumbnail,
                     }
                 },
-                crunchyroll_rs::MediaCollection::Movie(movie) => {
-                    // Convert duration to seconds before calculation
-                    let duration_secs = movie.duration.num_seconds() as f64;
-                    let playhead_secs = entry.playhead as f64;
+                Some(crunchyroll_rs::MediaCollection::Movie(movie)) => {
+                    let duration_ms = movie.duration.num_milliseconds() as u64;
+                    let playhead_ms = (entry.playhead as u64) * 1000;
 
-                    let progress = if duration_secs > 0.0 {
-                        (playhead_secs / duration_secs) * 100.0
-                    } else {
-                        0.0
-                    };
-
-                    
                     let thumbnail = movie.images.thumbnail
                         .iter()
                         .max_by_key(|img| img.width)
                         .map(|img| img.source.clone());
 
-                    WatchedItem {
+                    HistoryEntry {
+                        id: format!("item-{}", index),
                         title: movie.title,
                         episode_title: None,
-                        date_watched: entry.date_played,
-                        progress,
-                        fully_watched: entry.fully_watched,
+                        watched_at: Some(entry.date_played.to_rfc3339()),
+                        progress_ms: Some(playhead_ms),
+                        duration_ms: Some(duration_ms),
                         thumbnail,
                     }
                 },
                 _ => continue,
             };
 
-            history.push(watched_item);
+            history.push(history_entry);
+            index += 1;
         }
 
         Ok(history)
