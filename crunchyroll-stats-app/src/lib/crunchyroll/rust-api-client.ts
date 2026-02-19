@@ -77,14 +77,21 @@ export async function getRustProfile(
     });
 
     const data = response.data;
-    return {
+    console.log('getRustProfile - Raw response data:', JSON.stringify(data, null, 2));
+    console.log('getRustProfile - Avatar field:', data.avatar);
+    console.log('getRustProfile - Avatar type:', typeof data.avatar);
+    
+    const profile = {
       profileId: data.profile_id,
       username: data.username,
       profileName: data.profile_name,
-      avatar: data.avatar,
+      avatar: data.avatar || '',
       maturityRating: data.maturity_rating,
       isPrimary: data.is_primary,
     };
+    
+    console.log('getRustProfile - Returning profile:', JSON.stringify(profile, null, 2));
+    return profile;
   } catch (error) {
     console.error('Rust API profile call failed:', error);
     if (axios.isAxiosError(error)) {

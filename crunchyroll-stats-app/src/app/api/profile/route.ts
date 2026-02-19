@@ -23,6 +23,10 @@ export async function GET(request: NextRequest) {
 
     const profile = await getRustProfile(session.email, session.password);
 
+    console.log('Profile API route - Profile received:', JSON.stringify(profile, null, 2));
+    console.log('Profile API route - Avatar value:', profile.avatar);
+    console.log('Profile API route - Avatar is empty:', !profile.avatar || profile.avatar.trim() === '');
+
     return NextResponse.json(profile);
   } catch (error) {
     console.error('Profile fetch error:', error);

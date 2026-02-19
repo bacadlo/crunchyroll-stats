@@ -87,7 +87,10 @@ async fn get_profile(req: web::Json<LoginRequest>) -> Result<HttpResponse> {
     info!("Profile request for user: {}", req.email);
 
     match fetch_profile(&req.email, &req.password).await {
-        Ok(profile) => Ok(HttpResponse::Ok().json(profile)),
+        Ok(profile) => {
+            info!("Profile fetched successfully: username={}, avatar='{}'", profile.username, profile.avatar);
+            Ok(HttpResponse::Ok().json(profile))
+        },
         Err(e) => {
             log::error!("Failed to fetch profile: {}", e);
             Ok(HttpResponse::BadRequest().json(ErrorResponse {

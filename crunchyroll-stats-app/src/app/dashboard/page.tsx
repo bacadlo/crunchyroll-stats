@@ -9,14 +9,13 @@ import { WatchHistoryTable } from '@/components/WatchHistoryTable';
 import { FilterBar } from '@/components/FilterBar';
 import { StatsOverview } from '@/components/StatsOverview';
 import { ExportButton } from '@/components/ExportButton';
-import { useTheme } from '@/components/ThemeProvider';
+import { ThemeToggle } from '@/components/ThemeToggle';
 import { WatchHistoryResponse } from '@/types/watch-history';
 import { Profile } from '@/types/auth';
-import { Tv, RefreshCw, LogOut, Sun, Moon } from 'lucide-react';
+import { Tv, RefreshCw, LogOut } from 'lucide-react';
 
 export default function DashboardPage() {
   const router = useRouter();
-  const { theme, toggleTheme } = useTheme();
   const [data, setData] = useState<WatchHistoryResponse | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -48,7 +47,12 @@ export default function DashboardPage() {
 
       if (profileRes.ok) {
         const profileResult = await profileRes.json();
+        console.log('Profile data received:', profileResult);
+        console.log('Avatar value:', profileResult.avatar);
+        console.log('Avatar type:', typeof profileResult.avatar);
         setProfile(profileResult);
+      } else {
+        console.error('Profile fetch failed:', profileRes.status, await profileRes.text());
       }
 
       setError('');
@@ -117,27 +121,47 @@ export default function DashboardPage() {
             <div className="flex items-center gap-3">
               {profile && (
                 <div className="flex items-center gap-2 mr-2">
-                  {profile.avatar && (
-                    <Image
-                      src={profile.avatar}
-                      alt={profile.username}
-                      width={32}
-                      height={32}
-                      className="rounded-full"
-                    />
+                  {profile.avatar && profile.avatar.trim() !== '' ? (
+                    (() => {
+                      let avatarUrl = profile.avatar.trim();
+                      // If it's a relative URL, make it absolute
+                      if (!avatarUrl.startsWith('http') && !avatarUrl.startsWith('//')) {
+                        if (avatarUrl.startsWith('/')) {
+                          avatarUrl = `https://www.crunchyroll.com${avatarUrl}`;
+                        } else {
+                          avatarUrl = `https://www.crunchyroll.com/${avatarUrl}`;
+                        }
+                      }
+                      console.log('Rendering avatar with URL:', avatarUrl);
+                      return (
+                        <Image
+                          src={avatarUrl}
+                          alt={profile.username}
+                          width={32}
+                          height={32}
+                          className="rounded-full"
+                          onError={(e) => {
+                            console.error('Avatar image failed to load:', avatarUrl, e);
+                          }}
+                          onLoad={() => {
+                            console.log('Avatar image loaded successfully:', avatarUrl);
+                          }}
+                        />
+                      );
+                    })()
+                  ) : (
+                    <div className="w-8 h-8 rounded-full bg-gray-300 dark:bg-gray-600 flex items-center justify-center">
+                      <span className="text-xs font-medium text-gray-600 dark:text-gray-300">
+                        {profile.username.charAt(0).toUpperCase()}
+                      </span>
+                    </div>
                   )}
                   <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
                     {profile.username}
                   </span>
                 </div>
               )}
-              <Button
-                variant="ghost"
-                onClick={toggleTheme}
-                className="flex items-center gap-2"
-              >
-                {theme === 'light' ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
-              </Button>
+              <ThemeToggle />
               <Button
                 variant="ghost"
                 onClick={fetchData}

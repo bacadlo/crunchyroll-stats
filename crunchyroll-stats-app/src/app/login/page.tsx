@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
+import { ThemeToggle } from '@/components/ThemeToggle';
 import { Tv, AlertCircle } from 'lucide-react';
 
 export default function LoginPage() {
@@ -44,17 +45,20 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-purple-50 flex items-center justify-center px-6 py-12">
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 flex items-center justify-center px-6 py-12">
+      <div className="absolute top-4 right-4">
+        <ThemeToggle />
+      </div>
       <div className="w-full max-w-md">
         <div className="flex items-center justify-center gap-2 mb-8">
           <Tv className="w-10 h-10 text-primary-600" />
-          <span className="text-2xl font-bold text-gray-900">CrunchyTracker</span>
+          <span className="text-2xl font-bold text-gray-900 dark:text-white">CrunchyTracker</span>
         </div>
 
-        <Card>
+        <Card className="dark:border-gray-700">
           <CardHeader>
-            <CardTitle className="text-2xl text-center">Sign In</CardTitle>
-            <p className="text-sm text-gray-600 text-center mt-2">
+            <CardTitle className="text-2xl text-center dark:text-white">Sign In</CardTitle>
+            <p className="text-sm text-gray-600 dark:text-gray-400 text-center mt-2">
               Enter your Crunchyroll credentials to continue
             </p>
           </CardHeader>
@@ -97,16 +101,16 @@ export default function LoginPage() {
               </Button>
             </form>
 
-            <div className="mt-6 pt-6 border-t border-gray-200">
-              <p className="text-sm text-gray-600 text-center">
+            <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
+              <p className="text-sm text-gray-600 dark:text-gray-400 text-center">
                 <Link href="/" className="text-primary-600 hover:text-primary-700 font-medium">
                   ← Back to home
                 </Link>
               </p>
             </div>
 
-            <div className="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
-              <p className="text-xs text-blue-800">
+            <div className="mt-6 bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+              <p className="text-xs text-blue-800 dark:text-blue-300">
                 <strong>Note:</strong> Your credentials are used only to authenticate with Crunchyroll's API.
                 We do not store your password.
               </p>
