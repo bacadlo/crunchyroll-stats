@@ -1,4 +1,4 @@
-import { WatchHistoryItem, WatchHistoryStats } from '@/types/watch-history';
+import { HistoryEntry, WatchHistoryStats } from '@/types/watch-history';
 
 type ClassValue =
   | string
@@ -36,6 +36,11 @@ export function cn(...inputs: ClassValue[]): string {
   return classes.join(' ');
 }
 
+export function getCompletionPercent(item: HistoryEntry): number {
+  if (!item.progressMs || !item.durationMs || item.durationMs === 0) return 0;
+  return Math.min(100, Math.round((item.progressMs / item.durationMs) * 100));
+}
+
 export function formatDate(dateString: string): string {
   const date = new Date(dateString);
   return date.toLocaleDateString('en-US', {
@@ -45,10 +50,11 @@ export function formatDate(dateString: string): string {
   });
 }
 
-export function formatDuration(seconds: number): string {
-  const hours = Math.floor(seconds / 3600);
-  const minutes = Math.floor((seconds % 3600) / 60);
-  
+export function formatDuration(ms: number): string {
+  const totalSeconds = Math.floor(ms / 1000);
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+
   if (hours > 0) {
     return `${hours}h ${minutes}m`;
   }
@@ -58,7 +64,7 @@ export function formatDuration(seconds: number): string {
 export function formatTotalWatchTime(minutes: number): string {
   const hours = Math.floor(minutes / 60);
   const days = Math.floor(hours / 24);
-  
+
   if (days > 0) {
     const remainingHours = hours % 24;
     return `${days}d ${remainingHours}h`;
@@ -70,24 +76,23 @@ export function formatTotalWatchTime(minutes: number): string {
   return `${minutes}m`;
 }
 
-export function calculateStats(watchHistory: WatchHistoryItem[]): WatchHistoryStats {
+export function calculateStats(watchHistory: HistoryEntry[]): WatchHistoryStats {
   const totalEpisodes = watchHistory.length;
   const totalWatchTime = watchHistory.reduce((acc, item) => {
-    const duration = item.duration || 0;
-    const watched = (duration * item.completionPercent) / 100;
-    return acc + watched / 60;
+    const progressMs = item.progressMs || 0;
+    return acc + progressMs / 60000;
   }, 0);
 
   const animeData = new Map<string, { count: number; thumbnail?: string }>();
   watchHistory.forEach(item => {
-    const existing = animeData.get(item.animeTitle);
+    const existing = animeData.get(item.title);
     if (existing) {
       existing.count += 1;
       if (!existing.thumbnail && item.thumbnail) {
         existing.thumbnail = item.thumbnail;
       }
     } else {
-      animeData.set(item.animeTitle, { count: 1, thumbnail: item.thumbnail });
+      animeData.set(item.title, { count: 1, thumbnail: item.thumbnail });
     }
   });
 
@@ -97,11 +102,15 @@ export function calculateStats(watchHistory: WatchHistoryItem[]): WatchHistorySt
     .slice(0, 5);
 
   const averageCompletion = watchHistory.length > 0
-    ? watchHistory.reduce((acc, item) => acc + item.completionPercent, 0) / watchHistory.length
+    ? watchHistory.reduce((acc, item) => acc + getCompletionPercent(item), 0) / watchHistory.length
     : 0;
 
-  const recentlyWatched = watchHistory
-    .sort((a, b) => new Date(b.dateWatched).getTime() - new Date(a.dateWatched).getTime())
+  const recentlyWatched = [...watchHistory]
+    .sort((a, b) => {
+      const dateA = a.watchedAt ? new Date(a.watchedAt).getTime() : 0;
+      const dateB = b.watchedAt ? new Date(b.watchedAt).getTime() : 0;
+      return dateB - dateA;
+    })
     .slice(0, 5);
 
   return {
@@ -113,15 +122,14 @@ export function calculateStats(watchHistory: WatchHistoryItem[]): WatchHistorySt
   };
 }
 
-export function exportToCSV(data: WatchHistoryItem[]): string {
-  const headers = ['Anime Title', 'Episode Number', 'Episode Name', 'Date Watched', 'Completion %', 'Duration'];
+export function exportToCSV(data: HistoryEntry[]): string {
+  const headers = ['Title', 'Episode', 'Date Watched', 'Completion %', 'Duration'];
   const rows = data.map(item => [
-    item.animeTitle,
-    item.episodeNumber || '',
-    item.episodeName,
-    formatDate(item.dateWatched),
-    item.completionPercent.toString(),
-    item.duration ? formatDuration(item.duration) : '',
+    item.title,
+    item.episodeTitle || '',
+    item.watchedAt ? formatDate(item.watchedAt) : '',
+    getCompletionPercent(item).toString(),
+    item.durationMs ? formatDuration(item.durationMs) : '',
   ]);
 
   return [
@@ -130,7 +138,7 @@ export function exportToCSV(data: WatchHistoryItem[]): string {
   ].join('\n');
 }
 
-export function exportToJSON(data: WatchHistoryItem[]): string {
+export function exportToJSON(data: HistoryEntry[]): string {
   return JSON.stringify(data, null, 2);
 }
 

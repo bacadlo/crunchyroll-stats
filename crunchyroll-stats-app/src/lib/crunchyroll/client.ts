@@ -1,7 +1,7 @@
 import axios, { AxiosInstance } from 'axios';
 import { crunchyrollAuth } from './auth';
 import { CrunchyrollPlayhead } from './types';
-import { WatchHistoryItem } from '@/types/watch-history';
+import { HistoryEntry } from '@/types/watch-history';
 
 const API_BASE_URL = 'https://www.crunchyroll.com';
 
@@ -24,16 +24,16 @@ export class CrunchyrollClient {
     };
   }
 
-  async getFullWatchHistory(limit: number = 100): Promise<WatchHistoryItem[]> {
+  async getFullWatchHistory(limit: number = 100): Promise<HistoryEntry[]> {
     try {
       const headers = await this.getAuthHeaders();
-      
+
       const profileResponse = await this.client.get('/accounts/v1/me/profile', { headers });
       const accountId = profileResponse.data.account_id;
 
       const playheadResponse = await this.client.get<{ data: CrunchyrollPlayhead[] }>(
         `/content/v2/playheads/${accountId}`,
-        { 
+        {
           headers,
           params: { locale: 'en-US' }
         }
@@ -62,23 +62,16 @@ export class CrunchyrollClient {
 
       return episodes.map((episode: any) => {
         const playhead = playheadMap.get(episode.id);
-        const durationSeconds = episode.duration_ms / 1000;
-        const watchedSeconds = playhead?.playhead || 0;
-        const completionPercent = durationSeconds > 0 
-          ? Math.round((watchedSeconds / durationSeconds) * 100) 
-          : 0;
+        const watchedMs = (playhead?.playhead || 0) * 1000;
 
         return {
           id: episode.id,
-          animeTitle: episode.series_title,
-          episodeNumber: episode.episode,
-          episodeName: episode.title,
-          dateWatched: playhead?.last_modified || new Date().toISOString(),
-          completionPercent: Math.min(completionPercent, 100),
-          duration: Math.round(durationSeconds),
+          title: episode.series_title,
+          episodeTitle: episode.title,
+          watchedAt: playhead?.last_modified || new Date().toISOString(),
+          progressMs: watchedMs,
+          durationMs: episode.duration_ms,
           thumbnail: episode.images?.thumbnail?.[0]?.source,
-          seriesId: episode.series_id,
-          episodeId: episode.id,
         };
       });
     } catch (error) {

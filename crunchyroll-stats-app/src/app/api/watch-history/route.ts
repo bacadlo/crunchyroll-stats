@@ -5,7 +5,7 @@ import { calculateStats } from '@/lib/utils';
 export async function GET(request: NextRequest) {
   try {
     const sessionCookie = request.cookies.get('cr_session');
-    
+
     if (!sessionCookie) {
       return NextResponse.json(
         { error: 'Not authenticated' },
@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
     }
 
     const session = JSON.parse(sessionCookie.value);
-    
+
     if (Date.now() >= session.expires_at) {
       return NextResponse.json(
         { error: 'Session expired' },
@@ -24,10 +24,9 @@ export async function GET(request: NextRequest) {
 
     console.log('Fetching watch history via Rust API...');
 
-    // Call Rust API
     const watchHistory = await getRustWatchHistory(session.email, session.password);
-    
-    console.log(` Received ${watchHistory.length} items from Rust API`);
+
+    console.log(`Received ${watchHistory.length} items from Rust API`);
 
     const stats = calculateStats(watchHistory);
 
@@ -38,7 +37,7 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     console.error('Watch history fetch error:', error);
-    
+
     return NextResponse.json(
       {
         error: error instanceof Error ? error.message : 'Failed to fetch watch history',

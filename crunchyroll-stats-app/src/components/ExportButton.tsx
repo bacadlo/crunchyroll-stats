@@ -2,12 +2,12 @@
 
 import React, { useState } from 'react';
 import { Button } from './ui/Button';
-import { WatchHistoryItem } from '@/types/watch-history';
+import { HistoryEntry } from '@/types/watch-history';
 import { exportToCSV, exportToJSON, downloadFile } from '@/lib/utils';
 import { Download, ChevronDown } from 'lucide-react';
 
 interface ExportButtonProps {
-  data: WatchHistoryItem[];
+  data: HistoryEntry[];
 }
 
 export const ExportButton: React.FC<ExportButtonProps> = ({ data }) => {

@@ -1,5 +1,5 @@
 import axios, { AxiosInstance } from 'axios';
-import { WatchHistoryItem } from '@/types/watch-history';
+import { HistoryEntry } from '@/types/watch-history';
 
 const BASE_URL = 'https://www.crunchyroll.com';
 
@@ -48,7 +48,6 @@ export class CrunchyrollAPI {
     try {
       console.log('Initializing Crunchyroll API client...');
 
-      // Step 1: Get device/CMS configuration
       try {
         const configResponse = await this.client.get('/index/v2', {
           headers: {
@@ -66,7 +65,6 @@ export class CrunchyrollAPI {
 
       console.log('Authenticating with Crunchyroll API...');
 
-      // Step 2: Authenticate with user credentials
       const formData = new URLSearchParams();
       formData.append('username', email);
       formData.append('password', password);
@@ -92,9 +90,9 @@ export class CrunchyrollAPI {
       this.expiresAt = Date.now() + response.data.expires_in * 1000;
       this.accountId = response.data.account_id;
 
-      console.log('✅ Authentication successful');
+      console.log('Authentication successful');
       console.log('Account ID:', this.accountId);
-      
+
       return response.data;
     } catch (error) {
       if (axios.isAxiosError(error)) {
@@ -109,7 +107,7 @@ export class CrunchyrollAPI {
         if (errorData?.error === 'invalid_client') {
           throw new Error('Authentication service configuration error. Please try again later.');
         }
-        
+
         throw new Error(errorData?.error || errorData?.message || 'Authentication failed');
       }
       throw error;
@@ -123,7 +121,7 @@ export class CrunchyrollAPI {
     return this.accessToken;
   }
 
-  async getWatchHistory(limit: number = 100): Promise<WatchHistoryItem[]> {
+  async getWatchHistory(limit: number = 100): Promise<HistoryEntry[]> {
     try {
       const token = await this.ensureValidToken();
 
@@ -163,7 +161,7 @@ export class CrunchyrollAPI {
       }
 
       const episodeIds = playheads.slice(0, limit).map(p => p.content_id);
-      
+
       console.log(`Retrieving details for ${episodeIds.length} episodes...`);
 
       const episodesResponse = await this.client.get('/content/v2/cms/episodes', {
@@ -182,29 +180,22 @@ export class CrunchyrollAPI {
 
       const playheadMap = new Map(playheads.map(p => [p.content_id, p]));
 
-      const watchHistory: WatchHistoryItem[] = episodes.map((episode: any) => {
+      const watchHistory: HistoryEntry[] = episodes.map((episode: any) => {
         const playhead = playheadMap.get(episode.id);
-        const durationSeconds = episode.duration_ms / 1000;
-        const watchedSeconds = playhead?.playhead || 0;
-        const completionPercent = durationSeconds > 0
-          ? Math.round((watchedSeconds / durationSeconds) * 100)
-          : 0;
+        const watchedMs = (playhead?.playhead || 0) * 1000;
 
         return {
           id: episode.id,
-          animeTitle: episode.series_title || 'Unknown',
-          episodeNumber: episode.episode || '',
-          episodeName: episode.title || 'Unknown Episode',
-          dateWatched: playhead?.last_modified || new Date().toISOString(),
-          completionPercent: Math.min(completionPercent, 100),
-          duration: Math.round(durationSeconds),
+          title: episode.series_title || 'Unknown',
+          episodeTitle: episode.title || 'Unknown Episode',
+          watchedAt: playhead?.last_modified || new Date().toISOString(),
+          progressMs: watchedMs,
+          durationMs: episode.duration_ms,
           thumbnail: episode.images?.thumbnail?.[0]?.source,
-          seriesId: episode.series_id,
-          episodeId: episode.id,
         };
       });
 
-      console.log(`✅ Successfully processed ${watchHistory.length} watch history items`);
+      console.log(`Successfully processed ${watchHistory.length} watch history items`);
       return watchHistory;
     } catch (error) {
       console.error('Failed to fetch watch history:', error);

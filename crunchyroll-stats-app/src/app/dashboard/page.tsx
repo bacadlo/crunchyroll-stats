@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
@@ -10,38 +11,49 @@ import { StatsOverview } from '@/components/StatsOverview';
 import { ExportButton } from '@/components/ExportButton';
 import { useTheme } from '@/components/ThemeProvider';
 import { WatchHistoryResponse } from '@/types/watch-history';
+import { Profile } from '@/types/auth';
 import { Tv, RefreshCw, LogOut, Sun, Moon } from 'lucide-react';
 
 export default function DashboardPage() {
   const router = useRouter();
   const { theme, toggleTheme } = useTheme();
   const [data, setData] = useState<WatchHistoryResponse | null>(null);
+  const [profile, setProfile] = useState<Profile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [isRefreshing, setIsRefreshing] = useState(false);
 
-  const fetchWatchHistory = async () => {
+  const fetchData = async () => {
     try {
       setIsRefreshing(true);
-      const response = await fetch('/api/watch-history');
 
-      if (response.status === 401) {
-        console.log('Not authenticated, redirecting to login...');
+      const [historyRes, profileRes] = await Promise.all([
+        fetch('/api/watch-history'),
+        fetch('/api/profile'),
+      ]);
+
+      if (historyRes.status === 401) {
         router.push('/login');
         return;
       }
 
-      if (!response.ok) {
-        const errorData = await response.json();
+      if (!historyRes.ok) {
+        const errorData = await historyRes.json();
         throw new Error(errorData.error || 'Failed to fetch watch history');
       }
 
-      const result = await response.json();
-      setData(result);
+      const historyResult = await historyRes.json();
+      setData(historyResult);
+
+      if (profileRes.ok) {
+        const profileResult = await profileRes.json();
+        setProfile(profileResult);
+      }
+
       setError('');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to fetch watch history');
+      setError(err instanceof Error ? err.message : 'Failed to fetch data');
     } finally {
       setIsLoading(false);
       setIsRefreshing(false);
@@ -49,7 +61,7 @@ export default function DashboardPage() {
   };
 
   useEffect(() => {
-    fetchWatchHistory();
+    fetchData();
   }, []);
 
   const handleLogout = async () => {
@@ -81,7 +93,7 @@ export default function DashboardPage() {
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Error Loading Data</h3>
             <p className="text-gray-600 dark:text-gray-400 mb-6">{error}</p>
             <div className="flex gap-3 justify-center">
-              <Button onClick={fetchWatchHistory}>Try Again</Button>
+              <Button onClick={fetchData}>Try Again</Button>
               <Button variant="outline" onClick={handleLogout}>Back to Login</Button>
             </div>
           </CardContent>
@@ -103,6 +115,22 @@ export default function DashboardPage() {
               </div>
             </div>
             <div className="flex items-center gap-3">
+              {profile && (
+                <div className="flex items-center gap-2 mr-2">
+                  {profile.avatar && (
+                    <Image
+                      src={profile.avatar}
+                      alt={profile.username}
+                      width={32}
+                      height={32}
+                      className="rounded-full"
+                    />
+                  )}
+                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                    {profile.username}
+                  </span>
+                </div>
+              )}
               <Button
                 variant="ghost"
                 onClick={toggleTheme}
@@ -112,7 +140,7 @@ export default function DashboardPage() {
               </Button>
               <Button
                 variant="ghost"
-                onClick={fetchWatchHistory}
+                onClick={fetchData}
                 disabled={isRefreshing}
                 className="flex items-center gap-2"
               >

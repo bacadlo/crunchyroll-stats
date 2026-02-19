@@ -5,7 +5,7 @@ import Image from 'next/image';
 import { WatchHistoryStats } from '@/types/watch-history';
 import { StatCard } from './ui/Stats';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/Card';
-import { formatTotalWatchTime } from '@/lib/utils';
+import { formatTotalWatchTime, getCompletionPercent } from '@/lib/utils';
 import { Tv, Clock, TrendingUp, Star } from 'lucide-react';
 
 interface StatsOverviewProps {
@@ -102,7 +102,7 @@ export const StatsOverview: React.FC<StatsOverviewProps> = ({ stats }) => {
                     <div className="relative w-16 h-10 rounded-md overflow-hidden flex-shrink-0 bg-gradient-to-br from-primary-100 via-white to-purple-100 dark:from-primary-900/30 dark:via-gray-900 dark:to-purple-900/20 ring-1 ring-primary-200/60 dark:ring-primary-800/40 shadow-sm">
                       <Image
                         src={item.thumbnail}
-                        alt={item.animeTitle}
+                        alt={item.title}
                         fill
                         className="object-cover transition-transform duration-300 group-hover:scale-105"
                         sizes="64px"
@@ -115,14 +115,14 @@ export const StatsOverview: React.FC<StatsOverviewProps> = ({ stats }) => {
                   )}
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
-                      {item.animeTitle}
+                      {item.title}
                     </p>
                     <p className="text-xs text-gray-600 dark:text-gray-400 mt-1 truncate">
-                      {item.episodeName}
+                      {item.episodeTitle || 'Unknown'}
                     </p>
                   </div>
                   <span className="text-xs text-gray-500 dark:text-gray-400 ml-2 flex-shrink-0">
-                    {item.completionPercent}%
+                    {getCompletionPercent(item)}%
                   </span>
                 </div>
               ))}
