@@ -13,7 +13,7 @@ export default function HomePage() {
         <nav className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex min-w-0 items-center gap-2">
             <BrandLogoIcon size="sm" />
-            <span className="heading-font truncate text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-primary-600 to-purple-600 sm:text-xl">CrunchyStats</span>
+            <span className="heading-font truncate text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-primary-600 to-blue-600 sm:text-xl">CrunchyStats</span>
           </div>
           <div className="flex items-center gap-3">
             <ThemeToggle />
@@ -28,7 +28,7 @@ export default function HomePage() {
         <div className="text-center max-w-3xl mx-auto">
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-6 leading-tight sm:text-5xl md:text-6xl">
             Track Your Anime Journey with{' '}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-600 to-purple-600">
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-600 to-blue-600">
               CrunchyStats
             </span>
           </h1>

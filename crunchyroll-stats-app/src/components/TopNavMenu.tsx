@@ -65,7 +65,7 @@ export function TopNavMenu() {
       >
         <div className="group/brand inline-flex items-center gap-2.5 border-b border-[var(--border)] px-4 py-4">
           <BrandLogoIcon size="sm" />
-          <span className="heading-font text-base font-semibold leading-none text-transparent bg-clip-text bg-gradient-to-r from-primary-600 to-purple-600">
+          <span className="heading-font text-base font-semibold leading-none text-transparent bg-clip-text bg-gradient-to-r from-primary-600 to-blue-600">
             CrunchyStats
           </span>
         </div>

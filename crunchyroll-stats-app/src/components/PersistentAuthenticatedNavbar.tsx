@@ -68,7 +68,7 @@ export function PersistentAuthenticatedNavbar() {
 
         <div className="flex min-w-0 items-center justify-self-center gap-2 sm:gap-3">
           <BrandLogoIcon size="sm" />
-          <h1 className="truncate text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-primary-600 to-purple-600 sm:text-2xl">
+          <h1 className="truncate text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-primary-600 to-blue-600 sm:text-2xl">
             CrunchyStats
           </h1>
         </div>

@@ -18,18 +18,15 @@ export function useTheme() {
   return useContext(ThemeContext);
 }
 
-function getInitialTheme(): Theme {
-  if (typeof window !== 'undefined') {
-    return document.documentElement.classList.contains('dark') ? 'dark' : 'light';
-  }
-  return 'light';
-}
-
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setTheme] = useState<Theme>(getInitialTheme);
+  const [theme, setTheme] = useState<Theme>('light');
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    const stored = localStorage.getItem('theme') as Theme | null;
+    if (stored === 'dark' || stored === 'light') {
+      setTheme(stored);
+    }
     setMounted(true);
   }, []);
 
@@ -50,7 +47,9 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <ThemeContext.Provider value={{ theme, toggleTheme }}>
-      {children}
+      <div style={{ visibility: mounted ? 'visible' : 'hidden' }}>
+        {children}
+      </div>
     </ThemeContext.Provider>
   );
 }

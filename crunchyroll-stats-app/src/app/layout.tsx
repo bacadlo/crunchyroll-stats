@@ -10,7 +10,7 @@ const inter = localFont({
   weight: '100 900',
   style: 'normal',
   display: 'swap',
-  preload: true,
+  preload: false,
 });
 
 const orbitron = localFont({
@@ -23,7 +23,7 @@ const orbitron = localFont({
   ],
   variable: '--font-heading',
   display: 'swap',
-  preload: true,
+  preload: false,
 });
 
 export const metadata: Metadata = {
@@ -38,13 +38,6 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <head>
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `(function(){try{var t=localStorage.getItem('theme');if(t==='dark')document.documentElement.classList.add('dark')}catch(e){}})()`,
-          }}
-        />
-      </head>
       <body className={`${inter.variable} ${orbitron.variable}`}>
         <ThemeProvider>
           <PetalCanvasBackground />
