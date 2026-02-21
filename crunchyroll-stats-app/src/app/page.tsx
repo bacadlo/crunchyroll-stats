@@ -3,16 +3,17 @@
 import Link from 'next/link';
 import { Button } from '@/components/ui/Button';
 import { ThemeToggle } from '@/components/ThemeToggle';
+import { BrandLogoIcon } from '@/components/BrandLogoIcon';
 import { Tv, BarChart3, Download, Shield } from 'lucide-react';
 
 export default function HomePage() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+    <div className="min-h-screen">
       <header className="px-6 py-4">
         <nav className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Tv className="w-8 h-8 text-primary-600" />
-            <span className="text-xl font-bold text-gray-900 dark:text-white">CrunchyTracker</span>
+            <BrandLogoIcon size="sm" />
+            <span className="heading-font text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-primary-600 to-purple-600">CrunchyTracker</span>
           </div>
           <div className="flex items-center gap-3">
             <ThemeToggle />
@@ -80,7 +81,7 @@ function FeatureCard({
   description: string;
 }) {
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-md dark:hover:shadow-lg transition-shadow">
+    <div className="rounded-xl border border-primary-500/20 bg-[var(--card)] p-6 shadow-[0_0_45px_rgba(249,115,22,0.14)] ring-1 ring-[var(--border)]/60 transition-shadow hover:shadow-[0_0_55px_rgba(249,115,22,0.2)]">
       <div className="text-primary-600 mb-4">{icon}</div>
       <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">{title}</h3>
       <p className="text-gray-600 dark:text-gray-400 text-sm leading-relaxed">{description}</p>

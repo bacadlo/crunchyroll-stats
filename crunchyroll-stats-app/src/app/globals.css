@@ -1,9 +1,43 @@
 @config "../../tailwind.config.js";
 @import "tailwindcss";
 
+:root {
+  --bg: #d9dee6;
+  --card: #f3f5f8;
+  --border: #b8c0ca;
+}
+
+.dark {
+  --bg: #020202;
+  --card: #0b0b0b;
+  --border: #1a1a1a;
+}
+
 @layer base {
   body {
-    @apply bg-gray-50 text-gray-900 antialiased dark:bg-gray-900 dark:text-gray-100;
+    @apply text-gray-900 antialiased dark:text-gray-100;
+    background-color: var(--bg);
+    font-family: var(--font-body), sans-serif;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: var(--font-heading), sans-serif;
+  }
+}
+
+@layer utilities {
+  .heading-font {
+    font-family: var(--font-heading), sans-serif;
+  }
+
+  .stat-number {
+    font-family: var(--font-heading), sans-serif;
+    font-weight: 600;
   }
 }
 
@@ -14,13 +48,13 @@
 }
 
 ::-webkit-scrollbar-track {
-  @apply bg-gray-100 dark:bg-gray-800;
+  background-color: var(--card);
 }
 
 ::-webkit-scrollbar-thumb {
-  @apply bg-gray-300 rounded-full dark:bg-gray-600;
+  @apply bg-primary-300 rounded-full dark:bg-primary-700;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  @apply bg-gray-400 dark:bg-gray-500;
+  @apply bg-primary-400 dark:bg-primary-600;
 }

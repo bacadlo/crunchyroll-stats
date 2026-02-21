@@ -8,7 +8,14 @@ export interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
 export const Card = React.forwardRef<HTMLDivElement, CardProps>(
   ({ className, children, ...props }, ref) => {
     return (
-      <div ref={ref} className={cn('bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden', className)} {...props}>
+      <div
+        ref={ref}
+        className={cn(
+          'rounded-xl border border-primary-500/20 bg-[var(--card)] shadow-[0_0_45px_rgba(249,115,22,0.14)] ring-1 ring-[var(--border)]/60 overflow-hidden',
+          className
+        )}
+        {...props}
+      >
         {children}
       </div>
     );
@@ -20,7 +27,7 @@ Card.displayName = 'Card';
 export const CardHeader = React.forwardRef<HTMLDivElement, CardProps>(
   ({ className, children, ...props }, ref) => {
     return (
-      <div ref={ref} className={cn('px-6 py-4 border-b border-gray-200 dark:border-gray-700', className)} {...props}>
+      <div ref={ref} className={cn('px-6 py-4 border-b border-[var(--border)]', className)} {...props}>
         {children}
       </div>
     );

@@ -10,18 +10,22 @@ import { FilterBar } from '@/components/FilterBar';
 import { StatsOverview } from '@/components/StatsOverview';
 import { ExportButton } from '@/components/ExportButton';
 import { ThemeToggle } from '@/components/ThemeToggle';
+import { TopNavMenu } from '@/components/TopNavMenu';
+import { BrandLogoIcon } from '@/components/BrandLogoIcon';
 import { WatchHistoryResponse } from '@/types/watch-history';
 import { Profile } from '@/types/auth';
-import { Tv, RefreshCw, LogOut } from 'lucide-react';
+import { LogOut } from 'lucide-react';
 
 export default function DashboardPage() {
   const router = useRouter();
   const [data, setData] = useState<WatchHistoryResponse | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [loadingMessage, setLoadingMessage] = useState('Fetching your history...');
   const [error, setError] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [avatarLoadFailed, setAvatarLoadFailed] = useState(false);
 
   const fetchData = async () => {
     try {
@@ -68,17 +72,54 @@ export default function DashboardPage() {
     fetchData();
   }, []);
 
+  useEffect(() => {
+    if (!isLoading) {
+      setLoadingMessage('Fetching your history...');
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      setLoadingMessage('Analyzing you stats...');
+    }, 3000);
+
+    return () => clearTimeout(timer);
+  }, [isLoading]);
+
+  useEffect(() => {
+    setAvatarLoadFailed(false);
+  }, [profile?.avatar]);
+
   const handleLogout = async () => {
     await fetch('/api/auth', { method: 'DELETE' });
     router.push('/login');
   };
 
+  const getProfileDisplayName = (p: Profile): string => {
+    const profileName = p.profileName?.trim();
+    return profileName && profileName.length > 0 ? profileName : p.username;
+  };
+
+  const getAvatarUrl = (avatar: string): string | null => {
+    const value = avatar?.trim();
+    if (!value) return null;
+
+    if (/^[\w-]+\.(png|jpg|jpeg|webp|gif|avif)$/i.test(value)) {
+      return `https://static.crunchyroll.com/assets/avatar/170x170/${value}`;
+    }
+
+    if (value.startsWith('//')) return `https:${value}`;
+    if (value.startsWith('/')) return `https://www.crunchyroll.com${value}`;
+    if (value.startsWith('http://')) return value.replace('http://', 'https://');
+    if (value.startsWith('https://')) return value;
+    return null;
+  };
+
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto mb-4" />
-          <p className="text-gray-600 dark:text-gray-400">Loading your watch history...</p>
+          <p className="text-gray-600 dark:text-gray-400">{loadingMessage}</p>
         </div>
       </div>
     );
@@ -86,7 +127,7 @@ export default function DashboardPage() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center px-6">
+      <div className="min-h-screen flex items-center justify-center px-6">
         <Card className="max-w-md w-full">
           <CardContent className="pt-6 text-center">
             <div className="text-red-600 mb-4">
@@ -106,79 +147,63 @@ export default function DashboardPage() {
     );
   }
 
+  const profileDisplayName = profile ? getProfileDisplayName(profile) : '';
+  const profileAvatarUrl = profile ? getAvatarUrl(profile.avatar) : null;
+
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-10">
+    <div className="min-h-screen">
+      <header className="bg-[var(--card)] border-b border-[var(--border)] sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <Tv className="w-8 h-8 text-primary-600" />
-              <div>
-                <h1 className="text-2xl font-bold text-gray-900 dark:text-white">CrunchyTracker</h1>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Your Anime Watch History</p>
-              </div>
+          <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-4">
+            <TopNavMenu />
+
+            <div className="flex items-center gap-3 justify-self-center">
+              <BrandLogoIcon size="sm" />
+              <h1 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-primary-600 to-purple-600">CrunchyTracker</h1>
             </div>
-            <div className="flex items-center gap-3">
+
+            <div className="flex items-center gap-3 justify-self-end">
+              <ThemeToggle />
               {profile && (
-                <div className="flex items-center gap-2 mr-2">
-                  {profile.avatar && profile.avatar.trim() !== '' ? (
-                    (() => {
-                      let avatarUrl = profile.avatar.trim();
-                      // If it's a relative URL, make it absolute
-                      if (!avatarUrl.startsWith('http') && !avatarUrl.startsWith('//')) {
-                        if (avatarUrl.startsWith('/')) {
-                          avatarUrl = `https://www.crunchyroll.com${avatarUrl}`;
-                        } else {
-                          avatarUrl = `https://www.crunchyroll.com/${avatarUrl}`;
-                        }
-                      }
-                      console.log('Rendering avatar with URL:', avatarUrl);
-                      return (
-                        <Image
-                          src={avatarUrl}
-                          alt={profile.username}
-                          width={32}
-                          height={32}
-                          className="rounded-full"
-                          onError={(e) => {
-                            console.error('Avatar image failed to load:', avatarUrl, e);
-                          }}
-                          onLoad={() => {
-                            console.log('Avatar image loaded successfully:', avatarUrl);
-                          }}
-                        />
-                      );
-                    })()
+                <div className="flex items-stretch gap-3">
+                  <div className="flex h-12 flex-col items-start justify-center gap-1">
+                    <span className="text-base font-semibold text-gray-800 dark:text-gray-200">
+                      {profileDisplayName}
+                    </span>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={handleLogout}
+                      className="h-auto justify-start gap-1 px-0 py-0 text-xs !text-gray-500 hover:!bg-transparent hover:!text-gray-600 focus:!ring-gray-400 dark:!text-gray-400 dark:hover:!text-gray-300 dark:focus:!ring-gray-500"
+                    >
+                      <LogOut className="w-3 h-3" />
+                      Logout
+                    </Button>
+                  </div>
+
+                  {profileAvatarUrl && !avatarLoadFailed ? (
+                    <div className="relative h-12 w-12 overflow-hidden rounded-full">
+                      <Image
+                        src={profileAvatarUrl}
+                        alt={profileDisplayName}
+                        fill
+                        sizes="44px"
+                        unoptimized
+                        className="object-cover"
+                        onError={() => {
+                          setAvatarLoadFailed(true);
+                        }}
+                      />
+                    </div>
                   ) : (
-                    <div className="w-8 h-8 rounded-full bg-gray-300 dark:bg-gray-600 flex items-center justify-center">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gray-300 dark:bg-gray-600">
                       <span className="text-xs font-medium text-gray-600 dark:text-gray-300">
-                        {profile.username.charAt(0).toUpperCase()}
+                        {profileDisplayName.charAt(0).toUpperCase()}
                       </span>
                     </div>
                   )}
-                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                    {profile.username}
-                  </span>
                 </div>
               )}
-              <ThemeToggle />
-              <Button
-                variant="ghost"
-                onClick={fetchData}
-                disabled={isRefreshing}
-                className="flex items-center gap-2"
-              >
-                <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-                Refresh
-              </Button>
-              <Button
-                variant="outline"
-                onClick={handleLogout}
-                className="flex items-center gap-2"
-              >
-                <LogOut className="w-4 h-4" />
-                Logout
-              </Button>
             </div>
           </div>
         </div>
