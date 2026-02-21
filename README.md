@@ -17,7 +17,7 @@ A full-stack app for viewing and analyzing your Crunchyroll watch history. Built
 
 | Layer | Technology |
 |-------|------------|
-| Backend | Rust, Actix-web, crunchyroll-rs |
+| Backend | Rust, Actix-web, [crunchyroll-rs](https://github.com/crunchy-labs/crunchyroll-rs/tree/master) |
 | Frontend | Next.js 16, React 19, TypeScript |
 | Styling | Tailwind CSS |
 | Icons | Lucide React |
@@ -30,7 +30,7 @@ A full-stack app for viewing and analyzing your Crunchyroll watch history. Built
 
 - [Rust](https://rustup.rs/) (stable)
 - [Node.js](https://nodejs.org/) (v18+)
-- A Crunchyroll account
+- A [Crunchyroll](https://www.crunchyroll.com/) account
 
 ### Backend
 
@@ -72,6 +72,6 @@ The app starts at `http://localhost:3000`.
 1. User logs in at `/login` with Crunchyroll credentials
 2. Next.js API route validates and stores credentials in an httpOnly cookie
 3. Dashboard and analytics pages fetch data via Next.js API routes → Rust backend → Crunchyroll API
-4. Rust server authenticates with Crunchyroll using `crunchyroll-rs`, fetches watch history (with genre resolution) and profile data
+4. Rust server authenticates with Crunchyroll using `[crunchyroll-rs](https://github.com/crunchy-labs/crunchyroll-rs/tree/master)`, fetches watch history (with genre resolution) and profile data
 5. Both the Rust API (10 min TTL) and Next.js server (5 min TTL) cache responses to avoid repeated Crunchyroll API calls
 6. Frontend computes stats and analytics, rendering the dashboard with tables, metrics, and export options
