@@ -99,6 +99,8 @@ function normalizeAnalyticsMediaType(entry: HistoryEntry): AnalyticsMediaType | 
   return null;
 }
 
+const RANGE_ENTRIES = Object.entries(RANGE_DAYS) as Array<[WatchTimeRange, number | null]>;
+
 export function calculateAnalyticsSummary(entries: HistoryEntry[]): AnalyticsSummary {
   const now = Date.now();
   const watchedHoursByRange: Record<WatchTimeRange, number> = {
@@ -128,7 +130,7 @@ export function calculateAnalyticsSummary(entries: HistoryEntry[]): AnalyticsSum
     const watchedDate = parseDate(entry.watchedAt);
     const watchedMs = watchedDate?.getTime() ?? null;
 
-    for (const [range, rangeDays] of Object.entries(RANGE_DAYS) as Array<[WatchTimeRange, number | null]>) {
+    for (const [range, rangeDays] of RANGE_ENTRIES) {
       if (rangeDays === null) {
         watchedHoursByRange[range] += hoursFromMs(progressMs);
         continue;
@@ -197,7 +199,16 @@ export function calculateAnalyticsSummary(entries: HistoryEntry[]): AnalyticsSum
       }
     }
 
-    const uniqueGenres = Array.from(new Set((entry.genres ?? []).map((genre) => genre.trim()).filter(Boolean)));
+    const rawGenres = entry.genres ?? [];
+    const uniqueGenres: string[] = [];
+    const seenGenres = new Set<string>();
+    for (const g of rawGenres) {
+      const trimmed = g.trim();
+      if (trimmed && !seenGenres.has(trimmed)) {
+        seenGenres.add(trimmed);
+        uniqueGenres.push(trimmed);
+      }
+    }
     const entryTitle =
       analyticsMediaType === 'episode'
         ? (entry.seriesTitle ?? entry.title ?? '').trim()

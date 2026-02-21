@@ -5,6 +5,7 @@ export interface HistoryEntry {
   seriesId?: string;
   movieListingId?: string;
   title: string;
+  seriesTitle?: string;
   episodeTitle?: string;
   watchedAt?: string;
   progressMs?: number;

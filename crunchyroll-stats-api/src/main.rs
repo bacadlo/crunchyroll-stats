@@ -1,4 +1,5 @@
 mod auth;
+mod cache;
 mod history;
 mod models;
 mod profile;
@@ -7,8 +8,8 @@ use actix_cors::Cors;
 use actix_web::{middleware::Logger, web, App, HttpResponse, HttpServer, Result};
 use log::info;
 use std::env;
-
 use auth::CrunchyrollClient;
+use cache::AppCache;
 use models::{ErrorResponse, HealthResponse, HistoryResponse, LoginRequest};
 
 #[actix_web::main]
@@ -20,14 +21,17 @@ async fn main() -> std::io::Result<()> {
     let port = env::var("PORT").unwrap_or_else(|_| "8080".to_string());
     let bind_address = format!("{}:{}", host, port);
 
+    let cache = AppCache::new();
+
     info!("Starting Crunchyroll API Server on {}", bind_address);
 
-    HttpServer::new(|| {
+    HttpServer::new(move || {
         let cors = Cors::permissive();
 
         App::new()
             .wrap(Logger::default())
             .wrap(cors)
+            .app_data(web::Data::from(cache.clone()))
             .route("/health", web::get().to(health_check))
             .route("/api/watch-history", web::post().to(get_watch_history))
             .route("/api/profile", web::post().to(get_profile))
@@ -44,14 +48,27 @@ async fn health_check() -> Result<HttpResponse> {
     }))
 }
 
-async fn get_watch_history(req: web::Json<LoginRequest>) -> Result<HttpResponse> {
+async fn get_watch_history(
+    req: web::Json<LoginRequest>,
+    cache: web::Data<AppCache>,
+) -> Result<HttpResponse> {
     info!("Watch history request for user: {}", req.email);
+
+    let cache_key = AppCache::cache_key(&req.email);
+
+    // Check cache first
+    if let Some(cached) = cache.get_history(&cache_key).await {
+        info!("Returning cached watch history ({} items)", cached.len());
+        let total = cached.len();
+        return Ok(HttpResponse::Ok().json(HistoryResponse { data: cached, total }));
+    }
 
     let limit = Some(100);
 
     match fetch_watch_history(&req.email, &req.password, limit).await {
         Ok(data) => {
             let total = data.len();
+            cache.set_history(cache_key, data.clone()).await;
             Ok(HttpResponse::Ok().json(HistoryResponse { data, total }))
         }
         Err(e) => {
@@ -63,8 +80,19 @@ async fn get_watch_history(req: web::Json<LoginRequest>) -> Result<HttpResponse>
     }
 }
 
-async fn get_profile(req: web::Json<LoginRequest>) -> Result<HttpResponse> {
+async fn get_profile(
+    req: web::Json<LoginRequest>,
+    cache: web::Data<AppCache>,
+) -> Result<HttpResponse> {
     info!("Profile request for user: {}", req.email);
+
+    let cache_key = AppCache::cache_key(&req.email);
+
+    // Check cache first
+    if let Some(cached) = cache.get_profile(&cache_key).await {
+        info!("Returning cached profile: '{}'", cached.profile_name);
+        return Ok(HttpResponse::Ok().json(cached));
+    }
 
     match fetch_profile(&req.email, &req.password).await {
         Ok(profile) => {
@@ -72,6 +100,7 @@ async fn get_profile(req: web::Json<LoginRequest>) -> Result<HttpResponse> {
                 "Profile fetched successfully: profile_name='{}', avatar='{}'",
                 profile.profile_name, profile.avatar
             );
+            cache.set_profile(cache_key, profile.clone()).await;
             Ok(HttpResponse::Ok().json(profile))
         }
         Err(e) => {

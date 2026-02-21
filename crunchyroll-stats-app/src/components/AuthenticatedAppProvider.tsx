@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { WatchHistoryResponse } from '@/types/watch-history';
 import { Profile } from '@/types/auth';
@@ -34,6 +34,7 @@ export function AuthenticatedAppProvider({ children }: { children: React.ReactNo
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState('Fetching your history...');
   const [error, setError] = useState('');
+  const initialFetchRef = useRef(false);
 
   const logout = useCallback(async () => {
     await fetch('/api/auth', { method: 'DELETE' });
@@ -86,6 +87,10 @@ export function AuthenticatedAppProvider({ children }: { children: React.ReactNo
   );
 
   useEffect(() => {
+    if (initialFetchRef.current) {
+      return;
+    }
+    initialFetchRef.current = true;
     fetchAllData(false);
   }, [fetchAllData]);
 

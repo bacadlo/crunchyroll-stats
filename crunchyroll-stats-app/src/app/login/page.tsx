@@ -20,6 +20,10 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
+    router.prefetch('/dashboard');
+  }, [router]);
+
+  useEffect(() => {
     const remembered = localStorage.getItem('cr_remember_me') === 'true';
     const rememberedEmail = localStorage.getItem('cr_remembered_email') || '';
     if (remembered && rememberedEmail) {

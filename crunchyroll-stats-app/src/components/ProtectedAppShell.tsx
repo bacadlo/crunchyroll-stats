@@ -9,7 +9,7 @@ import { PersistentAuthenticatedNavbar } from '@/components/PersistentAuthentica
 import { DashboardPanel } from '@/components/panels/DashboardPanel';
 import { AnalyticsPanel } from '@/components/panels/AnalyticsPanel';
 import { StatsOverview } from '@/components/StatsOverview';
-import { cn } from '@/lib/utils';
+
 
 function ProtectedAppFrame({ children }: { children: ReactNode }) {
   const pathname = usePathname();
@@ -63,12 +63,8 @@ function ProtectedAppFrame({ children }: { children: ReactNode }) {
       <div className="min-h-screen">
         <main className="max-w-7xl mx-auto px-4 py-6 sm:px-6 sm:py-8 space-y-6 sm:space-y-8">
           {isDashboardRoute && historyData?.stats && <StatsOverview stats={historyData.stats} />}
-          <section className={cn(!isDashboardRoute && 'hidden')} aria-hidden={!isDashboardRoute}>
-            <DashboardPanel />
-          </section>
-          <section className={cn(!isAnalyticsRoute && 'hidden')} aria-hidden={!isAnalyticsRoute}>
-            <AnalyticsPanel />
-          </section>
+          {isDashboardRoute && <DashboardPanel />}
+          {isAnalyticsRoute && <AnalyticsPanel />}
           {!isKnownPersistentRoute ? children : null}
         </main>
       </div>
