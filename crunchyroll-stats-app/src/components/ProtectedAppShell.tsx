@@ -1,14 +1,22 @@
 'use client';
 
 import { ReactNode } from 'react';
+import { usePathname } from 'next/navigation';
 import { Button } from '@/components/ui/Button';
 import { Card, CardContent } from '@/components/ui/Card';
 import { AuthenticatedAppProvider, useAuthenticatedApp } from '@/components/AuthenticatedAppProvider';
 import { PersistentAuthenticatedNavbar } from '@/components/PersistentAuthenticatedNavbar';
+import { DashboardPanel } from '@/components/panels/DashboardPanel';
+import { AnalyticsPanel } from '@/components/panels/AnalyticsPanel';
 import { StatsOverview } from '@/components/StatsOverview';
+import { cn } from '@/lib/utils';
 
 function ProtectedAppFrame({ children }: { children: ReactNode }) {
+  const pathname = usePathname();
   const { historyData, isLoading, loadingMessage, error, refreshData, logout } = useAuthenticatedApp();
+  const isDashboardRoute = pathname === '/dashboard' || pathname.startsWith('/dashboard/');
+  const isAnalyticsRoute = pathname === '/analytics' || pathname.startsWith('/analytics/');
+  const isKnownPersistentRoute = isDashboardRoute || isAnalyticsRoute;
 
   if (isLoading) {
     return (
@@ -55,7 +63,13 @@ function ProtectedAppFrame({ children }: { children: ReactNode }) {
       <div className="min-h-screen">
         <main className="max-w-7xl mx-auto px-6 py-8 space-y-8">
           {historyData?.stats && <StatsOverview stats={historyData.stats} />}
-          {children}
+          <section className={cn(!isDashboardRoute && 'hidden')} aria-hidden={!isDashboardRoute}>
+            <DashboardPanel />
+          </section>
+          <section className={cn(!isAnalyticsRoute && 'hidden')} aria-hidden={!isAnalyticsRoute}>
+            <AnalyticsPanel />
+          </section>
+          {!isKnownPersistentRoute ? children : null}
         </main>
       </div>
     </>

@@ -20,12 +20,17 @@ export async function getRustWatchHistory(
 
     const watchHistory: HistoryEntry[] = response.data.data.map((item: any) => ({
       id: item.id,
+      mediaType: item.media_type ?? undefined,
+      contentId: item.content_id ?? undefined,
+      seriesId: item.series_id ?? undefined,
+      movieListingId: item.movie_listing_id ?? undefined,
       title: item.title,
       episodeTitle: item.episode_title ?? undefined,
       watchedAt: item.watched_at ?? undefined,
       progressMs: item.progress_ms ?? undefined,
       durationMs: item.duration_ms ?? undefined,
       thumbnail: item.thumbnail ?? undefined,
+      genres: Array.isArray(item.genres) ? item.genres : [],
     }));
 
     return watchHistory;

@@ -1,6 +1,6 @@
-use anyhow::Result;
 use crate::auth::CrunchyrollClient;
 use crate::models::AccountOwner;
+use anyhow::Result;
 
 pub struct Account<'a> {
     client: &'a CrunchyrollClient,

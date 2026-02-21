@@ -1,11 +1,16 @@
 export interface HistoryEntry {
   id: string;
+  mediaType?: 'episode' | 'movie';
+  contentId?: string;
+  seriesId?: string;
+  movieListingId?: string;
   title: string;
   episodeTitle?: string;
   watchedAt?: string;
   progressMs?: number;
   durationMs?: number;
   thumbnail?: string;
+  genres?: string[];
 }
 
 export interface TopAnime {

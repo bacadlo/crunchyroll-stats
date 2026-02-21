@@ -3,12 +3,17 @@ use serde::{Deserialize, Serialize};
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct HistoryEntry {
     pub id: String,
+    pub media_type: String,
+    pub content_id: Option<String>,
+    pub series_id: Option<String>,
+    pub movie_listing_id: Option<String>,
     pub title: String,
     pub episode_title: Option<String>,
     pub watched_at: Option<String>,
     pub progress_ms: Option<u64>,
     pub duration_ms: Option<u64>,
     pub thumbnail: Option<String>,
+    pub genres: Vec<String>,
 }
 
 #[derive(Debug, Serialize)]

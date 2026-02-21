@@ -4,12 +4,8 @@ mod history;
 mod models;
 mod profile;
 
-use actix_web::{
-    middleware::Logger,
-    web,
-    App, HttpResponse, HttpServer, Result,
-};
 use actix_cors::Cors;
+use actix_web::{middleware::Logger, web, App, HttpResponse, HttpServer, Result};
 use log::info;
 use std::env;
 
@@ -88,9 +84,12 @@ async fn get_profile(req: web::Json<LoginRequest>) -> Result<HttpResponse> {
 
     match fetch_profile(&req.email, &req.password).await {
         Ok(profile) => {
-            info!("Profile fetched successfully: username={}, avatar='{}'", profile.username, profile.avatar);
+            info!(
+                "Profile fetched successfully: username={}, avatar='{}'",
+                profile.username, profile.avatar
+            );
             Ok(HttpResponse::Ok().json(profile))
-        },
+        }
         Err(e) => {
             log::error!("Failed to fetch profile: {}", e);
             Ok(HttpResponse::BadRequest().json(ErrorResponse {
@@ -112,19 +111,13 @@ async fn fetch_watch_history(
     Ok(items)
 }
 
-async fn fetch_account(
-    email: &str,
-    password: &str,
-) -> anyhow::Result<models::AccountOwner> {
+async fn fetch_account(email: &str, password: &str) -> anyhow::Result<models::AccountOwner> {
     let client = CrunchyrollClient::new(email, password).await?;
     let acct = account::Account::new(&client);
     acct.fetch_account().await
 }
 
-async fn fetch_profile(
-    email: &str,
-    password: &str,
-) -> anyhow::Result<models::Profile> {
+async fn fetch_profile(email: &str, password: &str) -> anyhow::Result<models::Profile> {
     let client = CrunchyrollClient::new(email, password).await?;
     let prof = profile::Profile::new(&client);
     prof.fetch_profile().await

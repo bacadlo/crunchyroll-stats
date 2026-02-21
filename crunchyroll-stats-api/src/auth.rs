@@ -1,6 +1,6 @@
 use anyhow::Result;
-use crunchyroll_rs::Crunchyroll;
 use crunchyroll_rs::crunchyroll::DeviceIdentifier;
+use crunchyroll_rs::Crunchyroll;
 
 pub struct CrunchyrollClient {
     pub client: Crunchyroll,
