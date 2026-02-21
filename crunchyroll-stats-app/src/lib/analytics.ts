@@ -5,7 +5,13 @@ export type WatchTimeRange = 'all_time' | 'last_year' | 'last_month' | 'last_wee
 export interface GenreMetric {
   name: string;
   hours: number;
-  count: number;
+  titles: number;
+}
+
+interface GenreAccumulator {
+  name: string;
+  hours: number;
+  titles: Set<string>;
 }
 
 export interface AnalyticsSummary {
@@ -25,6 +31,12 @@ export interface AnalyticsSummary {
     date: string | null;
     hours: number;
   };
+  mostBingedSeries: {
+    name: string;
+    episodes: number;
+    hours: number;
+    days: number;
+  } | null;
 }
 
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -55,6 +67,38 @@ function createDayKey(date: Date): string {
   return date.toISOString().slice(0, 10);
 }
 
+type AnalyticsMediaType = 'episode' | 'movie' | 'season' | 'series';
+
+interface BingeSessionState {
+  name: string;
+  episodes: number;
+  totalMs: number;
+  firstWatch: Date | null;
+  lastWatch: Date | null;
+}
+
+function normalizeAnalyticsMediaType(entry: HistoryEntry): AnalyticsMediaType | null {
+  const mediaType = typeof entry.mediaType === 'string'
+    ? entry.mediaType.toLowerCase()
+    : '';
+
+  if (mediaType === 'episode' || mediaType === 'movie' || mediaType === 'season' || mediaType === 'series') {
+    return mediaType;
+  }
+
+  // Treat API movie listing payloads as movies for analytics purposes.
+  if (mediaType === 'movie_listing') {
+    return 'movie';
+  }
+
+  // Backward-compatible fallback when mediaType is missing from older payloads.
+  if (!mediaType) {
+    return entry.episodeTitle ? 'episode' : 'movie';
+  }
+
+  return null;
+}
+
 export function calculateAnalyticsSummary(entries: HistoryEntry[]): AnalyticsSummary {
   const now = Date.now();
   const watchedHoursByRange: Record<WatchTimeRange, number> = {
@@ -69,11 +113,17 @@ export function calculateAnalyticsSummary(entries: HistoryEntry[]): AnalyticsSum
   const series = new Set<string>();
   const movies = new Set<string>();
   const episodes = new Set<string>();
-  const genresByKey = new Map<string, GenreMetric>();
+  const genresByKey = new Map<string, GenreAccumulator>();
   const dayWatchMs = new Map<string, number>();
   const watchedDays = new Set<string>();
+  const bingeSessions = new Map<string, BingeSessionState>();
 
   for (const entry of entries) {
+    const analyticsMediaType = normalizeAnalyticsMediaType(entry);
+    if (!analyticsMediaType) {
+      continue;
+    }
+
     const progressMs = getEntryProgressMs(entry);
     const watchedDate = parseDate(entry.watchedAt);
     const watchedMs = watchedDate?.getTime() ?? null;
@@ -95,10 +145,7 @@ export function calculateAnalyticsSummary(entries: HistoryEntry[]): AnalyticsSum
       titles.add(normalizedTitle);
     }
 
-    const inferredMediaType: 'episode' | 'movie' | 'unknown' = entry.mediaType
-      ?? (entry.episodeTitle ? 'episode' : 'movie');
-
-    if (inferredMediaType === 'episode') {
+    if (analyticsMediaType === 'episode') {
       const seriesKey = (entry.seriesId ?? entry.title).trim().toLowerCase();
       if (seriesKey) series.add(seriesKey);
 
@@ -108,25 +155,68 @@ export function calculateAnalyticsSummary(entries: HistoryEntry[]): AnalyticsSum
       if (episodeKey) episodes.add(episodeKey);
     }
 
-    if (inferredMediaType === 'movie') {
+    if (analyticsMediaType === 'movie') {
       const movieKey = (entry.contentId ?? entry.movieListingId ?? entry.title).trim().toLowerCase();
       if (movieKey) movies.add(movieKey);
     }
 
+    if (analyticsMediaType === 'season' || analyticsMediaType === 'series') {
+      const seriesKey = (entry.seriesId ?? entry.contentId ?? entry.title).trim().toLowerCase();
+      if (seriesKey) series.add(seriesKey);
+    }
+
+    if (analyticsMediaType === 'episode' || analyticsMediaType === 'season' || analyticsMediaType === 'series') {
+      if (watchedDate) {
+        const rawSeries = (entry.seriesId ?? entry.contentId ?? entry.title ?? '').trim();
+        const seriesKey = rawSeries.toLowerCase();
+        if (seriesKey) {
+          const dateKey = createDayKey(watchedDate);
+          const sessionKey = `${dateKey}|${seriesKey}`;
+          const existing = bingeSessions.get(sessionKey);
+          const displayName = entry.seriesTitle?.trim() || entry.title?.trim() || 'Untitled Series';
+          const nextSession: BingeSessionState = existing ?? {
+            name: displayName,
+            episodes: 0,
+            totalMs: 0,
+            firstWatch: watchedDate,
+            lastWatch: watchedDate,
+          };
+
+          nextSession.name = displayName || nextSession.name;
+          nextSession.episodes += 1;
+          nextSession.totalMs += progressMs;
+          if (!nextSession.firstWatch || watchedDate < nextSession.firstWatch) {
+            nextSession.firstWatch = watchedDate;
+          }
+          if (!nextSession.lastWatch || watchedDate > nextSession.lastWatch) {
+            nextSession.lastWatch = watchedDate;
+          }
+
+          bingeSessions.set(sessionKey, nextSession);
+        }
+      }
+    }
+
     const uniqueGenres = Array.from(new Set((entry.genres ?? []).map((genre) => genre.trim()).filter(Boolean)));
+    const entryTitle =
+      analyticsMediaType === 'episode'
+        ? (entry.seriesTitle ?? entry.title ?? '').trim()
+        : (entry.title ?? '').trim();
+    const titleKey = entryTitle ? entryTitle.toLowerCase() : null;
+
     for (const genre of uniqueGenres) {
       const key = genre.toLowerCase();
       const existing = genresByKey.get(key);
-      if (existing) {
-        existing.hours += hoursFromMs(progressMs);
-        existing.count += 1;
-      } else {
-        genresByKey.set(key, {
-          name: genre,
-          hours: hoursFromMs(progressMs),
-          count: 1,
-        });
+      const titleAccumulator: GenreAccumulator = existing ?? {
+        name: genre,
+        hours: 0,
+        titles: new Set(),
+      };
+      titleAccumulator.hours += hoursFromMs(progressMs);
+      if (titleKey) {
+        titleAccumulator.titles.add(titleKey);
       }
+      genresByKey.set(key, titleAccumulator);
     }
 
     if (watchedDate) {
@@ -166,8 +256,44 @@ export function calculateAnalyticsSummary(entries: HistoryEntry[]): AnalyticsSum
   }
 
   const top3Genres = Array.from(genresByKey.values())
-    .sort((a, b) => b.hours - a.hours || b.count - a.count || a.name.localeCompare(b.name))
+    .map<GenreMetric>((genre) => ({
+      name: genre.name,
+      hours: genre.hours,
+      titles: genre.titles.size,
+    }))
+    .sort(
+      (a, b) =>
+        b.hours - a.hours
+        || b.titles - a.titles
+        || a.name.localeCompare(b.name)
+    )
     .slice(0, 3);
+
+  let mostBingedSeries: AnalyticsSummary['mostBingedSeries'] = null;
+  for (const session of bingeSessions.values()) {
+    if (session.episodes < 3) continue;
+
+    const firstMs = session.firstWatch?.getTime() ?? null;
+    const lastMs = session.lastWatch?.getTime() ?? null;
+    const days = firstMs !== null && lastMs !== null
+      ? Math.max(1, Math.floor((lastMs - firstMs) / DAY_MS) + 1)
+      : 1;
+
+    const candidate = {
+      name: session.name,
+      episodes: session.episodes,
+      hours: hoursFromMs(session.totalMs),
+      days,
+    };
+
+    if (
+      !mostBingedSeries
+      || candidate.episodes > mostBingedSeries.episodes
+      || (candidate.episodes === mostBingedSeries.episodes && candidate.hours > mostBingedSeries.hours)
+    ) {
+      mostBingedSeries = candidate;
+    }
+  }
 
   return {
     watchedHoursByRange,
@@ -186,5 +312,6 @@ export function calculateAnalyticsSummary(entries: HistoryEntry[]): AnalyticsSum
       date: peakDayDate,
       hours: hoursFromMs(peakDayMs),
     },
+    mostBingedSeries,
   };
 }

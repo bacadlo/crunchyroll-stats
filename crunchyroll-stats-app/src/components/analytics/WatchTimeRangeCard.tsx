@@ -13,14 +13,16 @@ const RANGE_LABELS: Record<WatchTimeRange, string> = {
   last_day: 'Last Day',
 };
 
+const RANGE_ORDER: WatchTimeRange[] = ['last_day', 'last_week', 'last_month', 'last_year', 'all_time'];
+
 interface WatchTimeRangeCardProps {
   hoursByRange: Record<WatchTimeRange, number>;
 }
 
 function formatHours(value: number): string {
-  if (value >= 1000) return `${value.toFixed(0)}h`;
-  if (value >= 100) return `${value.toFixed(1)}h`;
-  return `${value.toFixed(2)}h`;
+  if (value >= 1000) return `${value.toFixed(0)} Hours`;
+  if (value >= 100) return `${value.toFixed(1)} Hours`;
+  return `${value.toFixed(2)} Hours`;
 }
 
 export function WatchTimeRangeCard({ hoursByRange }: WatchTimeRangeCardProps) {
@@ -29,22 +31,24 @@ export function WatchTimeRangeCard({ hoursByRange }: WatchTimeRangeCardProps) {
   const selectedHours = useMemo(() => hoursByRange[selectedRange] ?? 0, [hoursByRange, selectedRange]);
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Watch Time by Range</CardTitle>
+    <Card className="group relative h-full border-primary-500/25 bg-gradient-to-br from-[var(--card)] via-[var(--card)] to-primary-500/5 transition-all duration-300 hover:border-primary-500/45 hover:shadow-[0_0_60px_rgba(249,115,22,0.2)]">
+      <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-primary-500/35 via-primary-500/70 to-primary-600/80" />
+      <CardHeader className="pb-3 text-center pt-6">
+        <CardTitle>Watch Time</CardTitle>
+        <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">Switch ranges to compare total hours.</p>
       </CardHeader>
-      <CardContent className="space-y-5">
-        <div className="grid grid-cols-2 gap-2 sm:grid-cols-5">
-          {(Object.keys(RANGE_LABELS) as WatchTimeRange[]).map((range) => (
+      <CardContent className="space-y-5 text-center">
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-5 justify-items-center">
+          {RANGE_ORDER.map((range) => (
             <button
               key={range}
               type="button"
               onClick={() => setSelectedRange(range)}
               className={cn(
-                'rounded-lg border px-3 py-2 text-xs font-semibold transition-colors',
+                'rounded-lg border px-3 py-2 text-xs font-semibold transition-all duration-200',
                 selectedRange === range
-                  ? 'border-primary-600 bg-primary-600 text-white'
-                  : 'border-[var(--border)] bg-[var(--bg)] text-gray-700 hover:border-primary-500/60 hover:text-primary-600 dark:text-gray-300 dark:hover:text-primary-400'
+                  ? 'border-primary-600 bg-primary-600 text-white shadow-sm shadow-primary-600/30'
+                  : 'border-[var(--border)] bg-[var(--bg)] text-gray-700 hover:border-primary-500/60 hover:bg-primary-500/5 hover:text-primary-600 dark:text-gray-300 dark:hover:text-primary-400'
               )}
             >
               {RANGE_LABELS[range]}
@@ -52,11 +56,11 @@ export function WatchTimeRangeCard({ hoursByRange }: WatchTimeRangeCardProps) {
           ))}
         </div>
 
-        <div className="rounded-lg border border-[var(--border)] bg-[var(--bg)] px-4 py-5">
-          <p className="text-sm text-gray-600 dark:text-gray-400">
+        <div className="rounded-xl border border-primary-500/25 bg-gradient-to-br from-primary-500/10 via-[var(--card)] to-[var(--bg)] px-4 py-5 text-center">
+          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-primary-700/90 dark:text-primary-300">
             {RANGE_LABELS[selectedRange]}
           </p>
-          <p className="stat-number mt-1 text-3xl text-primary-600">{formatHours(selectedHours)}</p>
+          <p className="stat-number mt-2 text-3xl text-primary-600 dark:text-primary-400">{formatHours(selectedHours)}</p>
         </div>
       </CardContent>
     </Card>

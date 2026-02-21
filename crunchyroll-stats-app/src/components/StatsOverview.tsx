@@ -14,6 +14,9 @@ interface StatsOverviewProps {
 
 export const StatsOverview: React.FC<StatsOverviewProps> = ({ stats }) => {
   const topAnime = stats.topAnime[0];
+  const panelCardClass =
+    'group relative border-primary-500/25 bg-gradient-to-br from-[var(--card)] via-[var(--card)] to-primary-500/5 transition-all duration-300 hover:border-primary-500/45 hover:shadow-[0_0_60px_rgba(249,115,22,0.2)]';
+  const panelAccentBar = 'absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-primary-500/35 via-primary-500/70 to-primary-600/80';
 
   return (
     <div className="space-y-6">
@@ -41,11 +44,12 @@ export const StatsOverview: React.FC<StatsOverviewProps> = ({ stats }) => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card>
-          <CardHeader>
+        <Card className={panelCardClass}>
+          <div className={panelAccentBar} />
+          <CardHeader className="pb-3 pt-6 text-center">
             <CardTitle>Top 5 Most Watched Anime</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="pt-2">
             <div className="space-y-3">
               {stats.topAnime.map((anime, index) => (
                 <div
@@ -87,17 +91,21 @@ export const StatsOverview: React.FC<StatsOverviewProps> = ({ stats }) => {
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader>
+        <Card className={panelCardClass}>
+          <div className={panelAccentBar} />
+          <CardHeader className="pb-3 pt-6 text-center">
             <CardTitle>Recently Watched</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="pt-2">
             <div className="space-y-3">
-              {stats.recentlyWatched.slice(0, 5).map((item) => (
+              {stats.recentlyWatched.slice(0, 5).map((item, index) => (
                 <div
                   key={item.id}
                   className="group flex items-center gap-3 pb-3 border-b border-gray-100 dark:border-gray-700 last:border-0 last:pb-0"
                 >
+                  <span className="text-lg font-bold text-primary-600 w-6 flex-shrink-0">
+                    #{index + 1}
+                  </span>
                   {item.thumbnail ? (
                     <div className="relative w-16 h-10 rounded-md overflow-hidden flex-shrink-0 bg-gradient-to-br from-primary-100 via-white to-purple-100 dark:from-primary-900/30 dark:via-gray-900 dark:to-purple-900/20 ring-1 ring-primary-200/60 dark:ring-primary-800/40 shadow-sm">
                       <Image

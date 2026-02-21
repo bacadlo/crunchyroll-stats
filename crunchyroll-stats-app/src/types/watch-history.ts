@@ -1,6 +1,6 @@
 export interface HistoryEntry {
   id: string;
-  mediaType?: 'episode' | 'movie';
+  mediaType?: 'series' | 'season' | 'episode' | 'movie_listing' | 'movie' | 'artist' | 'music_video' | 'concert';
   contentId?: string;
   seriesId?: string;
   movieListingId?: string;

@@ -17,16 +17,16 @@ const SIZE_STYLES: Record<BrandLogoIconSize, {
   ping: string;
 }> = {
   sm: {
-    wrapper: 'h-8 w-8',
-    icon: 'h-5 w-5',
-    sparkle: '-right-0.5 -top-0.5 h-2.5 w-2.5',
-    ping: '-bottom-0.5 -left-0.5 h-1.5 w-1.5',
+    wrapper: 'h-7 w-7 sm:h-8 sm:w-8',
+    icon: 'h-4 w-4 sm:h-5 sm:w-5',
+    sparkle: '-right-0.5 -top-0.5 h-2 w-2 sm:h-2.5 sm:w-2.5',
+    ping: '-bottom-0.5 -left-0.5 h-1 w-1 sm:h-1.5 sm:w-1.5',
   },
   md: {
-    wrapper: 'h-12 w-12',
-    icon: 'h-7 w-7',
-    sparkle: '-right-1 -top-1 h-3.5 w-3.5',
-    ping: '-bottom-1 -left-1 h-2 w-2',
+    wrapper: 'h-10 w-10 sm:h-12 sm:w-12',
+    icon: 'h-6 w-6 sm:h-7 sm:w-7',
+    sparkle: '-right-1 -top-1 h-3 w-3 sm:h-3.5 sm:w-3.5',
+    ping: '-bottom-1 -left-1 h-1.5 w-1.5 sm:h-2 sm:w-2',
   },
 };
 

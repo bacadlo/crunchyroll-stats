@@ -8,6 +8,7 @@ import { WatchTimeRangeCard } from '@/components/analytics/WatchTimeRangeCard';
 import { AnalyticsMetricGrid } from '@/components/analytics/AnalyticsMetricGrid';
 import { GenreInsightsCard } from '@/components/analytics/GenreInsightsCard';
 import { StreakPeakCard } from '@/components/analytics/StreakPeakCard';
+import { MostBingedSeriesCard } from '@/components/analytics/MostBingedSeriesCard';
 
 export function AnalyticsPanel() {
   const { historyData } = useAuthenticatedApp();
@@ -29,14 +30,19 @@ export function AnalyticsPanel() {
 
   return (
     <div className="space-y-6">
-      <WatchTimeRangeCard hoursByRange={summary.watchedHoursByRange} />
       <AnalyticsMetricGrid totals={summary.totals} />
-      <GenreInsightsCard totalGenres={summary.genres.total} topGenres={summary.genres.top3} />
-      <StreakPeakCard
-        longestStreakDays={summary.longestStreakDays}
-        peakDayDate={summary.peakDay.date}
-        peakDayHours={summary.peakDay.hours}
-      />
+      <div className="grid gap-6 md:grid-cols-2">
+        <WatchTimeRangeCard hoursByRange={summary.watchedHoursByRange} />
+        <GenreInsightsCard totalGenres={summary.genres.total} topGenres={summary.genres.top3} />
+      </div>
+      <div className="grid gap-6 md:grid-cols-2">
+        <MostBingedSeriesCard data={summary.mostBingedSeries} />
+        <StreakPeakCard
+          longestStreakDays={summary.longestStreakDays}
+          peakDayDate={summary.peakDay.date}
+          peakDayHours={summary.peakDay.hours}
+        />
+      </div>
     </div>
   );
 }

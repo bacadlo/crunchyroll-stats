@@ -1,20 +1,29 @@
 import type { Metadata } from 'next';
-import { Inter, Orbitron } from 'next/font/google';
+import localFont from 'next/font/local';
 import { PetalCanvasBackground } from '@/components/PetalCanvasBackground';
 import { ThemeProvider } from '@/components/ThemeProvider';
 import './globals.css';
 
-const inter = Inter({
-  subsets: ['latin'],
+const inter = localFont({
+  src: './fonts/Inter-VariableFont_opsz,wght.ttf',
   variable: '--font-body',
+  weight: '100 900',
+  style: 'normal',
   display: 'swap',
+  preload: false,
 });
 
-const orbitron = Orbitron({
-  subsets: ['latin'],
+const orbitron = localFont({
+  src: [
+    {
+      path: './fonts/Orbitron-VariableFont_wght.ttf',
+      weight: '400 900',
+      style: 'normal',
+    },
+  ],
   variable: '--font-heading',
-  weight: ['500', '600', '700', '800'],
   display: 'swap',
+  preload: false,
 });
 
 export const metadata: Metadata = {

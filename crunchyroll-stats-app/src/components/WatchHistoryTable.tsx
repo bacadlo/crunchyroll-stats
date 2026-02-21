@@ -1,10 +1,10 @@
 'use client';
 
-import React, { useState, useMemo, useRef } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import Image from 'next/image';
 import { HistoryEntry } from '@/types/watch-history';
 import { formatDate, formatDuration, getCompletionPercent } from '@/lib/utils';
-import { ArrowUpDown, ArrowUp, ArrowDown, ChevronLeft, ChevronRight, Tv } from 'lucide-react';
+import { ArrowDown, ArrowUp, ArrowUpDown, ChevronLeft, ChevronRight, Tv } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 
 interface WatchHistoryTableProps {
@@ -127,15 +127,82 @@ export const WatchHistoryTable: React.FC<WatchHistoryTableProps> = ({ data, sear
 
   return (
     <div>
-      <div className="overflow-x-auto">
+      <div className="space-y-3 md:hidden">
+        {paginatedData.length === 0 ? (
+          <div className="rounded-lg border border-[var(--border)] px-4 py-8 text-center text-sm text-gray-500 dark:text-gray-400">
+            No watch history found matching your search.
+          </div>
+        ) : (
+        paginatedData.map((item, index) => {
+          const completion = getCompletionPercent(item);
+          const globalIndex = startIndex + index + 1;
+          return (
+              <article
+                key={item.id}
+                className="rounded-lg border border-[var(--border)] bg-[var(--card)] p-3 shadow-sm"
+              >
+              <div className="flex items-start gap-3">
+                <span className="text-lg font-semibold text-primary-600">
+                  #{globalIndex}
+                </span>
+                {item.thumbnail ? (
+                    <div className="group relative h-12 w-20 flex-shrink-0 overflow-hidden rounded-md bg-gradient-to-br from-primary-100 via-white to-purple-100 ring-1 ring-primary-200/60 dark:from-primary-900/30 dark:via-gray-900 dark:to-purple-900/20 dark:ring-primary-800/40">
+                      <Image
+                        src={item.thumbnail}
+                        alt={item.title}
+                        fill
+                        className="object-cover transition-transform duration-300 group-hover:scale-105"
+                        sizes="80px"
+                      />
+                    </div>
+                  ) : (
+                    <div className="flex h-12 w-20 flex-shrink-0 items-center justify-center rounded-md bg-gradient-to-br from-primary-100 to-purple-100 ring-1 ring-primary-200/60 dark:from-primary-900/30 dark:to-purple-900/20 dark:ring-primary-800/40">
+                      <Tv className="h-4 w-4 text-primary-600 dark:text-primary-400" />
+                    </div>
+                  )}
+
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate font-medium text-gray-900 dark:text-white">{item.title}</p>
+                    <p className="mt-1 truncate text-sm text-gray-600 dark:text-gray-400">
+                      {item.episodeTitle || 'N/A'}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="mt-3 grid grid-cols-2 gap-2 text-xs text-primary-600 dark:text-primary-400">
+                  <div>
+                    <span className="block text-[11px] uppercase tracking-wide text-gray-500 dark:text-gray-500">Date</span>
+                    <span>{item.watchedAt ? formatDate(item.watchedAt) : 'N/A'}</span>
+                  </div>
+                  <div>
+                    <span className="block text-[11px] uppercase tracking-wide text-gray-500 dark:text-gray-500">Duration</span>
+                    <span>{item.durationMs ? formatDuration(item.durationMs) : 'N/A'}</span>
+                  </div>
+                  <div className="col-span-2">
+                    <span className="mr-2 text-[11px] uppercase tracking-wide text-gray-500 dark:text-gray-500">Completion</span>
+                    <span
+                      className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${getCompletionColor(completion)}`}
+                    >
+                      {completion}%
+                    </span>
+                  </div>
+                </div>
+              </article>
+            );
+          })
+        )}
+      </div>
+
+      <div className="hidden overflow-x-auto md:block">
         <table className="w-full">
-          <thead>
-            <tr className="border-b border-gray-200 dark:border-gray-700">
-              <th className="px-4 py-3 text-left font-semibold text-gray-900 dark:text-gray-100 w-20">Thumbnail</th>
+            <thead>
+              <tr className="border-b border-gray-200 dark:border-gray-700">
+              <th className="px-4 py-3 text-left font-semibold text-gray-900 dark:text-gray-100">#</th>
+              <th className="w-20 px-4 py-3 text-left font-semibold text-gray-900 dark:text-gray-100">Thumbnail</th>
               <th className="px-4 py-3 text-left">
                 <button
                   onClick={() => handleSort('title')}
-                  className="flex items-center gap-2 font-semibold text-gray-900 dark:text-gray-100 hover:text-primary-600 transition-colors"
+                  className="flex items-center gap-2 font-semibold text-gray-900 transition-colors hover:text-primary-600 dark:text-gray-100"
                 >
                   Title
                   <SortIcon field="title" sortField={sortField} sortOrder={sortOrder} />
@@ -145,7 +212,7 @@ export const WatchHistoryTable: React.FC<WatchHistoryTableProps> = ({ data, sear
               <th className="px-4 py-3 text-left">
                 <button
                   onClick={() => handleSort('watchedAt')}
-                  className="flex items-center gap-2 font-semibold text-gray-900 dark:text-gray-100 hover:text-primary-600 transition-colors"
+                  className="flex items-center gap-2 font-semibold text-gray-900 transition-colors hover:text-primary-600 dark:text-gray-100"
                 >
                   Date Watched
                   <SortIcon field="watchedAt" sortField={sortField} sortOrder={sortOrder} />
@@ -154,7 +221,7 @@ export const WatchHistoryTable: React.FC<WatchHistoryTableProps> = ({ data, sear
               <th className="px-4 py-3 text-left">
                 <button
                   onClick={() => handleSort('completion')}
-                  className="flex items-center gap-2 font-semibold text-gray-900 dark:text-gray-100 hover:text-primary-600 transition-colors"
+                  className="flex items-center gap-2 font-semibold text-gray-900 transition-colors hover:text-primary-600 dark:text-gray-100"
                 >
                   Completion
                   <SortIcon field="completion" sortField={sortField} sortOrder={sortOrder} />
@@ -171,16 +238,20 @@ export const WatchHistoryTable: React.FC<WatchHistoryTableProps> = ({ data, sear
                 </td>
               </tr>
             ) : (
-              paginatedData.map((item) => {
+              paginatedData.map((item, index) => {
                 const completion = getCompletionPercent(item);
+                const globalIndex = startIndex + index + 1;
                 return (
-                  <tr
-                    key={item.id}
-                    className="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
-                  >
+                    <tr
+                      key={item.id}
+                      className="border-b border-gray-100 transition-colors hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-800"
+                    >
+                    <td className="px-4 py-4 font-semibold text-primary-600 dark:text-primary-400">
+                      #{globalIndex}
+                    </td>
                     <td className="px-4 py-4">
                       {item.thumbnail ? (
-                        <div className="group relative w-16 h-10 rounded-md overflow-hidden bg-gradient-to-br from-primary-100 via-white to-purple-100 dark:from-primary-900/30 dark:via-gray-900 dark:to-purple-900/20 ring-1 ring-primary-200/60 dark:ring-primary-800/40 shadow-sm">
+                        <div className="group relative h-10 w-16 overflow-hidden rounded-md bg-gradient-to-br from-primary-100 via-white to-purple-100 ring-1 ring-primary-200/60 shadow-sm dark:from-primary-900/30 dark:via-gray-900 dark:to-purple-900/20 dark:ring-primary-800/40">
                           <Image
                             src={item.thumbnail}
                             alt={item.title}
@@ -190,8 +261,8 @@ export const WatchHistoryTable: React.FC<WatchHistoryTableProps> = ({ data, sear
                           />
                         </div>
                       ) : (
-                        <div className="w-16 h-10 rounded-md bg-gradient-to-br from-primary-100 to-purple-100 dark:from-primary-900/30 dark:to-purple-900/20 flex items-center justify-center ring-1 ring-primary-200/60 dark:ring-primary-800/40">
-                          <Tv className="w-4 h-4 text-primary-600 dark:text-primary-400" />
+                        <div className="flex h-10 w-16 items-center justify-center rounded-md bg-gradient-to-br from-primary-100 to-purple-100 ring-1 ring-primary-200/60 dark:from-primary-900/30 dark:to-purple-900/20 dark:ring-primary-800/40">
+                          <Tv className="h-4 w-4 text-primary-600 dark:text-primary-400" />
                         </div>
                       )}
                     </td>
@@ -199,21 +270,21 @@ export const WatchHistoryTable: React.FC<WatchHistoryTableProps> = ({ data, sear
                       <div className="font-medium text-gray-900 dark:text-white">{item.title}</div>
                     </td>
                     <td className="px-4 py-4">
-                      <div className="text-sm text-gray-600 dark:text-gray-400 truncate max-w-xs">
+                      <div className="max-w-xs truncate text-sm text-gray-600 dark:text-gray-400">
                         {item.episodeTitle || 'N/A'}
                       </div>
                     </td>
-                    <td className="px-4 py-4 text-sm text-gray-600 dark:text-gray-400">
+                    <td className="px-4 py-4 text-sm text-primary-600 dark:text-primary-400">
                       {item.watchedAt ? formatDate(item.watchedAt) : 'N/A'}
                     </td>
                     <td className="px-4 py-4">
                       <span
-                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getCompletionColor(completion)}`}
+                        className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${getCompletionColor(completion)}`}
                       >
                         {completion}%
                       </span>
                     </td>
-                    <td className="px-4 py-4 text-sm text-gray-600 dark:text-gray-400">
+                    <td className="px-4 py-4 text-sm text-primary-600 dark:text-primary-400">
                       {item.durationMs ? formatDuration(item.durationMs) : 'N/A'}
                     </td>
                   </tr>
@@ -225,10 +296,10 @@ export const WatchHistoryTable: React.FC<WatchHistoryTableProps> = ({ data, sear
       </div>
 
       {totalItems > 0 && (
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 px-4 py-4 border-t border-gray-200 dark:border-gray-700">
-          <div className="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
+        <div className="flex flex-col items-center justify-between gap-4 border-t border-gray-200 px-4 py-4 sm:flex-row dark:border-gray-700">
+          <div className="flex flex-col items-center gap-2 text-sm text-gray-600 sm:flex-row sm:gap-4 dark:text-gray-400">
             <span>
-              Showing {startIndex + 1}–{endIndex} of {totalItems}
+              Showing {startIndex + 1}-{endIndex} of {totalItems}
             </span>
             <div className="flex items-center gap-2">
               <label htmlFor="page-size" className="text-sm text-gray-600 dark:text-gray-400">
@@ -238,7 +309,7 @@ export const WatchHistoryTable: React.FC<WatchHistoryTableProps> = ({ data, sear
                 id="page-size"
                 value={itemsPerPage}
                 onChange={(e) => handleItemsPerPageChange(Number(e.target.value))}
-                className="border border-gray-300 dark:border-gray-600 rounded-md px-2 py-1 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
+                className="rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-800 dark:text-white"
               >
                 {PAGE_SIZE_OPTIONS.map((size) => (
                   <option key={size} value={size}>
@@ -250,42 +321,66 @@ export const WatchHistoryTable: React.FC<WatchHistoryTableProps> = ({ data, sear
           </div>
 
           {totalPages > 1 && (
-            <div className="flex items-center gap-1">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                disabled={safeCurrentPage === 1}
-              >
-                <ChevronLeft className="w-4 h-4" />
-              </Button>
+            <>
+              <div className="flex items-center gap-2 sm:hidden">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                  disabled={safeCurrentPage === 1}
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                </Button>
+                <span className="text-sm text-gray-700 dark:text-gray-300">
+                  Page {safeCurrentPage} / {totalPages}
+                </span>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                  disabled={safeCurrentPage === totalPages}
+                >
+                  <ChevronRight className="w-4 h-4" />
+                </Button>
+              </div>
 
-              {getPageNumbers().map((page, idx) =>
-                page === 'ellipsis' ? (
-                  <span key={`ellipsis-${idx}`} className="px-2 text-gray-400 dark:text-gray-500">
-                    ...
-                  </span>
-                ) : (
-                  <Button
-                    key={page}
-                    variant={page === safeCurrentPage ? 'primary' : 'ghost'}
-                    size="sm"
-                    onClick={() => setCurrentPage(page)}
-                  >
-                    {page}
-                  </Button>
-                )
-              )}
+              <div className="hidden items-center gap-1 sm:flex">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                  disabled={safeCurrentPage === 1}
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                </Button>
 
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-                disabled={safeCurrentPage === totalPages}
-              >
-                <ChevronRight className="w-4 h-4" />
-              </Button>
-            </div>
+                {getPageNumbers().map((page, idx) =>
+                  page === 'ellipsis' ? (
+                    <span key={`ellipsis-${idx}`} className="px-2 text-gray-400 dark:text-gray-500">
+                      ...
+                    </span>
+                  ) : (
+                    <Button
+                      key={page}
+                      variant={page === safeCurrentPage ? 'primary' : 'ghost'}
+                      size="sm"
+                      onClick={() => setCurrentPage(page)}
+                    >
+                      {page}
+                    </Button>
+                  )
+                )}
+
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                  disabled={safeCurrentPage === totalPages}
+                >
+                  <ChevronRight className="w-4 h-4" />
+                </Button>
+              </div>
+            </>
           )}
         </div>
       )}

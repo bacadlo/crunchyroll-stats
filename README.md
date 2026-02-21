@@ -1,4 +1,4 @@
-# CrunchyTracker
+# CrunchyStats
 
 A full-stack app for viewing and analyzing your Crunchyroll watch history. Built with a Rust backend and Next.js frontend.
 

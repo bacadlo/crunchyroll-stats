@@ -1,4 +1,3 @@
-mod account;
 mod auth;
 mod history;
 mod models;
@@ -31,7 +30,6 @@ async fn main() -> std::io::Result<()> {
             .wrap(cors)
             .route("/health", web::get().to(health_check))
             .route("/api/watch-history", web::post().to(get_watch_history))
-            .route("/api/account", web::post().to(get_account))
             .route("/api/profile", web::post().to(get_profile))
     })
     .bind(&bind_address)?
@@ -65,28 +63,14 @@ async fn get_watch_history(req: web::Json<LoginRequest>) -> Result<HttpResponse>
     }
 }
 
-async fn get_account(req: web::Json<LoginRequest>) -> Result<HttpResponse> {
-    info!("Account request for user: {}", req.email);
-
-    match fetch_account(&req.email, &req.password).await {
-        Ok(account) => Ok(HttpResponse::Ok().json(account)),
-        Err(e) => {
-            log::error!("Failed to fetch account: {}", e);
-            Ok(HttpResponse::BadRequest().json(ErrorResponse {
-                error: e.to_string(),
-            }))
-        }
-    }
-}
-
 async fn get_profile(req: web::Json<LoginRequest>) -> Result<HttpResponse> {
     info!("Profile request for user: {}", req.email);
 
     match fetch_profile(&req.email, &req.password).await {
         Ok(profile) => {
             info!(
-                "Profile fetched successfully: username={}, avatar='{}'",
-                profile.username, profile.avatar
+                "Profile fetched successfully: profile_name='{}', avatar='{}'",
+                profile.profile_name, profile.avatar
             );
             Ok(HttpResponse::Ok().json(profile))
         }
@@ -109,12 +93,6 @@ async fn fetch_watch_history(
     let items = history.fetch_history(limit).await?;
     info!("Retrieved {} history items", items.len());
     Ok(items)
-}
-
-async fn fetch_account(email: &str, password: &str) -> anyhow::Result<models::AccountOwner> {
-    let client = CrunchyrollClient::new(email, password).await?;
-    let acct = account::Account::new(&client);
-    acct.fetch_account().await
 }
 
 async fn fetch_profile(email: &str, password: &str) -> anyhow::Result<models::Profile> {

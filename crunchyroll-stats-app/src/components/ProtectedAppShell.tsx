@@ -36,7 +36,7 @@ function ProtectedAppFrame({ children }: { children: ReactNode }) {
     return (
       <>
         <PersistentAuthenticatedNavbar />
-        <div className="min-h-[calc(100vh-73px)] flex items-center justify-center px-6">
+        <div className="min-h-[calc(100vh-73px)] flex items-center justify-center px-4 sm:px-6">
           <Card className="max-w-md w-full">
             <CardContent className="pt-6 text-center">
               <div className="text-red-600 mb-4">
@@ -46,7 +46,7 @@ function ProtectedAppFrame({ children }: { children: ReactNode }) {
               </div>
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Error Loading Data</h3>
               <p className="text-gray-600 dark:text-gray-400 mb-6">{error}</p>
-              <div className="flex gap-3 justify-center">
+              <div className="flex flex-col gap-3 sm:flex-row sm:justify-center">
                 <Button onClick={refreshData}>Try Again</Button>
                 <Button variant="outline" onClick={logout}>Back to Login</Button>
               </div>
@@ -61,8 +61,8 @@ function ProtectedAppFrame({ children }: { children: ReactNode }) {
     <>
       <PersistentAuthenticatedNavbar />
       <div className="min-h-screen">
-        <main className="max-w-7xl mx-auto px-6 py-8 space-y-8">
-          {historyData?.stats && <StatsOverview stats={historyData.stats} />}
+        <main className="max-w-7xl mx-auto px-4 py-6 sm:px-6 sm:py-8 space-y-6 sm:space-y-8">
+          {isDashboardRoute && historyData?.stats && <StatsOverview stats={historyData.stats} />}
           <section className={cn(!isDashboardRoute && 'hidden')} aria-hidden={!isDashboardRoute}>
             <DashboardPanel />
           </section>

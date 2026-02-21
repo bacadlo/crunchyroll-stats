@@ -44,7 +44,7 @@ export function TopNavMenu() {
         onClick={() => setIsOpen((prev) => !prev)}
         aria-label="Toggle navigation menu"
         className={cn(
-          'inline-flex items-center gap-2.5 rounded-full border px-4 py-2 text-base font-semibold transition-all',
+          'inline-flex items-center gap-2 rounded-full border px-3 py-2 text-sm font-semibold transition-all sm:gap-2.5 sm:px-4 sm:text-base',
           'border-[var(--border)] text-gray-900 hover:border-primary-500/60 hover:text-primary-600',
           'dark:text-gray-100 dark:hover:border-primary-500/60 dark:hover:text-primary-400'
         )}
@@ -57,7 +57,7 @@ export function TopNavMenu() {
 
       <div
         className={cn(
-          'absolute left-0 top-full z-20 mt-3 w-72 origin-top-left rounded-2xl border border-[var(--border)] bg-[var(--card)]/95 shadow-[0_20px_45px_rgba(15,23,42,0.2)] backdrop-blur-sm transition-all duration-200',
+          'absolute left-0 top-full z-20 mt-3 w-[min(18rem,calc(100vw-2rem))] origin-top-left rounded-2xl border border-[var(--border)] bg-[var(--card)]/95 shadow-[0_20px_45px_rgba(15,23,42,0.2)] backdrop-blur-sm transition-all duration-200',
           isOpen
             ? 'pointer-events-auto translate-y-0 opacity-100'
             : 'pointer-events-none -translate-y-2 opacity-0'
@@ -66,7 +66,7 @@ export function TopNavMenu() {
         <div className="group/brand inline-flex items-center gap-2.5 border-b border-[var(--border)] px-4 py-4">
           <BrandLogoIcon size="sm" />
           <span className="heading-font text-base font-semibold leading-none text-transparent bg-clip-text bg-gradient-to-r from-primary-600 to-purple-600">
-            CrunchyTracker
+            CrunchyStats
           </span>
         </div>
 

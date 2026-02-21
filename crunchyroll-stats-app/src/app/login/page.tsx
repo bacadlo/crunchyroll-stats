@@ -65,7 +65,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-6 py-12">
+    <div className="min-h-screen flex items-center justify-center px-4 py-8 sm:px-6 sm:py-12">
       <div className="absolute top-4 right-4">
         <ThemeToggle />
       </div>
@@ -76,17 +76,17 @@ export default function LoginPage() {
             className="pointer-events-none absolute inset-[-20px] -z-10 rounded-[2rem] bg-primary-500/20 blur-2xl dark:bg-primary-500/25"
           />
           <Card className="group rounded-3xl border border-primary-500/25 bg-[var(--card)] shadow-[0_0_60px_rgba(249,115,22,0.18)] ring-1 ring-[var(--border)]/60 transition-transform duration-300 hover:scale-[1.01]">
-            <CardHeader className="!border-0 px-10 pb-0 pt-10">
+            <CardHeader className="!border-0 px-5 pb-0 pt-8 sm:px-10 sm:pt-10">
               <div className="mb-6 flex flex-col items-center justify-center gap-3">
                 <BrandLogoIcon size="md" />
-                <span className="heading-font text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-primary-600 to-purple-600">CrunchyTracker</span>
+                <span className="heading-font text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-primary-600 to-purple-600">CrunchyStats</span>
               </div>
               <CardTitle className="text-2xl text-center !text-white">Sign In</CardTitle>
               <p className="mt-2 text-center text-sm text-primary-600 dark:text-primary-400">
                 Enter your Crunchyroll credentials to continue
               </p>
             </CardHeader>
-            <CardContent className="px-10 pb-10 pt-6">
+            <CardContent className="px-5 pb-8 pt-6 sm:px-10 sm:pb-10">
               <form onSubmit={handleSubmit} className="space-y-4">
                 {error && (
                   <div className="flex items-start gap-3 rounded-lg border border-red-200 bg-red-50 p-4">
