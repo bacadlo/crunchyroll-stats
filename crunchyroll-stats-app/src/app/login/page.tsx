@@ -60,6 +60,7 @@ export default function LoginPage() {
         localStorage.removeItem('cr_remembered_email');
       }
 
+      localStorage.setItem('cr_display_email', data.email);
       router.push('/dashboard');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Authentication failed');
@@ -85,7 +86,7 @@ export default function LoginPage() {
                 <BrandLogoIcon size="md" />
                 <span className="heading-font text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-primary-600 to-blue-600">CrunchyStats</span>
               </div>
-              <CardTitle className="text-2xl text-center !text-white">Sign In</CardTitle>
+              <CardTitle className="text-2xl text-center text-primary-600 dark:text-primary-400">Sign In</CardTitle>
               <p className="mt-2 text-center text-sm text-primary-600 dark:text-primary-400">
                 Enter your Crunchyroll credentials to continue
               </p>

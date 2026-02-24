@@ -30,6 +30,7 @@ export async function POST(request: NextRequest) {
     const response = NextResponse.json({
       success: true,
       message: 'Authentication successful',
+      email,
     });
 
     // Store credentials in session for Rust API calls.

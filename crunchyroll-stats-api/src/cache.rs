@@ -3,10 +3,9 @@ use std::sync::Arc;
 use std::time::{Duration, Instant};
 use tokio::sync::RwLock;
 
-use crate::models::{HistoryEntry, Profile};
+use crate::models::HistoryEntry;
 
-const HISTORY_TTL: Duration = Duration::from_secs(10 * 60); // 10 minutes
-const PROFILE_TTL: Duration = Duration::from_secs(30 * 60); // 30 minutes
+const HISTORY_TTL: Duration = Duration::from_secs(60 * 60); // 60 minutes
 
 struct CacheEntry<T> {
     data: T,
@@ -22,14 +21,12 @@ impl<T> CacheEntry<T> {
 
 pub struct AppCache {
     history: RwLock<HashMap<String, CacheEntry<Vec<HistoryEntry>>>>,
-    profiles: RwLock<HashMap<String, CacheEntry<Profile>>>,
 }
 
 impl AppCache {
     pub fn new() -> Arc<Self> {
         Arc::new(Self {
             history: RwLock::new(HashMap::new()),
-            profiles: RwLock::new(HashMap::new()),
         })
     }
 
@@ -57,26 +54,6 @@ impl AppCache {
             data,
             inserted_at: Instant::now(),
             ttl: HISTORY_TTL,
-        });
-    }
-
-    pub async fn get_profile(&self, key: &str) -> Option<Profile> {
-        let cache = self.profiles.read().await;
-        cache.get(key).and_then(|entry| {
-            if entry.is_expired() {
-                None
-            } else {
-                Some(entry.data.clone())
-            }
-        })
-    }
-
-    pub async fn set_profile(&self, key: String, data: Profile) {
-        let mut cache = self.profiles.write().await;
-        cache.insert(key, CacheEntry {
-            data,
-            inserted_at: Instant::now(),
-            ttl: PROFILE_TTL,
         });
     }
 }

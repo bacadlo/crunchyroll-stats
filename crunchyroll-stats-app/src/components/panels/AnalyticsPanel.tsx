@@ -13,12 +13,7 @@ import { MostBingedSeriesCard } from '@/components/analytics/MostBingedSeriesCar
 export function AnalyticsPanel() {
   const { historyData } = useAuthenticatedApp();
   const analyticsEntries = useMemo(() => {
-    const data = historyData?.data ?? [];
-    const oneYearAgo = Date.now() - 365 * 24 * 60 * 60 * 1000;
-    return data.filter((entry) => {
-      if (!entry.watchedAt) return false;
-      return new Date(entry.watchedAt).getTime() >= oneYearAgo;
-    });
+    return (historyData?.data ?? []).filter((entry) => !!entry.watchedAt);
   }, [historyData]);
   const summary = useMemo(
     () => calculateAnalyticsSummary(analyticsEntries),

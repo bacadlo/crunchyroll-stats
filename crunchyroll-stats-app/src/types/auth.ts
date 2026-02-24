@@ -9,7 +9,3 @@ export interface AuthResponse {
   error?: string;
 }
 
-export interface Profile {
-  profileName: string;
-  avatar: string;
-}

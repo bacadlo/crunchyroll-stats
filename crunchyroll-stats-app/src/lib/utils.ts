@@ -76,16 +76,8 @@ export function formatTotalWatchTime(minutes: number): string {
   return `${minutes}m`;
 }
 
-function filterLastYear(entries: HistoryEntry[]): HistoryEntry[] {
-  const oneYearAgo = Date.now() - 365 * 24 * 60 * 60 * 1000;
-  return entries.filter((item) => {
-    if (!item.watchedAt) return false;
-    return new Date(item.watchedAt).getTime() >= oneYearAgo;
-  });
-}
-
 export function calculateStats(allHistory: HistoryEntry[]): WatchHistoryStats {
-  const watchHistory = filterLastYear(allHistory);
+  const watchHistory = allHistory;
   const totalEpisodes = watchHistory.length;
   const totalWatchTime = watchHistory.reduce((acc, item) => {
     const progressMs = item.progressMs || 0;

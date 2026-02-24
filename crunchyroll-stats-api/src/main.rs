@@ -2,7 +2,6 @@ mod auth;
 mod cache;
 mod history;
 mod models;
-mod profile;
 
 use actix_cors::Cors;
 use actix_web::{middleware::Logger, web, App, HttpResponse, HttpServer, Result};
@@ -34,7 +33,6 @@ async fn main() -> std::io::Result<()> {
             .app_data(web::Data::from(cache.clone()))
             .route("/health", web::get().to(health_check))
             .route("/api/watch-history", web::post().to(get_watch_history))
-            .route("/api/profile", web::post().to(get_profile))
     })
     .bind(&bind_address)?
     .run()
@@ -80,38 +78,6 @@ async fn get_watch_history(
     }
 }
 
-async fn get_profile(
-    req: web::Json<LoginRequest>,
-    cache: web::Data<AppCache>,
-) -> Result<HttpResponse> {
-    info!("Profile request for user: {}", req.email);
-
-    let cache_key = AppCache::cache_key(&req.email);
-
-    // Check cache first
-    if let Some(cached) = cache.get_profile(&cache_key).await {
-        info!("Returning cached profile: '{}'", cached.profile_name);
-        return Ok(HttpResponse::Ok().json(cached));
-    }
-
-    match fetch_profile(&req.email, &req.password).await {
-        Ok(profile) => {
-            info!(
-                "Profile fetched successfully: profile_name='{}', avatar='{}'",
-                profile.profile_name, profile.avatar
-            );
-            cache.set_profile(cache_key, profile.clone()).await;
-            Ok(HttpResponse::Ok().json(profile))
-        }
-        Err(e) => {
-            log::error!("Failed to fetch profile: {}", e);
-            Ok(HttpResponse::BadRequest().json(ErrorResponse {
-                error: e.to_string(),
-            }))
-        }
-    }
-}
-
 async fn fetch_watch_history(
     email: &str,
     password: &str,
@@ -124,8 +90,3 @@ async fn fetch_watch_history(
     Ok(items)
 }
 
-async fn fetch_profile(email: &str, password: &str) -> anyhow::Result<models::Profile> {
-    let client = CrunchyrollClient::new(email, password).await?;
-    let prof = profile::Profile::new(&client);
-    prof.fetch_profile().await
-}

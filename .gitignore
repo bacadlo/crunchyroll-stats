@@ -3,14 +3,6 @@
 Thumbs.db
 Desktop.ini
 
-# === IDEs / Editors ===
-.cursor/
-.vscode/
-.idea/
-*.swp
-*.swo
-*~
-
 # === Environment variables ===
 .env
 .env.*
@@ -43,3 +35,8 @@ yarn-error.log*
 
 # === Rust (crunchyroll-stats-api) ===
 target/
+
+# === Docker ===
+docker-compose.override.yml
+
+

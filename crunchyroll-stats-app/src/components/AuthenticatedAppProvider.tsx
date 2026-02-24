@@ -3,11 +3,10 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { WatchHistoryResponse } from '@/types/watch-history';
-import { Profile } from '@/types/auth';
 
 interface AuthenticatedAppContextValue {
   historyData: WatchHistoryResponse | null;
-  profile: Profile | null;
+  displayEmail: string;
   isLoading: boolean;
   isRefreshing: boolean;
   loadingMessage: string;
@@ -29,7 +28,11 @@ export function useAuthenticatedApp() {
 export function AuthenticatedAppProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const [historyData, setHistoryData] = useState<WatchHistoryResponse | null>(null);
-  const [profile, setProfile] = useState<Profile | null>(null);
+  const [displayEmail, setDisplayEmail] = useState('');
+
+  useEffect(() => {
+    setDisplayEmail(localStorage.getItem('cr_display_email') || '');
+  }, []);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState('Fetching your history...');
@@ -37,6 +40,7 @@ export function AuthenticatedAppProvider({ children }: { children: React.ReactNo
   const initialFetchRef = useRef(false);
 
   const logout = useCallback(async () => {
+    localStorage.removeItem('cr_display_email');
     await fetch('/api/auth', { method: 'DELETE' });
     router.push('/login');
   }, [router]);
@@ -50,12 +54,9 @@ export function AuthenticatedAppProvider({ children }: { children: React.ReactNo
           setIsLoading(true);
         }
 
-        const [historyRes, profileRes] = await Promise.all([
-          fetch('/api/watch-history'),
-          fetch('/api/profile'),
-        ]);
+        const historyRes = await fetch('/api/watch-history');
 
-        if (historyRes.status === 401 || profileRes.status === 401) {
+        if (historyRes.status === 401) {
           await logout();
           return;
         }
@@ -67,13 +68,6 @@ export function AuthenticatedAppProvider({ children }: { children: React.ReactNo
 
         const historyResult = (await historyRes.json()) as WatchHistoryResponse;
         setHistoryData(historyResult);
-
-        if (profileRes.ok) {
-          const profileResult = (await profileRes.json()) as Profile;
-          setProfile(profileResult);
-        } else {
-          setProfile(null);
-        }
 
         setError('');
       } catch (err) {
@@ -96,12 +90,12 @@ export function AuthenticatedAppProvider({ children }: { children: React.ReactNo
 
   useEffect(() => {
     if (!isLoading) {
-      setLoadingMessage('Fetching your history...');
+      setLoadingMessage('Fetching account history...');
       return;
     }
 
     const timer = setTimeout(() => {
-      setLoadingMessage('Analyzing you stats...');
+      setLoadingMessage('Analyzing anime stats...');
     }, 2000);
 
     return () => clearTimeout(timer);
@@ -110,7 +104,7 @@ export function AuthenticatedAppProvider({ children }: { children: React.ReactNo
   const value = useMemo<AuthenticatedAppContextValue>(
     () => ({
       historyData,
-      profile,
+      displayEmail,
       isLoading,
       isRefreshing,
       loadingMessage,
@@ -118,7 +112,7 @@ export function AuthenticatedAppProvider({ children }: { children: React.ReactNo
       refreshData: () => fetchAllData(true),
       logout,
     }),
-    [historyData, profile, isLoading, isRefreshing, loadingMessage, error, fetchAllData, logout]
+    [historyData, displayEmail, isLoading, isRefreshing, loadingMessage, error, fetchAllData, logout]
   );
 
   return (

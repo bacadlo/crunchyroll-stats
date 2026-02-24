@@ -1,6 +1,5 @@
 import axios from 'axios';
 import { HistoryEntry } from '@/types/watch-history';
-import { Profile } from '@/types/auth';
 
 const RUST_API_URL = process.env.RUST_API_URL || 'http://localhost:8080';
 
@@ -44,29 +43,3 @@ export async function getRustWatchHistory(
   }
 }
 
-export async function getRustProfile(
-  email: string,
-  password: string
-): Promise<Profile> {
-  try {
-    const response = await axios.post(`${RUST_API_URL}/api/profile`, {
-      email,
-      password,
-    });
-
-    const data = response.data;
-    const profile = {
-      profileName: data.profile_name,
-      avatar: data.avatar || '',
-    };
-
-    return profile;
-  } catch (error) {
-    console.error('Rust API profile call failed:', error);
-    if (axios.isAxiosError(error)) {
-      const errorMsg = error.response?.data?.error || error.message;
-      throw new Error(`Failed to fetch profile: ${errorMsg}`);
-    }
-    throw new Error('Failed to fetch profile');
-  }
-}

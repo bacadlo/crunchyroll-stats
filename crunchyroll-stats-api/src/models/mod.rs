@@ -1,8 +1,6 @@
 pub mod history;
-pub mod profile;
 
 pub use history::{HistoryEntry, HistoryResponse};
-pub use profile::Profile;
 
 use serde::{Deserialize, Serialize};
 
