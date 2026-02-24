@@ -44,7 +44,7 @@ Browser -> Cloudflare (SSL) -> Nginx -> Next.js (port 3000) -> Rust API (port 80
 ### Run with Docker (recommended)
 
 ```bash
-git clone https://github.com/<your-username>/crunchyroll-stats.git
+git clone https://github.com/<bacadlo/crunchyroll-stats.git
 cd crunchyroll-stats
 
 # Create env files
