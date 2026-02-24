@@ -1,47 +1,75 @@
 # CrunchyStats
 
-A full-stack app for viewing and analyzing your Crunchyroll watch history. Built with a Rust backend and Next.js frontend.
+A full-stack analytics dashboard for Crunchyroll watch history. Rust backend, Next.js frontend, containerized with Docker.
 
-## Features
-
-- **Watch History** — View all anime and movies watched via Crunchyroll
-- **Analytics** — Viewing patterns, genre insights, binge stats, streak tracking, and watch time breakdowns (last year)
-- **Search & Sort** — Real-time search across titles, sortable by date/title/completion
-- **Pagination** — Configurable page sizes (10/20/50)
-- **Data Export** — Download history as CSV or JSON
-- **Dark Mode** — Persistent theme toggle
-- **Secure Auth** — httpOnly cookie-based sessions with server-side validation
-- **Caching** — Server-side caching on both the Rust API and Next.js layers to minimize Crunchyroll-rs API calls
+**Live:** [crunchyroll-stats.edngoche.com](https://crunchyroll-stats.edngoche.com)
 
 ## Tech Stack
 
 | Layer | Technology |
 |-------|------------|
-| Backend | Rust, Actix-web, [crunchyroll-rs](https://github.com/crunchy-labs/crunchyroll-rs/tree/master) |
+| Backend | Rust, Actix-web, [crunchyroll-rs](https://github.com/crunchy-labs/crunchyroll-rs) |
 | Frontend | Next.js 16, React 19, TypeScript |
-| Styling | Tailwind CSS |
-| Icons | Lucide React |
-| Validation | Zod |
+| Styling | Tailwind CSS 4 |
+| Charts | Recharts |
+| Validation | Zod, react-hook-form |
+| Infrastructure | Docker, Nginx, Cloudflare |
 
+## Features
+
+- Watch history viewer with real-time search, sorting, and pagination
+- Analytics dashboard: genre insights, binge stats, streak tracking, watch time breakdowns
+- Data export (CSV, JSON)
+- Dark/light mode
+- httpOnly cookie sessions with server-side validation
+- Multi-layer caching (Rust API 60 min, Next.js server 60 min)
+- Dockerized with multi-stage builds for both services
+
+## Architecture
+
+```
+Browser -> Cloudflare (SSL) -> Nginx -> Next.js (port 3000) -> Rust API (port 8080) -> Crunchyroll API
+```
+
+- Next.js handles auth, serves the frontend, and proxies data requests to the Rust backend
+- Rust backend authenticates with Crunchyroll, fetches and caches watch history
+- Containers communicate over an internal Docker network exposing only the frontend to the network
 
 ## Getting Started
 
 ### Prerequisites
 
-- [Rust](https://rustup.rs/) (stable)
-- [Node.js](https://nodejs.org/) (v18+)
+- [Docker](https://docs.docker.com/get-docker/) and Docker Compose v2
 - A [Crunchyroll](https://www.crunchyroll.com/) account
 
-### Backend
+### Run with Docker (recommended)
+
+```bash
+git clone https://github.com/<your-username>/crunchyroll-stats.git
+cd crunchyroll-stats
+
+# Create env files
+cp .env.api.example .env.api
+cp .env.app.example .env.app
+# Edit .env.app and set SESSION_SECRET (run: openssl rand -hex 32)
+
+docker compose up -d --build
+```
+
+Open [http://localhost:3000](http://localhost:3000).
+
+### Run without Docker
+
+**Backend:**
 
 ```bash
 cd crunchyroll-stats-api
 cargo run
 ```
 
-The API server starts at `http://localhost:8080`.
+Starts at `http://localhost:8080`.
 
-### Frontend
+**Frontend:**
 
 ```bash
 cd crunchyroll-stats-app
@@ -49,17 +77,11 @@ npm install
 npm run dev
 ```
 
-The app starts at `http://localhost:3000`.
+Starts at `http://localhost:3000`.
 
 ### Environment Variables
 
-**Frontend** (`crunchyroll-stats-app/.env.local`):
-
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `RUST_API_URL` | `http://localhost:8080` | Rust backend URL |
-
-**Backend**:
+**Rust API** (`.env.api`):
 
 | Variable | Default | Description |
 |----------|---------|-------------|
@@ -67,11 +89,36 @@ The app starts at `http://localhost:3000`.
 | `HOST` | `0.0.0.0` | Bind address |
 | `PORT` | `8080` | Server port |
 
-## How It Works
+**Next.js App** (`.env.app`):
 
-1. User logs in at `/login` with Crunchyroll credentials
-2. Next.js API route validates and stores credentials in an httpOnly cookie
-3. Dashboard and analytics pages fetch data via Next.js API routes → Rust backend → Crunchyroll API
-4. Rust server authenticates with Crunchyroll using [crunchyroll-rs](https://github.com/crunchy-labs/crunchyroll-rs/tree/master), fetches watch history (with genre resolution) and profile data
-5. Both the Rust API (10 min TTL) and Next.js server (5 min TTL) cache responses to avoid repeated Crunchyroll API calls
-6. Frontend computes stats and analytics, rendering the dashboard with tables, metrics, and export options
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `RUST_API_URL` | `http://localhost:8080` | Rust backend URL |
+| `NEXT_PUBLIC_APP_URL` | `http://localhost:3000` | Public app URL |
+| `SESSION_SECRET` | - | 64-char hex string for cookie signing |
+| `NODE_ENV` | `development` | Environment |
+
+## Project Structure
+
+```
+crunchyroll-stats/
+├── crunchyroll-stats-api/       # Rust backend (Actix-web)
+│   ├── src/
+│   │   ├── main.rs              # Routes and server setup
+│   │   ├── auth.rs              # Crunchyroll authentication
+│   │   ├── history.rs           # Watch history fetching + genre resolution
+│   │   ├── cache.rs             # In-memory cache (60 min TTL)
+│   │   └── models/              # Data models
+│   ├── Cargo.toml
+│   └── Dockerfile
+├── crunchyroll-stats-app/       # Next.js frontend
+│   ├── src/
+│   │   ├── app/                 # App router (pages + API routes)
+│   │   ├── components/          # UI components, panels, analytics
+│   │   ├── lib/                 # Utils, analytics, caching, API client
+│   │   └── types/               # TypeScript interfaces
+│   ├── package.json
+│   └── Dockerfile
+├── docker-compose.yml
+└── .env.api / .env.app
+```
