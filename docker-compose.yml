@@ -1,0 +1,28 @@
+services:
+  api:
+    build: ./crunchyroll-stats-api
+    container_name: crunchyroll-api
+    restart: unless-stopped
+    env_file: .env.api
+    networks:
+      - crunchyroll-net
+
+  app:
+    build:
+      context: ./crunchyroll-stats-app
+      args:
+        RUST_API_URL: http://api:8080
+        NEXT_PUBLIC_APP_URL: https://crunchyroll-stats.edngoche.com
+    container_name: crunchyroll-app
+    restart: unless-stopped
+    env_file: .env.app
+    ports:
+      - "127.0.0.1:3000:3000"
+    depends_on:
+      - api
+    networks:
+      - crunchyroll-net
+
+networks:
+  crunchyroll-net:
+    driver: bridge
