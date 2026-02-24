@@ -1,121 +1,7 @@
 use crate::{auth::CrunchyrollClient, models::HistoryEntry};
 use anyhow::Result;
-use crunchyroll_rs::categories::{Category, CategoryInformation};
 use futures_util::StreamExt;
-use std::collections::{HashMap, HashSet};
-
-fn capitalize(word: &str) -> String {
-    let mut chars = word.chars();
-    match chars.next() {
-        Some(first) => format!("{}{}", first.to_uppercase(), chars.as_str()),
-        None => String::new(),
-    }
-}
-
-fn prettify_category(raw: &str) -> String {
-    raw.split('-')
-        .filter(|part| !part.is_empty())
-        .map(capitalize)
-        .collect::<Vec<_>>()
-        .join(" ")
-}
-
-fn normalize_genres(genres: Vec<String>) -> Vec<String> {
-    let mut seen = HashSet::new();
-    let mut normalized = Vec::new();
-
-    for genre in genres {
-        let trimmed = genre.trim();
-        if trimmed.is_empty() {
-            continue;
-        }
-
-        let key = trimmed.to_lowercase();
-        if seen.insert(key) {
-            normalized.push(trimmed.to_string());
-        }
-    }
-
-    normalized
-}
-
-#[derive(Default)]
-struct CategoryTaxonomy {
-    titles_by_id: HashMap<String, String>,
-}
-
-fn category_title_or_fallback(raw_id: &str, localized_title: &str) -> String {
-    let title = localized_title.trim();
-    if title.is_empty() {
-        return prettify_category(raw_id);
-    }
-
-    title.to_string()
-}
-
-async fn load_category_taxonomy(client: &crunchyroll_rs::Crunchyroll) -> CategoryTaxonomy {
-    let mut taxonomy = CategoryTaxonomy::default();
-
-    let categories = match client.categories().await {
-        Ok(categories) => categories,
-        Err(error) => {
-            log::warn!("Failed to load category taxonomy: {}", error);
-            return taxonomy;
-        }
-    };
-
-    for category in categories {
-        let parent_id = category.category.to_string();
-        taxonomy.titles_by_id.insert(
-            parent_id.clone(),
-            category_title_or_fallback(&parent_id, &category.localization.title),
-        );
-    }
-
-    taxonomy
-}
-
-fn resolve_genres(
-    raw_categories: Vec<Category>,
-    localized_categories: Vec<CategoryInformation>,
-    taxonomy: &CategoryTaxonomy,
-) -> Vec<String> {
-    let mut category_ids = Vec::new();
-    let mut seen_ids = HashSet::new();
-    let mut localized_titles = HashMap::new();
-
-    for category in localized_categories {
-        let category_id = category.category.to_string();
-        localized_titles.insert(
-            category_id.clone(),
-            category_title_or_fallback(&category_id, &category.localization.title),
-        );
-
-        if seen_ids.insert(category_id.clone()) {
-            category_ids.push(category_id);
-        }
-    }
-
-    for category in raw_categories {
-        let category_id = category.to_string();
-        if seen_ids.insert(category_id.clone()) {
-            category_ids.push(category_id);
-        }
-    }
-
-    normalize_genres(
-        category_ids
-            .into_iter()
-            .map(|category_id| {
-                localized_titles
-                    .get(&category_id)
-                    .or_else(|| taxonomy.titles_by_id.get(&category_id))
-                    .cloned()
-                    .unwrap_or_else(|| prettify_category(&category_id))
-            })
-            .collect(),
-    )
-}
+use std::collections::HashMap;
 
 pub struct History<'a> {
     client: &'a CrunchyrollClient,
@@ -128,7 +14,6 @@ impl<'a> History<'a> {
 
     pub async fn fetch_history(&self, limit: Option<usize>) -> Result<Vec<HistoryEntry>> {
         let mut history = Vec::new();
-        let taxonomy = load_category_taxonomy(&self.client.client).await;
         let mut series_genres_cache: HashMap<String, Vec<String>> = HashMap::new();
         let mut movie_listing_genres_cache: HashMap<String, Vec<String>> = HashMap::new();
         let mut pagination = self.client.client.watch_history();
@@ -233,24 +118,7 @@ impl<'a> History<'a> {
                             }
                         }
 
-                        let localized_categories = if raw_categories.is_empty() {
-                            match episode.categories().await {
-                                Ok(categories) => categories,
-                                Err(error) => {
-                                    log::warn!(
-                                        "Failed to fetch discover categories for series {}: {}",
-                                        series_id,
-                                        error
-                                    );
-                                    Vec::new()
-                                }
-                            }
-                        } else {
-                            Vec::new()
-                        };
-
-                        let resolved =
-                            resolve_genres(raw_categories, localized_categories, &taxonomy);
+                        let resolved: Vec<String> = raw_categories.into_iter().map(|c| c.to_string()).collect();
                         series_genres_cache.insert(series_id.clone(), resolved.clone());
                         resolved
                     };
@@ -290,23 +158,7 @@ impl<'a> History<'a> {
                         let genres = match movie.movie_listing().await {
                             Ok(listing) => {
                                 let raw_categories = listing.categories.clone().unwrap_or_default();
-                                let localized_categories = if raw_categories.is_empty() {
-                                    match listing.categories().await {
-                                        Ok(categories) => categories,
-                                        Err(error) => {
-                                            log::warn!(
-                                                "Failed to fetch discover categories for movie listing {}: {}",
-                                                movie_listing_id,
-                                                error
-                                            );
-                                            Vec::new()
-                                        }
-                                    }
-                                } else {
-                                    Vec::new()
-                                };
-
-                                resolve_genres(raw_categories, localized_categories, &taxonomy)
+                                raw_categories.into_iter().map(|c| c.to_string()).collect()
                             }
                             Err(error) => {
                                 log::warn!(
