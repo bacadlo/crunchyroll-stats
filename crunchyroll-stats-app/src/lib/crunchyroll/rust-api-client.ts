@@ -3,6 +3,11 @@ import { HistoryEntry } from '@/types/watch-history';
 
 const RUST_API_URL = process.env.RUST_API_URL || 'http://localhost:8080';
 
+interface RustImage {
+  source: string;
+  width: number;
+}
+
 export async function getRustWatchHistory(
   email: string,
   password: string
@@ -15,22 +20,28 @@ export async function getRustWatchHistory(
       password,
     });
 
-    console.log(`Received ${response.data.total} items from Rust API`);
+    console.log(`Received ${response.data.data.length} items from Rust API`);
 
-    const watchHistory: HistoryEntry[] = response.data.data.map((item: any) => ({
-      id: item.id,
-      mediaType: item.media_type ?? undefined,
-      contentId: item.content_id ?? undefined,
-      seriesId: item.series_id ?? undefined,
-      movieListingId: item.movie_listing_id ?? undefined,
-      title: item.title,
-      episodeTitle: item.episode_title ?? undefined,
-      watchedAt: item.watched_at ?? undefined,
-      progressMs: item.progress_ms ?? undefined,
-      durationMs: item.duration_ms ?? undefined,
-      thumbnail: item.thumbnail ?? undefined,
-      genres: Array.isArray(item.genres) ? item.genres : [],
-    }));
+    const watchHistory: HistoryEntry[] = response.data.data.map((item: any) => {
+      const images: RustImage[] = Array.isArray(item.images) ? item.images : [];
+      const thumbnail = images.length > 0
+        ? images.reduce((max, img) => img.width > max.width ? img : max).source
+        : undefined;
+
+      return {
+        id: item.id,
+        mediaType: item.media_type ?? undefined,
+        contentId: item.content_id ?? undefined,
+        seriesId: item.series_id ?? undefined,
+          title: item.title,
+        episodeTitle: item.episode_title ?? undefined,
+        watchedAt: item.watched_at ?? undefined,
+        progressMs: item.playhead != null ? item.playhead * 1000 : undefined,
+        durationMs: item.duration_ms ?? undefined,
+        thumbnail,
+        genres: Array.isArray(item.genres) ? item.genres : [],
+      };
+    });
 
     return watchHistory;
   } catch (error) {
@@ -42,4 +53,3 @@ export async function getRustWatchHistory(
     throw new Error('Failed to fetch watch history');
   }
 }
-

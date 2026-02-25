@@ -1,5 +1,6 @@
-use crate::{auth::CrunchyrollClient, models::HistoryEntry};
+use crate::{auth::CrunchyrollClient, models::{HistoryEntry, Image}};
 use anyhow::Result;
+use chrono::{Duration, Utc};
 use futures_util::StreamExt;
 use std::collections::HashMap;
 
@@ -22,10 +23,16 @@ impl<'a> History<'a> {
             pagination.page_size(limit as u32);
         }
 
+        let cutoff = Utc::now() - Duration::days(365);
         let mut index = 0usize;
         while let Some(entry) = pagination.next().await {
             let entry = entry?;
-            let playhead_ms = (entry.playhead as u64) * 1000;
+
+            if entry.date_played < cutoff {
+                break;
+            }
+
+            let playhead = entry.playhead;
             let watched_at = Some(entry.date_played.to_rfc3339());
 
             let panel = match entry.panel {
@@ -93,11 +100,11 @@ impl<'a> History<'a> {
                     let series_id = episode.series_id.clone();
                     let content_id = episode.id.clone();
 
-                    let thumbnail = episode
+                    let images: Vec<Image> = episode
                         .images
                         .iter()
-                        .max_by_key(|img| img.width)
-                        .map(|img| img.source.clone());
+                        .map(|img| Image { source: img.source.clone(), width: img.width })
+                        .collect();
 
                     let genres = if let Some(cached) = series_genres_cache.get(&series_id) {
                         cached.clone()
@@ -132,9 +139,9 @@ impl<'a> History<'a> {
                         title: episode.series_title,
                         episode_title: Some(episode.title),
                         watched_at,
-                        progress_ms: Some(playhead_ms),
+                        playhead: Some(playhead),
                         duration_ms: Some(duration_ms),
-                        thumbnail,
+                        images,
                         genres,
                     }
                 }
@@ -143,12 +150,12 @@ impl<'a> History<'a> {
                     let content_id = movie.id.clone();
                     let movie_listing_id = movie.movie_listing_id.clone();
 
-                    let thumbnail = movie
+                    let images: Vec<Image> = movie
                         .images
                         .thumbnail
                         .iter()
-                        .max_by_key(|img| img.width)
-                        .map(|img| img.source.clone());
+                        .map(|img| Image { source: img.source.clone(), width: img.width })
+                        .collect();
 
                     let genres = if let Some(cached) =
                         movie_listing_genres_cache.get(&movie_listing_id)
@@ -183,9 +190,9 @@ impl<'a> History<'a> {
                         title: movie.title,
                         episode_title: None,
                         watched_at,
-                        progress_ms: Some(playhead_ms),
+                        playhead: Some(playhead),
                         duration_ms: Some(duration_ms),
-                        thumbnail,
+                        images,
                         genres,
                     }
                 }

@@ -1,6 +1,6 @@
 pub mod history;
 
-pub use history::{HistoryEntry, HistoryResponse};
+pub use history::{HistoryEntry, HistoryResponse, Image};
 
 use serde::{Deserialize, Serialize};
 

@@ -30,7 +30,7 @@ export function DashboardPanel() {
       <div className={accentBar} />
       <CardHeader className="pb-3 pt-6">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <CardTitle>Watch History ({historyData.total})</CardTitle>
+          <CardTitle>Watch History ({historyData.data.length})</CardTitle>
           <ExportButton data={historyData.data} />
         </div>
       </CardHeader>

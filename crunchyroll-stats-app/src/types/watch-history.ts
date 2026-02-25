@@ -3,9 +3,7 @@ export interface HistoryEntry {
   mediaType?: 'series' | 'season' | 'episode' | 'movie_listing' | 'movie' | 'artist' | 'music_video' | 'concert';
   contentId?: string;
   seriesId?: string;
-  movieListingId?: string;
   title: string;
-  seriesTitle?: string;
   episodeTitle?: string;
   watchedAt?: string;
   progressMs?: number;
@@ -30,6 +28,5 @@ export interface WatchHistoryStats {
 
 export interface WatchHistoryResponse {
   data: HistoryEntry[];
-  total: number;
   stats: WatchHistoryStats;
 }

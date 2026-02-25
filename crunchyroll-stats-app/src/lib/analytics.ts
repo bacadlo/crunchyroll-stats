@@ -158,7 +158,7 @@ export function calculateAnalyticsSummary(entries: HistoryEntry[]): AnalyticsSum
     }
 
     if (analyticsMediaType === 'movie') {
-      const movieKey = (entry.contentId ?? entry.movieListingId ?? entry.title).trim().toLowerCase();
+      const movieKey = (entry.contentId ?? entry.title).trim().toLowerCase();
       if (movieKey) movies.add(movieKey);
     }
 
@@ -175,7 +175,7 @@ export function calculateAnalyticsSummary(entries: HistoryEntry[]): AnalyticsSum
           const dateKey = createDayKey(watchedDate);
           const sessionKey = `${dateKey}|${seriesKey}`;
           const existing = bingeSessions.get(sessionKey);
-          const displayName = entry.seriesTitle?.trim() || entry.title?.trim() || 'Untitled Series';
+          const displayName = entry.title?.trim() || 'Untitled Series';
           const nextSession: BingeSessionState = existing ?? {
             name: displayName,
             episodes: 0,
@@ -211,7 +211,7 @@ export function calculateAnalyticsSummary(entries: HistoryEntry[]): AnalyticsSum
     }
     const entryTitle =
       analyticsMediaType === 'episode'
-        ? (entry.seriesTitle ?? entry.title ?? '').trim()
+        ? (entry.title ?? '').trim()
         : (entry.title ?? '').trim();
     const titleKey = entryTitle ? entryTitle.toLowerCase() : null;
 

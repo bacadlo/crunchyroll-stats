@@ -27,7 +27,7 @@ export async function GET(request: NextRequest) {
     const cacheKey = `history:${session.email}`;
     const cached = getCached<WatchHistoryResponse>(cacheKey);
     if (cached) {
-      console.log(`Returning cached watch history (${cached.total} items)`);
+      console.log(`Returning cached watch history (${cached.data.length} items)`);
       return NextResponse.json(cached);
     }
 
@@ -41,7 +41,6 @@ export async function GET(request: NextRequest) {
 
     const result: WatchHistoryResponse = {
       data: watchHistory,
-      total: watchHistory.length,
       stats,
     };
 

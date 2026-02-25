@@ -57,17 +57,15 @@ async fn get_watch_history(
     // Check cache first
     if let Some(cached) = cache.get_history(&cache_key).await {
         info!("Returning cached watch history ({} items)", cached.len());
-        let total = cached.len();
-        return Ok(HttpResponse::Ok().json(HistoryResponse { data: cached, total }));
+        return Ok(HttpResponse::Ok().json(HistoryResponse { data: cached }));
     }
 
     let limit = Some(100);
 
     match fetch_watch_history(&req.email, &req.password, limit).await {
         Ok(data) => {
-            let total = data.len();
             cache.set_history(cache_key, data.clone()).await;
-            Ok(HttpResponse::Ok().json(HistoryResponse { data, total }))
+            Ok(HttpResponse::Ok().json(HistoryResponse { data }))
         }
         Err(e) => {
             log::error!("Failed to fetch watch history: {}", e);
