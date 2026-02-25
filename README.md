@@ -1,7 +1,6 @@
 # CrunchyStats
 
-A full-stack analytics dashboard for Crunchyroll watch history. Rust backend, Next.js frontend, containerized with Docker.
-
+A full-stack analytics dashboard for Crunchyroll watch history. Rust backend, Next.js frontend, containerized with Docker
 
 ## Tech Stack
 
@@ -12,52 +11,54 @@ A full-stack analytics dashboard for Crunchyroll watch history. Rust backend, Ne
 | Styling | Tailwind CSS 4 |
 | Charts | Recharts |
 | Validation | Zod, react-hook-form |
-| Infrastructure | Docker, Nginx, Cloudflare |
+| Infrastructure | Docker, multi-stage builds, Nginx, Cloudflare |
 
 ## Features
 
-- Watch history viewer with real-time search, sorting, and pagination
-- Analytics dashboard: genre insights, binge stats, streak tracking, watch time breakdowns
-- Data export (CSV, JSON)
-- Dark/light mode
-- httpOnly cookie sessions with server-side validation
-- Multi-layer caching (Rust API 60 min, Next.js server 60 min)
-- Dockerized with multi-stage builds for both services
+- **Watch History** — browse your last year of activity with real-time search, sorting, and pagination
+- **Analytics Dashboard** — genre distribution, binge detection, streak tracking, watch-time breakdowns by day/week/month
+- **Data Export** — download history as CSV or JSON
+- **Theming** — dark and light mode with system preference detection
+- **Session Security** — httpOnly cookie-based sessions with server-side validation
+- **Multi-Layer Caching** — 60-minute TTL on both Rust API and Next.js server layers to minimize redundant API calls
+- **Containerized** — Dockerized with multi-stage builds for both services; a single `docker compose up` to run
 
 ## Architecture
 
 ```
-Browser -> Cloudflare (SSL) -> Nginx -> Next.js (port 3000) -> Rust API (port 8080) -> Crunchyroll API
+Browser ──▸ Next.js (port 3000) ──▸ Rust API (port 8080) ──▸ Crunchyroll API
 ```
 
-- Next.js handles auth, serves the frontend, and proxies data requests to the Rust backend
-- Rust backend authenticates with Crunchyroll, fetches and caches watch history
-- Containers communicate over an internal Docker network exposing only the frontend to the network
+- **Next.js** handles authentication, serves the frontend, and proxies data requests to the Rust backend via internal Docker networking
+- **Rust API** authenticates with Crunchyroll, fetches watch history (capped to the last 365 days), resolves genre metadata per series/movie, and caches results in memory
+- **Containers** communicate over an isolated Docker network; only the frontend is exposed externally
 
 ## Getting Started
 
 ### Prerequisites
 
-- [Docker](https://docs.docker.com/get-docker/) and Docker Compose v2
+- [Docker](https://docs.docker.com/get-docker/) and Docker Compose v2+
 - A [Crunchyroll](https://www.crunchyroll.com/) account
 
-### Run with Docker (recommended)
+### Run with Docker
 
 ```bash
 git clone https://github.com/bacadlo/crunchyroll-stats.git
 cd crunchyroll-stats
 
-# Create env files
+# Create env files from examples
 cp .env.api.example .env.api
 cp .env.app.example .env.app
-# Edit .env.app and set SESSION_SECRET (run: openssl rand -hex 32)
+
+# Generate a session secret and add it to .env.app
+openssl rand -hex 32
 
 docker compose up -d --build
 ```
 
 Open [http://localhost:3000](http://localhost:3000).
 
-### Run without Docker
+### Run Locally (without Docker)
 
 **Backend:**
 
@@ -84,7 +85,7 @@ Starts at `http://localhost:3000`.
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `RUST_LOG` | `info` | Log level |
+| `RUST_LOG` | `info` | Log verbosity (`debug`, `info`, `warn`, `error`) |
 | `HOST` | `0.0.0.0` | Bind address |
 | `PORT` | `8080` | Server port |
 
@@ -92,32 +93,36 @@ Starts at `http://localhost:3000`.
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `RUST_API_URL` | `http://localhost:8080` | Rust backend URL |
-| `NEXT_PUBLIC_APP_URL` | `http://localhost:3000` | Public app URL |
-| `SESSION_SECRET` | - | 64-char hex string for cookie signing |
-| `NODE_ENV` | `development` | Environment |
+| `RUST_API_URL` | `http://localhost:8080` | Internal URL to the Rust backend |
+| `NEXT_PUBLIC_APP_URL` | `http://localhost:3000` | Public-facing app URL |
+| `SESSION_SECRET` | — | 64-char hex string for cookie signing |
+| `NODE_ENV` | `development` | `development` or `production` |
 
 ## Project Structure
 
 ```
 crunchyroll-stats/
-├── crunchyroll-stats-api/       # Rust backend (Actix-web)
+├── crunchyroll-stats-api/          # Rust backend
 │   ├── src/
-│   │   ├── main.rs              # Routes and server setup
-│   │   ├── auth.rs              # Crunchyroll authentication
-│   │   ├── history.rs           # Watch history fetching + genre resolution
-│   │   ├── cache.rs             # In-memory cache (60 min TTL)
-│   │   └── models/              # Data models
+│   │   ├── main.rs                 # HTTP routes, server bootstrap
+│   │   ├── auth.rs                 # Crunchyroll credential auth
+│   │   ├── history.rs              # Watch history pagination + genre resolution
+│   │   ├── cache.rs                # In-memory TTL cache
+│   │   └── models/                 # Request/response data models
 │   ├── Cargo.toml
 │   └── Dockerfile
-├── crunchyroll-stats-app/       # Next.js frontend
+├── crunchyroll-stats-app/          # Next.js frontend
 │   ├── src/
-│   │   ├── app/                 # App router (pages + API routes)
-│   │   ├── components/          # UI components, panels, analytics
-│   │   ├── lib/                 # Utils, analytics, caching, API client
-│   │   └── types/               # TypeScript interfaces
+│   │   ├── app/                    # App Router pages + API routes
+│   │   ├── components/
+│   │   │   ├── analytics/          # Chart and insight components
+│   │   │   ├── panels/             # Dashboard, history panels
+│   │   │   ├── ui/                 # Reusable UI primitives
+│   │   │   └── *.tsx               # Auth shell, navbar, filters, export
+│   │   ├── lib/                    # Analytics engine, API client, caching
+│   │   └── types/                  # TypeScript interfaces
 │   ├── package.json
 │   └── Dockerfile
 ├── docker-compose.yml
-└── .env.api / .env.app
+└── .env.api / .env.app             # Environment config (not committed)
 ```
