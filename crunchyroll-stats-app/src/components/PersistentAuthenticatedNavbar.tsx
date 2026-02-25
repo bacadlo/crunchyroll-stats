@@ -55,15 +55,15 @@ export function PersistentAuthenticatedNavbar() {
               aria-haspopup="menu"
               aria-expanded={isMenuOpen}
             >
-              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gray-300 dark:bg-gray-600 sm:h-10 sm:w-10">
-                <User className="h-4 w-4 text-gray-600 dark:text-gray-300" />
+              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gray-600 sm:h-10 sm:w-10">
+                <User className="h-4 w-4 text-gray-300" />
               </div>
-              <span className="hidden max-w-[10rem] truncate text-sm font-semibold text-gray-800 dark:text-gray-200 md:block">
+              <span className="hidden max-w-[10rem] truncate text-sm font-semibold text-gray-200 md:block">
                 {displayName}
               </span>
               <ChevronDown
                 className={cn(
-                  'h-4 w-4 text-gray-500 transition-transform dark:text-gray-400',
+                  'h-4 w-4 text-gray-400 transition-transform',
                   isMenuOpen && 'rotate-180'
                 )}
               />
@@ -79,9 +79,9 @@ export function PersistentAuthenticatedNavbar() {
               role="menu"
             >
               <div className="border-b border-[var(--border)] px-2 py-2">
-                <p className="truncate text-sm font-semibold text-gray-900 dark:text-gray-100">{displayName}</p>
+                <p className="truncate text-sm font-semibold text-gray-100">{displayName}</p>
                 {displayEmail && (
-                  <p className="truncate text-xs text-gray-500 dark:text-gray-400">{displayEmail}</p>
+                  <p className="truncate text-xs text-gray-400">{displayEmail}</p>
                 )}
               </div>
 
@@ -104,7 +104,7 @@ export function PersistentAuthenticatedNavbar() {
                   setIsMenuOpen(false);
                   await logout();
                 }}
-                className="flex w-full items-center justify-start gap-2 px-3 py-2 text-sm text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
+                className="flex w-full items-center justify-start gap-2 px-3 py-2 text-sm text-red-400 hover:text-red-300"
                 role="menuitem"
               >
                 <LogOut className="h-4 w-4" />

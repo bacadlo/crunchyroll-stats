@@ -15,13 +15,13 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         disabled={disabled || isLoading}
         className={cn(
           'inline-flex items-center justify-center rounded-lg font-medium transition-all',
-          'focus:outline-none focus:ring-2 focus:ring-offset-2 dark:ring-offset-gray-900',
+          'focus:outline-none focus:ring-2 focus:ring-offset-gray-900',
           'disabled:opacity-50 disabled:cursor-not-allowed',
           {
             'bg-gradient-to-r from-primary-600 to-primary-700 text-white shadow-sm hover:from-primary-700 hover:to-primary-800 hover:shadow focus:ring-primary-500': variant === 'primary',
-            'bg-gray-200 text-gray-900 shadow-sm hover:bg-gray-300 focus:ring-gray-500 dark:bg-gray-700 dark:text-gray-100 dark:hover:bg-gray-600': variant === 'secondary',
-            'border-2 border-primary-600 text-primary-700 shadow-sm hover:bg-primary-50 focus:ring-primary-500 dark:text-primary-300 dark:border-primary-400 dark:hover:bg-primary-950': variant === 'outline',
-            'text-gray-700 hover:bg-gray-100 focus:ring-gray-500 dark:text-gray-300 dark:hover:bg-gray-800': variant === 'ghost',
+            'bg-gray-700 text-gray-100 shadow-sm hover:bg-gray-600 focus:ring-gray-500': variant === 'secondary',
+            'border-2 border-primary-400 text-primary-300 shadow-sm hover:bg-primary-950 focus:ring-primary-500': variant === 'outline',
+            'text-gray-300 hover:bg-gray-800 focus:ring-gray-500': variant === 'ghost',
             'px-3 py-1.5 text-sm': size === 'sm',
             'px-4 py-2 text-base': size === 'md',
             'px-6 py-3 text-lg': size === 'lg',

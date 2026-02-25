@@ -11,14 +11,14 @@ export function DashboardPanel() {
   const { historyData } = useAuthenticatedApp();
   const [searchQuery, setSearchQuery] = useState('');
   const accentCardClass =
-    'group relative border-primary-500/25 bg-gradient-to-br from-[var(--card)] via-[var(--card)] to-primary-500/5 transition-all duration-300 hover:border-primary-500/45 hover:shadow-[0_0_60px_rgba(249,115,22,0.2)]';
+    'group relative border-primary-500/25 transition-all duration-300 hover:border-primary-500/45';
   const accentBar = 'absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-primary-500/35 via-primary-500/70 to-primary-600/80';
 
   if (!historyData) {
     return (
       <Card className={accentCardClass}>
         <div className={accentBar} />
-      <CardContent className="pt-10 pb-10 text-center text-gray-600 dark:text-gray-400">
+      <CardContent className="pt-10 pb-10 text-center text-gray-400">
           No watch history available yet.
         </CardContent>
       </Card>

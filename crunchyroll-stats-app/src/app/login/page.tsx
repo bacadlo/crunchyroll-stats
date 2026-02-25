@@ -78,25 +78,25 @@ export default function LoginPage() {
         <div className="relative">
           <div
             aria-hidden="true"
-            className="pointer-events-none absolute inset-[-20px] -z-10 rounded-[2rem] bg-primary-500/20 blur-2xl dark:bg-primary-500/25"
+            className="pointer-events-none absolute inset-[-20px] -z-10 rounded-[2rem] bg-primary-500/20 blur-2xl bg-primary-500/25"
           />
-          <Card className="group rounded-3xl border border-primary-500/25 bg-[var(--card)] shadow-[0_0_60px_rgba(249,115,22,0.18)] ring-1 ring-[var(--border)]/60 transition-transform duration-300 hover:scale-[1.01]">
+          <Card className="group rounded-3xl border border-primary-500/25 bg-[var(--card)] shadow-[0_0_60px_rgba(244,117,33,0.18)] ring-1 ring-[var(--border)]/60 transition-transform duration-300 hover:scale-[1.01]">
             <CardHeader className="!border-0 px-5 pb-0 pt-8 sm:px-10 sm:pt-10">
               <div className="mb-6 flex flex-col items-center justify-center gap-3">
                 <BrandLogoIcon size="md" />
                 <span className="heading-font text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-primary-600 to-blue-600">CrunchyStats</span>
               </div>
-              <CardTitle className="text-2xl text-center text-primary-600 dark:text-primary-400">Sign In</CardTitle>
-              <p className="mt-2 text-center text-sm text-primary-600 dark:text-primary-400">
+              <CardTitle className="text-2xl text-center text-primary-400">Sign In</CardTitle>
+              <p className="mt-2 text-center text-sm text-primary-400">
                 Enter your Crunchyroll credentials to continue
               </p>
             </CardHeader>
             <CardContent className="px-5 pb-8 pt-6 sm:px-10 sm:pb-10">
               <form onSubmit={handleSubmit} className="space-y-4">
                 {error && (
-                  <div className="flex items-start gap-3 rounded-lg border border-red-200 bg-red-50 p-4">
-                    <AlertCircle className="mt-0.5 h-5 w-5 flex-shrink-0 text-red-600" />
-                    <p className="text-sm text-red-800">{error}</p>
+                  <div className="flex items-start gap-3 rounded-lg border border-red-800 bg-red-950 p-4">
+                    <AlertCircle className="mt-0.5 h-5 w-5 flex-shrink-0 text-red-400" />
+                    <p className="text-sm text-red-300">{error}</p>
                   </div>
                 )}
 
@@ -111,7 +111,7 @@ export default function LoginPage() {
                 />
 
                 <div className="w-full">
-                  <label htmlFor="password" className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  <label htmlFor="password" className="mb-1 block text-sm font-medium text-gray-300">
                     Password
                   </label>
                   <div className="relative">
@@ -123,12 +123,12 @@ export default function LoginPage() {
                       onChange={(e) => setPassword(e.target.value)}
                       required
                       disabled={isLoading}
-                      className="w-full rounded-lg border border-gray-300 bg-white px-4 py-2 pr-20 text-gray-900 placeholder:text-gray-400 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:cursor-not-allowed disabled:bg-gray-100 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:placeholder:text-gray-500 dark:disabled:bg-gray-700"
+                      className="w-full rounded-lg border border-gray-600 bg-gray-800 px-4 py-2 pr-20 text-white placeholder:text-gray-500 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:cursor-not-allowed disabled:bg-gray-700"
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword((prev) => !prev)}
-                      className="absolute right-3 top-1/2 inline-flex -translate-y-1/2 items-center gap-1 text-xs text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
+                      className="absolute right-3 top-1/2 inline-flex -translate-y-1/2 items-center gap-1 text-xs text-gray-500 hover:text-gray-300"
                       aria-label={showPassword ? 'Hide password' : 'Show password'}
                     >
                       {showPassword ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
@@ -137,13 +137,13 @@ export default function LoginPage() {
                   </div>
                 </div>
 
-                <label className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
+                <label className="flex items-center gap-2 text-sm text-gray-300">
                   <input
                     type="checkbox"
                     checked={rememberMe}
                     onChange={(e) => setRememberMe(e.target.checked)}
                     disabled={isLoading}
-                    className="h-4 w-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-800"
+                    className="h-4 w-4 rounded border-gray-600 bg-gray-800 text-primary-600 focus:ring-primary-500"
                   />
                   Remember me
                 </label>
@@ -159,7 +159,7 @@ export default function LoginPage() {
               </form>
 
               <div className="mt-6 border-t border-[var(--border)] pt-6">
-                <p className="text-center text-sm text-gray-600 dark:text-gray-400">
+                <p className="text-center text-sm text-gray-400">
                   <Link href="/" className="font-medium text-primary-600 hover:text-primary-700">
                     {'<- Back to home'}
                   </Link>
@@ -167,7 +167,7 @@ export default function LoginPage() {
               </div>
 
               <div className="mt-6">
-                <p className="text-center text-xs text-gray-500 dark:text-gray-400">
+                <p className="text-center text-xs text-gray-400">
                   Note: Your credentials are used only for authentication. We do not store your password or data.
                 </p>
               </div>

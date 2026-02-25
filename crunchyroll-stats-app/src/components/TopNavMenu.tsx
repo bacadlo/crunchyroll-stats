@@ -45,8 +45,7 @@ export function TopNavMenu() {
         aria-label="Toggle navigation menu"
         className={cn(
           'inline-flex items-center gap-2 rounded-full border px-3 py-2 text-sm font-semibold transition-all sm:gap-2.5 sm:px-4 sm:text-base',
-          'border-[var(--border)] text-gray-900 hover:border-primary-500/60 hover:text-primary-600',
-          'dark:text-gray-100 dark:hover:border-primary-500/60 dark:hover:text-primary-400'
+          'border-[var(--border)] text-gray-100 hover:border-primary-500/60 hover:text-primary-400'
         )}
         aria-expanded={isOpen}
         aria-haspopup="menu"
@@ -81,8 +80,8 @@ export function TopNavMenu() {
                 className={cn(
                   'flex items-center gap-3 rounded-lg px-3 py-3 text-base font-medium transition-all duration-200',
                   isActive
-                    ? 'bg-primary-100/80 text-primary-700 shadow-[inset_0_0_20px_rgba(255,106,0,0.08)] dark:bg-primary-900/30 dark:text-primary-300'
-                    : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-700 dark:hover:text-gray-100'
+                    ? 'bg-primary-900/30 text-primary-300 shadow-[inset_0_0_20px_rgba(255,106,0,0.08)]'
+                    : 'text-gray-300 hover:bg-gray-700 hover:text-gray-100'
                 )}
               >
                 <Icon size={20} />

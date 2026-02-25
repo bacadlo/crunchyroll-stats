@@ -26,13 +26,13 @@ export default function HomePage() {
 
       <main className="max-w-7xl mx-auto px-4 py-14 sm:px-6 sm:py-20">
         <div className="text-center max-w-3xl mx-auto">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-6 leading-tight sm:text-5xl md:text-6xl">
+          <h1 className="text-3xl font-bold text-white mb-6 leading-tight sm:text-5xl md:text-6xl">
             Track Your Anime Journey with{' '}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-600 to-blue-600">
               CrunchyStats
             </span>
           </h1>
-          <p className="text-base text-gray-600 dark:text-gray-300 mb-10 leading-relaxed sm:text-xl">
+          <p className="text-base text-gray-300 mb-10 leading-relaxed sm:text-xl">
             Discover insights about your Crunchyroll watch history. See what you've watched, analyze your viewing patterns, and export your data.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -81,10 +81,10 @@ function FeatureCard({
   description: string;
 }) {
   return (
-    <div className="rounded-xl border border-primary-500/20 bg-[var(--card)] p-6 shadow-[0_0_45px_rgba(249,115,22,0.14)] ring-1 ring-[var(--border)]/60 transition-shadow hover:shadow-[0_0_55px_rgba(249,115,22,0.2)]">
+    <div className="rounded-xl border border-primary-500/20 bg-[var(--card)] p-6 shadow-[0_0_45px_rgba(244,117,33,0.14)] ring-1 ring-[var(--border)]/60 transition-shadow">
       <div className="text-primary-600 mb-4">{icon}</div>
-      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">{title}</h3>
-      <p className="text-gray-600 dark:text-gray-400 text-sm leading-relaxed">{description}</p>
+      <h3 className="text-lg font-semibold text-white mb-2">{title}</h3>
+      <p className="text-gray-400 text-sm leading-relaxed">{description}</p>
     </div>
   );
 }

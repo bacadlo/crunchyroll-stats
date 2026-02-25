@@ -27,6 +27,8 @@ export interface AnalyticsSummary {
     top3: GenreMetric[];
   };
   longestStreakDays: number;
+  longestStreakStart: string | null;
+  longestStreakEnd: string | null;
   peakDay: {
     date: string | null;
     hours: number;
@@ -37,6 +39,15 @@ export interface AnalyticsSummary {
     hours: number;
     days: number;
   } | null;
+  watchTimeByDayOfWeek: { day: string; hours: number }[];
+  watchTimeByHour: { hour: number; hours: number }[];
+  monthlyTrend: { month: string; hours: number }[];
+  averageCompletionRate: number;
+  seriesCompletion: { name: string; watched: number; total: number }[];
+  newVsRewatched: { new: number; rewatched: number };
+  averageSessionMinutes: number;
+  activityCalendar: { date: string; hours: number }[];
+  genreOverTime: { month: string; [genre: string]: number | string }[];
 }
 
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -239,17 +250,25 @@ export function calculateAnalyticsSummary(entries: HistoryEntry[]): AnalyticsSum
 
   const sortedDays = Array.from(watchedDays).sort();
   let longestStreakDays = 0;
+  let longestStreakStart: string | null = null;
+  let longestStreakEnd: string | null = null;
   let currentStreak = 0;
+  let currentStreakStart: string | null = null;
   let previousDayMs: number | null = null;
 
   for (const day of sortedDays) {
     const dayMs = new Date(`${day}T00:00:00.000Z`).getTime();
     if (previousDayMs === null || dayMs - previousDayMs !== DAY_MS) {
       currentStreak = 1;
+      currentStreakStart = day;
     } else {
       currentStreak += 1;
     }
-    longestStreakDays = Math.max(longestStreakDays, currentStreak);
+    if (currentStreak > longestStreakDays) {
+      longestStreakDays = currentStreak;
+      longestStreakStart = currentStreakStart;
+      longestStreakEnd = day;
+    }
     previousDayMs = dayMs;
   }
 
@@ -306,6 +325,185 @@ export function calculateAnalyticsSummary(entries: HistoryEntry[]): AnalyticsSum
     }
   }
 
+  // --- New analytics computations ---
+
+  // Watch time by day of week
+  const dayOfWeekMs = [0, 0, 0, 0, 0, 0, 0]; // Sun-Sat
+  const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  // Watch time by hour of day
+  const hourMs = new Array<number>(24).fill(0);
+  // Monthly trend
+  const monthlyMs = new Map<string, number>();
+  // Completion rate
+  let completionSum = 0;
+  let completionCount = 0;
+  // Series episode counts
+  const seriesEpisodeCounts = new Map<string, { name: string; count: number }>();
+  // New vs rewatched
+  const contentIdSeen = new Map<string, number>();
+  // Genre over time
+  const genreMonthMs = new Map<string, Map<string, number>>();
+  // Collect timestamps for session calculation
+  const watchTimestamps: { time: number; progressMs: number }[] = [];
+
+  const oneYearAgo = now - 365 * DAY_MS;
+
+  for (const entry of entries) {
+    const analyticsMediaType = normalizeAnalyticsMediaType(entry);
+    if (!analyticsMediaType) continue;
+
+    const progressMs = getEntryProgressMs(entry);
+    const watchedDate = parseDate(entry.watchedAt);
+    if (!watchedDate) continue;
+    const watchedMs = watchedDate.getTime();
+
+    // Day of week
+    dayOfWeekMs[watchedDate.getUTCDay()] += progressMs;
+
+    // Hour of day
+    hourMs[watchedDate.getUTCHours()] += progressMs;
+
+    // Monthly trend (past year)
+    if (watchedMs >= oneYearAgo) {
+      const monthKey = `${watchedDate.getUTCFullYear()}-${String(watchedDate.getUTCMonth() + 1).padStart(2, '0')}`;
+      monthlyMs.set(monthKey, (monthlyMs.get(monthKey) ?? 0) + progressMs);
+    }
+
+    // Completion rate
+    if (entry.progressMs && entry.durationMs && entry.durationMs > 0) {
+      completionSum += Math.min(1, entry.progressMs / entry.durationMs);
+      completionCount += 1;
+    }
+
+    // Series episode counts
+    if (analyticsMediaType === 'episode') {
+      const seriesKey = (entry.seriesId ?? entry.title).trim().toLowerCase();
+      const displayName = entry.title?.trim() || 'Untitled';
+      const existing = seriesEpisodeCounts.get(seriesKey);
+      if (existing) {
+        existing.count += 1;
+      } else {
+        seriesEpisodeCounts.set(seriesKey, { name: displayName, count: 1 });
+      }
+    }
+
+    // New vs rewatched
+    const cid = entry.contentId ?? `${entry.title}::${entry.episodeTitle ?? ''}`;
+    contentIdSeen.set(cid, (contentIdSeen.get(cid) ?? 0) + 1);
+
+    // Genre over time (past year)
+    if (watchedMs >= oneYearAgo) {
+      const monthKey = `${watchedDate.getUTCFullYear()}-${String(watchedDate.getUTCMonth() + 1).padStart(2, '0')}`;
+      const rawGenres = entry.genres ?? [];
+      for (const g of rawGenres) {
+        const trimmed = g.trim();
+        if (!trimmed) continue;
+        if (!genreMonthMs.has(trimmed)) genreMonthMs.set(trimmed, new Map());
+        const gMap = genreMonthMs.get(trimmed)!;
+        gMap.set(monthKey, (gMap.get(monthKey) ?? 0) + progressMs);
+      }
+    }
+
+    // Session timestamps
+    watchTimestamps.push({ time: watchedMs, progressMs });
+  }
+
+  // Build watchTimeByDayOfWeek (reorder Mon-Sun)
+  const dayOrder = [1, 2, 3, 4, 5, 6, 0];
+  const watchTimeByDayOfWeek = dayOrder.map((i) => ({
+    day: dayNames[i],
+    hours: parseFloat(hoursFromMs(dayOfWeekMs[i]).toFixed(2)),
+  }));
+
+  // Build watchTimeByHour
+  const watchTimeByHour = hourMs.map((ms, i) => ({
+    hour: i,
+    hours: parseFloat(hoursFromMs(ms).toFixed(2)),
+  }));
+
+  // Build monthlyTrend sorted chronologically
+  const monthlyTrend = Array.from(monthlyMs.entries())
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([month, ms]) => ({ month, hours: parseFloat(hoursFromMs(ms).toFixed(2)) }));
+
+  // Average completion rate
+  const averageCompletionRate = completionCount > 0 ? completionSum / completionCount : 0;
+
+  // Series completion (top 10)
+  const seriesCompletion = Array.from(seriesEpisodeCounts.values())
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 10)
+    .map((s) => ({ name: s.name, watched: s.count, total: s.count }));
+
+  // New vs rewatched
+  let newCount = 0;
+  let rewatchedCount = 0;
+  for (const count of contentIdSeen.values()) {
+    if (count === 1) newCount += 1;
+    else rewatchedCount += count;
+  }
+  const newVsRewatched = { new: newCount, rewatched: rewatchedCount };
+
+  // Average session duration (cluster consecutive watches <30 min gap)
+  watchTimestamps.sort((a, b) => a.time - b.time);
+  const SESSION_GAP_MS = 30 * 60 * 1000;
+  let sessionCount = 0;
+  let totalSessionMs = 0;
+  let sessionStartMs = 0;
+  let sessionEndMs = 0;
+  for (let i = 0; i < watchTimestamps.length; i++) {
+    const ts = watchTimestamps[i];
+    if (i === 0 || ts.time - sessionEndMs > SESSION_GAP_MS) {
+      if (i > 0) {
+        totalSessionMs += sessionEndMs - sessionStartMs;
+        sessionCount += 1;
+      }
+      sessionStartMs = ts.time;
+      sessionEndMs = ts.time + ts.progressMs;
+    } else {
+      sessionEndMs = Math.max(sessionEndMs, ts.time + ts.progressMs);
+    }
+  }
+  if (watchTimestamps.length > 0) {
+    totalSessionMs += sessionEndMs - sessionStartMs;
+    sessionCount += 1;
+  }
+  const averageSessionMinutes = sessionCount > 0
+    ? totalSessionMs / sessionCount / (1000 * 60)
+    : 0;
+
+  // Activity calendar (past year, sparse)
+  const activityCalendar: { date: string; hours: number }[] = [];
+  for (const [day, ms] of dayWatchMs.entries()) {
+    const dayDate = new Date(`${day}T00:00:00.000Z`).getTime();
+    if (dayDate >= oneYearAgo) {
+      activityCalendar.push({ date: day, hours: parseFloat(hoursFromMs(ms).toFixed(2)) });
+    }
+  }
+  activityCalendar.sort((a, b) => a.date.localeCompare(b.date));
+
+  // Genre over time (top 5 genres by total hours, hours per month)
+  const genreTotals = Array.from(genreMonthMs.entries())
+    .map(([genre, monthMap]) => {
+      let total = 0;
+      for (const ms of monthMap.values()) total += ms;
+      return { genre, total, monthMap };
+    })
+    .sort((a, b) => b.total - a.total)
+    .slice(0, 5);
+
+  const allMonths = Array.from(new Set(
+    genreTotals.flatMap((g) => Array.from(g.monthMap.keys()))
+  )).sort();
+
+  const genreOverTime = allMonths.map((month) => {
+    const row: { month: string; [genre: string]: number | string } = { month };
+    for (const g of genreTotals) {
+      row[g.genre] = parseFloat(hoursFromMs(g.monthMap.get(month) ?? 0).toFixed(2));
+    }
+    return row;
+  });
+
   return {
     watchedHoursByRange,
     totals: {
@@ -319,10 +517,21 @@ export function calculateAnalyticsSummary(entries: HistoryEntry[]): AnalyticsSum
       top3: top3Genres,
     },
     longestStreakDays,
+    longestStreakStart,
+    longestStreakEnd,
     peakDay: {
       date: peakDayDate,
       hours: hoursFromMs(peakDayMs),
     },
     mostBingedSeries,
+    watchTimeByDayOfWeek,
+    watchTimeByHour,
+    monthlyTrend,
+    averageCompletionRate,
+    seriesCompletion,
+    newVsRewatched,
+    averageSessionMinutes,
+    activityCalendar,
+    genreOverTime,
   };
 }

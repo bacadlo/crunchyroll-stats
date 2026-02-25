@@ -12,12 +12,12 @@ import { StatsOverview } from '@/components/StatsOverview';
 
 
 function SkeletonPulse({ className = '' }: { className?: string }) {
-  return <div className={`animate-pulse rounded-lg bg-gray-200 dark:bg-gray-700 ${className}`} />;
+  return <div className={`animate-pulse rounded-lg bg-gray-700 ${className}`} />;
 }
 
 function DashboardSkeleton({ message }: { message: string }) {
   const cardClass =
-    'group relative rounded-xl border border-primary-500/25 bg-gradient-to-br from-[var(--card)] via-[var(--card)] to-primary-500/5';
+    'group relative rounded-xl border border-primary-500/25';
   const accentBar = 'absolute inset-x-0 top-0 h-1 rounded-t-xl bg-gradient-to-r from-primary-500/35 via-primary-500/70 to-primary-600/80';
 
   return (
@@ -25,7 +25,7 @@ function DashboardSkeleton({ message }: { message: string }) {
       {/* Loading indicator */}
       <div className="flex items-center justify-center gap-3 py-2">
         <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-primary-600" />
-        <p className="text-sm text-gray-500 dark:text-gray-400">{message}</p>
+        <p className="text-sm text-gray-400">{message}</p>
       </div>
 
       {/* Stat cards skeleton */}
@@ -98,8 +98,8 @@ function ProtectedAppFrame({ children }: { children: ReactNode }) {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Error Loading Data</h3>
-              <p className="text-gray-600 dark:text-gray-400 mb-6">{error}</p>
+              <h3 className="text-lg font-semibold text-white mb-2">Error Loading Data</h3>
+              <p className="text-gray-400 mb-6">{error}</p>
               <div className="flex flex-col gap-3 sm:flex-row sm:justify-center">
                 <Button onClick={refreshData}>Try Again</Button>
                 <Button variant="outline" onClick={logout}>Back to Login</Button>

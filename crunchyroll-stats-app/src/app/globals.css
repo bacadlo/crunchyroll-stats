@@ -2,20 +2,20 @@
 @import "tailwindcss";
 
 :root {
-  --bg: #d9dee6;
-  --card: #f3f5f8;
-  --border: #b8c0ca;
+  --bg: #000000;
+  --card: #000000;
+  --border: #1a1a1a;
 }
 
 .dark {
-  --bg: #020202;
-  --card: #0b0b0b;
+  --bg: #000000;
+  --card: #000000;
   --border: #1a1a1a;
 }
 
 @layer base {
   body {
-    @apply text-gray-900 antialiased dark:text-gray-100;
+    @apply text-gray-100 antialiased;
     background-color: var(--bg);
     font-family: var(--font-body), sans-serif;
   }
@@ -52,9 +52,9 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  @apply bg-primary-300 rounded-full dark:bg-primary-700;
+  @apply bg-primary-700 rounded-full;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  @apply bg-primary-400 dark:bg-primary-600;
+  @apply bg-primary-600;
 }

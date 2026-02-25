@@ -46,20 +46,20 @@ export function AnalyticsMetricGrid({ totals }: AnalyticsMetricGridProps) {
       {METRICS.map((metric) => (
         <Card
           key={metric.key}
-          className="group relative border-primary-500/25 bg-gradient-to-br from-[var(--card)] via-[var(--card)] to-primary-500/5 transition-all duration-300 hover:-translate-y-0.5 hover:border-primary-500/45 hover:shadow-[0_0_60px_rgba(249,115,22,0.2)]"
+          className="group relative border-primary-500/25 transition-all duration-300 hover:-translate-y-0.5 hover:border-primary-500/45"
         >
           <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-primary-500/35 via-primary-500/70 to-primary-600/80" />
           <CardContent className="py-6 text-center">
-            <div className="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-primary-100 text-primary-600 dark:bg-primary-900/30 dark:text-primary-400 shadow-inner shadow-primary-500/30">
+            <div className="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-primary-100 text-primary-600 bg-primary-900/30 text-primary-400 shadow-inner shadow-primary-500/30">
               <metric.icon className="h-5 w-5" />
             </div>
-            <p className="text-xs font-semibold uppercase tracking-[0.12em] text-primary-700/90 dark:text-primary-300">
+            <p className="text-xs font-semibold uppercase tracking-[0.12em] text-primary-300">
               {metric.label}
             </p>
-            <p className="stat-number mt-3 text-4xl text-primary-600 dark:text-primary-400">
+            <p className="stat-number mt-3 text-4xl text-primary-400">
               {totals[metric.key]}
             </p>
-            <p className="mt-2 text-xs text-gray-600 dark:text-gray-400">{metric.helper}</p>
+            <p className="mt-2 text-xs text-gray-400">{metric.helper}</p>
           </CardContent>
         </Card>
       ))}
