@@ -16,7 +16,13 @@ A full-stack analytics dashboard for Crunchyroll watch history. Rust backend, Ne
 ## Features
 
 - **Watch History** — browse your last year of activity with real-time search, sorting, and pagination
-- **Analytics Dashboard** — genre distribution, binge detection, streak tracking, watch-time breakdowns by day/week/month
+- **Analytics Dashboard** — computed from your watch data with the following insights:
+  - **Watch Time** — total hours tracked across multiple time ranges (today, last week, last month, last year)
+  - **Library Totals** — unique titles, series, movies, and episodes watched
+  - **Genre Breakdown** — top 3 genres ranked by hours watched, with title counts per genre
+  - **Longest Streak** — consecutive days with at least one watch session
+  - **Peak Day** — the single day you watched the most, with total hours
+  - **Most Binged Series** — the series you watched 3+ episodes of in one day, ranked by episode count and hours
 - **Data Export** — download history as CSV or JSON
 - **Theming** — dark and light mode with system preference detection
 - **Session Security** — httpOnly cookie-based sessions with server-side validation
@@ -26,7 +32,7 @@ A full-stack analytics dashboard for Crunchyroll watch history. Rust backend, Ne
 ## Architecture
 
 ```
-Browser ──▸ Next.js (port 3000) ──▸ Rust API (port 8080) ──▸ Crunchyroll API
+Browser ──▸ Cloudflare (SSL) -> Nginx -> Next.js (port 3000) ──▸ Rust API (port 8080) ──▸ Crunchyroll API
 ```
 
 - **Next.js** handles authentication, serves the frontend, and proxies data requests to the Rust backend via internal Docker networking
