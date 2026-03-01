@@ -123,6 +123,15 @@ export function calculateStats(allHistory: HistoryEntry[]): WatchHistoryStats {
   };
 }
 
+function sanitizeCsvValue(value: string): string {
+  // Prevent CSV injection: prefix dangerous leading characters with a single quote
+  if (/^[=+\-@\t\r]/.test(value)) {
+    return `'${value}`;
+  }
+  // Escape double quotes within the value
+  return value.replace(/"/g, '""');
+}
+
 export function exportToCSV(data: HistoryEntry[]): string {
   const headers = ['Title', 'Episode', 'Date Watched', 'Completion %', 'Duration'];
   const rows = data.map(item => [
@@ -135,7 +144,7 @@ export function exportToCSV(data: HistoryEntry[]): string {
 
   return [
     headers.join(','),
-    ...rows.map(row => row.map(cell => `"${cell}"`).join(',')),
+    ...rows.map(row => row.map(cell => `"${sanitizeCsvValue(cell)}"`).join(',')),
   ].join('\n');
 }
 

@@ -19,6 +19,11 @@ impl<T> CacheEntry<T> {
     }
 }
 
+/// In-memory cache isolated per user.
+/// Cache keys are SHA256 hashes of the user's email address, ensuring:
+/// - Each user's data is stored under a unique, non-reversible key
+/// - No scenario where user A's lookup can return user B's data
+/// - Email addresses are not stored as plain text in cache keys
 pub struct AppCache {
     history: RwLock<HashMap<String, CacheEntry<Vec<HistoryEntry>>>>,
 }

@@ -1,28 +1,13 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { getRustWatchHistory } from '@/lib/crunchyroll/rust-api-client';
 import { calculateStats } from '@/lib/utils';
 import { getCached, setCache } from '@/lib/server-cache';
 import { WatchHistoryResponse } from '@/types/watch-history';
+import { validateSession, SessionError } from '@/lib/session';
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
-    const sessionCookie = request.cookies.get('cr_session');
-
-    if (!sessionCookie) {
-      return NextResponse.json(
-        { error: 'Not authenticated' },
-        { status: 401 }
-      );
-    }
-
-    const session = JSON.parse(sessionCookie.value);
-
-    if (Date.now() >= session.expires_at) {
-      return NextResponse.json(
-        { error: 'Session expired' },
-        { status: 401 }
-      );
-    }
+    const session = await validateSession();
 
     const cacheKey = `history:${session.email}`;
     const cached = getCached<WatchHistoryResponse>(cacheKey);
@@ -48,12 +33,17 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(result);
   } catch (error) {
+    if (error instanceof SessionError) {
+      return NextResponse.json(
+        { error: error.message },
+        { status: 401 }
+      );
+    }
+
     console.error('Watch history fetch error:', error);
 
     return NextResponse.json(
-      {
-        error: error instanceof Error ? error.message : 'Failed to fetch watch history',
-      },
+      { error: 'Failed to fetch watch history' },
       { status: 500 }
     );
   }

@@ -10,6 +10,8 @@ use std::env;
 use auth::CrunchyrollClient;
 use cache::AppCache;
 use models::{ErrorResponse, HealthResponse, HistoryResponse, LoginRequest};
+use validator::Validate;
+use zeroize::Zeroize;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
@@ -28,8 +30,22 @@ async fn main() -> std::io::Result<()> {
         let cors = Cors::permissive();
 
         App::new()
-            .wrap(Logger::default())
+            .wrap(Logger::new("%a \"%r\" %s %b %T").exclude("/api/watch-history"))
             .wrap(cors)
+            .app_data(
+                web::JsonConfig::default()
+                    .limit(4096)
+                    .error_handler(|err, _req| {
+                        log::warn!("JSON parse error: {}", err);
+                        actix_web::error::InternalError::from_response(
+                            err,
+                            HttpResponse::BadRequest().json(ErrorResponse {
+                                error: "Invalid request body".to_string(),
+                            }),
+                        )
+                        .into()
+                    }),
+            )
             .app_data(web::Data::from(cache.clone()))
             .route("/health", web::get().to(health_check))
             .route("/api/watch-history", web::post().to(get_watch_history))
@@ -50,27 +66,42 @@ async fn get_watch_history(
     req: web::Json<LoginRequest>,
     cache: web::Data<AppCache>,
 ) -> Result<HttpResponse> {
-    info!("Watch history request for user: {}", req.email);
+    // Extract credentials and drop the request wrapper immediately.
+    let mut login = req.into_inner();
 
-    let cache_key = AppCache::cache_key(&req.email);
+    if let Err(e) = login.validate() {
+        log::warn!("Input validation failed: {}", e);
+        login.zeroize();
+        return Ok(HttpResponse::BadRequest().json(ErrorResponse {
+            error: "Invalid request".to_string(),
+        }));
+    }
+
+    let cache_key = AppCache::cache_key(&login.email);
 
     // Check cache first
     if let Some(cached) = cache.get_history(&cache_key).await {
         info!("Returning cached watch history ({} items)", cached.len());
+        // login is dropped here — ZeroizeOnDrop clears email/password
         return Ok(HttpResponse::Ok().json(HistoryResponse { data: cached }));
     }
 
+    info!("Fetching watch history from Crunchyroll API");
     let limit = Some(100);
 
-    match fetch_watch_history(&req.email, &req.password, limit).await {
+    // Authenticate and fetch, then zero out credentials before processing result.
+    let result = fetch_watch_history(&login.email, &login.password, limit).await;
+    login.zeroize();
+
+    match result {
         Ok(data) => {
             cache.set_history(cache_key, data.clone()).await;
             Ok(HttpResponse::Ok().json(HistoryResponse { data }))
         }
         Err(e) => {
             log::error!("Failed to fetch watch history: {}", e);
-            Ok(HttpResponse::BadRequest().json(ErrorResponse {
-                error: e.to_string(),
+            Ok(HttpResponse::InternalServerError().json(ErrorResponse {
+                error: "Failed to fetch watch history".to_string(),
             }))
         }
     }
@@ -87,4 +118,3 @@ async fn fetch_watch_history(
     info!("Retrieved {} history items", items.len());
     Ok(items)
 }
-
