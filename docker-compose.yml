@@ -41,6 +41,7 @@ services:
       - "127.0.0.1:3000:3000"
     networks:
       - internal
+      - external
     env_file: .env.app
     depends_on:
       api:
