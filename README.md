@@ -1,6 +1,8 @@
 # CrunchyStats
 
-A full-stack analytics dashboard for Crunchyroll watch history. Rust backend, Next.js frontend, containerized with Docker
+A full-stack analytics dashboard for Crunchyroll watch history. Rust backend, Next.js frontend, containerized with Docker.
+
+**Live site:** [CrunchyStats](https://crunchystats.edngoche.com)
 
 ## Tech Stack
 
