@@ -14,7 +14,8 @@ jobs:
         run: cargo install cargo-audit
       - name: Run cargo audit
         working-directory: crunchyroll-stats-api
-        run: cargo audit
+        # Temporary exception: Not exploitable in our usage (no RSA decryption). No upstream fix available yet.
+        run: cargo audit --ignore RUSTSEC-2023-0071
 
   node-audit:
     runs-on: ubuntu-latest
