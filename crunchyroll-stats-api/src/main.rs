@@ -18,7 +18,7 @@ use zeroize::Zeroize;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    dotenv::dotenv().ok();
+    dotenvy::dotenv().ok();
 
     tracing_subscriber::fmt()
         .with_env_filter(
