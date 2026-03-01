@@ -9,9 +9,12 @@ COPY src ./src
 RUN touch src/main.rs && cargo build --release
 
 # Stage 2: Runtime
-FROM debian:bookworm-slim
-RUN apt-get update && apt-get install -y ca-certificates libssl3 && rm -rf /var/lib/apt/lists/*
+FROM debian:bookworm-slim AS runtime
+RUN apt-get update && apt-get install -y --no-install-recommends curl ca-certificates libssl3 \
+    && rm -rf /var/lib/apt/lists/* \
+    && groupadd -r appuser && useradd -r -g appuser -d /home/appuser -s /sbin/nologin appuser
 COPY --from=builder /app/target/release/crunchyroll-stats-api /usr/local/bin/app
+USER appuser
 ENV HOST=0.0.0.0 PORT=8080 RUST_LOG=info
 EXPOSE 8080
 CMD ["app"]

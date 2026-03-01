@@ -1,28 +1,74 @@
 services:
   api:
-    build: ./crunchyroll-stats-api
+    build:
+      context: ./crunchyroll-stats-api
+      dockerfile: Dockerfile
     container_name: crunchyroll-api
-    restart: unless-stopped
-    env_file: .env.api
+    # DO NOT add 'ports' here -- keep API internal only
     networks:
-      - crunchyroll-net
+      - internal
+      - external
+    env_file: .env.api
+    restart: unless-stopped
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 512m
+    cpus: '1.0'
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
 
   app:
     build:
       context: ./crunchyroll-stats-app
+      dockerfile: Dockerfile
       args:
         RUST_API_URL: http://api:8080
-        NEXT_PUBLIC_APP_URL: https://crunchyroll-stats.edngoche.com
+        NEXT_PUBLIC_APP_URL: https://crunchystats.edngoche.com
     container_name: crunchyroll-app
-    restart: unless-stopped
-    env_file: .env.app
     ports:
       - "127.0.0.1:3000:3000"
-    depends_on:
-      - api
     networks:
-      - crunchyroll-net
+      - internal
+    env_file: .env.app
+    depends_on:
+      api:
+        condition: service_healthy
+    restart: unless-stopped
+    read_only: true
+    tmpfs:
+      - /tmp
+      - /app/.next/cache
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 1g
+    cpus: '2.0'
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
 
 networks:
-  crunchyroll-net:
+  internal:
+    driver: bridge
+    internal: true
+  external:
     driver: bridge
