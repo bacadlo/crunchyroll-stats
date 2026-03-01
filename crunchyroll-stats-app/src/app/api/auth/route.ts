@@ -71,6 +71,12 @@ export async function DELETE() {
     message: 'Logged out successfully',
   });
 
-  response.cookies.delete('cr_session');
+  response.cookies.set('cr_session', '', {
+    httpOnly: true,
+    secure: true,
+    sameSite: 'lax',
+    path: '/',
+    maxAge: 0,
+  });
   return response;
 }
