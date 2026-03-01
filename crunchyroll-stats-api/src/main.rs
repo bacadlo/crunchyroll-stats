@@ -2,14 +2,17 @@ mod auth;
 mod cache;
 mod history;
 mod models;
+mod rate_limit;
 
 use actix_cors::Cors;
-use actix_web::{middleware::Logger, web, App, HttpResponse, HttpServer, Result};
+use actix_web::{middleware::Logger, web, App, HttpRequest, HttpResponse, HttpServer, Result};
 use log::info;
 use std::env;
+use std::net::IpAddr;
 use auth::CrunchyrollClient;
 use cache::AppCache;
 use models::{ErrorResponse, HealthResponse, HistoryResponse, LoginRequest};
+use rate_limit::RateLimiter;
 use validator::Validate;
 use zeroize::Zeroize;
 
@@ -23,6 +26,7 @@ async fn main() -> std::io::Result<()> {
     let bind_address = format!("{}:{}", host, port);
 
     let cache = AppCache::new();
+    let rate_limiter = RateLimiter::new();
 
     info!("Starting Crunchyroll API Server on {}", bind_address);
 
@@ -47,6 +51,7 @@ async fn main() -> std::io::Result<()> {
                     }),
             )
             .app_data(web::Data::from(cache.clone()))
+            .app_data(web::Data::from(rate_limiter.clone()))
             .route("/health", web::get().to(health_check))
             .route("/api/watch-history", web::post().to(get_watch_history))
     })
@@ -62,10 +67,26 @@ async fn health_check() -> Result<HttpResponse> {
     }))
 }
 
+fn peer_ip(req: &HttpRequest) -> IpAddr {
+    req.peer_addr()
+        .map(|addr| addr.ip())
+        .unwrap_or(IpAddr::V4(std::net::Ipv4Addr::UNSPECIFIED))
+}
+
 async fn get_watch_history(
+    http_req: HttpRequest,
     req: web::Json<LoginRequest>,
     cache: web::Data<AppCache>,
+    limiter: web::Data<RateLimiter>,
 ) -> Result<HttpResponse> {
+    let ip = peer_ip(&http_req);
+
+    if limiter.is_blocked(ip).await {
+        return Ok(HttpResponse::TooManyRequests().json(ErrorResponse {
+            error: "Too many failed attempts. Try again later.".to_string(),
+        }));
+    }
+
     // Extract credentials and drop the request wrapper immediately.
     let mut login = req.into_inner();
 
@@ -95,11 +116,13 @@ async fn get_watch_history(
 
     match result {
         Ok(data) => {
+            limiter.record_success(ip).await;
             cache.set_history(cache_key, data.clone()).await;
             Ok(HttpResponse::Ok().json(HistoryResponse { data }))
         }
         Err(e) => {
             log::error!("Failed to fetch watch history: {}", e);
+            limiter.record_failure(ip).await;
             Ok(HttpResponse::InternalServerError().json(ErrorResponse {
                 error: "Failed to fetch watch history".to_string(),
             }))

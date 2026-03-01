@@ -1,0 +1,30 @@
+name: Security Audit
+on:
+  schedule:
+    - cron: '0 6 * * 1' # Weekly on Mondays
+  push:
+    branches: [main]
+
+jobs:
+  rust-audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install cargo-audit
+        run: cargo install cargo-audit
+      - name: Run cargo audit
+        working-directory: crunchyroll-stats-api
+        run: cargo audit
+
+  node-audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Run npm audit
+        working-directory: crunchyroll-stats-app
+        run: |
+          npm ci
+          npm audit --audit-level=high
