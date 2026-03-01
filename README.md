@@ -25,9 +25,11 @@ A full-stack analytics dashboard for Crunchyroll watch history. Rust backend, Ne
   - **Most Binged Series** — the series you watched 3+ episodes of in one day, ranked by episode count and hours
 - **Data Export** — download history as CSV or JSON
 - **Theming** — dark and light mode with system preference detection
-- **Session Security** — httpOnly cookie-based sessions with server-side validation
+- **Session Security** — httpOnly cookie-based sessions with CSRF protection, server-side expiration, and rate limiting
+- **Security Headers** — CSP, X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Permissions-Policy
 - **Multi-Layer Caching** — 60-minute TTL on both Rust API and Next.js server layers to minimize redundant API calls
 - **Containerized** — Dockerized with multi-stage builds for both services; a single `docker compose up` to run
+- **CI** — GitHub Actions for build checks (Rust + Next.js) and weekly dependency security audits
 
 ## Architecture
 
@@ -129,6 +131,9 @@ crunchyroll-stats/
 │   │   └── types/                  # TypeScript interfaces
 │   ├── package.json
 │   └── Dockerfile
+├── .github/workflows/
+│   ├── build-check.yml             # Rust build+clippy, Next.js typecheck+lint+build
+│   └── security-audit.yml          # Weekly cargo audit + npm audit
 ├── docker-compose.yml
 └── .env.api / .env.app             # Environment config (not committed)
 ```
