@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
+import { validateCsrfToken } from '@/lib/csrf';
 
 const loginSchema = z.object({
   email: z.string().min(1, 'Email is required').email('Invalid email address'),
@@ -9,6 +10,14 @@ const loginSchema = z.object({
 
 export async function POST(request: NextRequest) {
   try {
+    const csrfToken = request.headers.get('X-CSRF-Token');
+    if (!validateCsrfToken(csrfToken)) {
+      return NextResponse.json(
+        { success: false, error: 'Invalid or missing CSRF token' },
+        { status: 403 }
+      );
+    }
+
     const body = await request.json();
 
     console.log('Login attempt for:', body.email);
@@ -65,7 +74,15 @@ export async function POST(request: NextRequest) {
   }
 }
 
-export async function DELETE() {
+export async function DELETE(request: NextRequest) {
+  const csrfToken = request.headers.get('X-CSRF-Token');
+  if (!validateCsrfToken(csrfToken)) {
+    return NextResponse.json(
+      { success: false, error: 'Invalid or missing CSRF token' },
+      { status: 403 }
+    );
+  }
+
   const response = NextResponse.json({
     success: true,
     message: 'Logged out successfully',

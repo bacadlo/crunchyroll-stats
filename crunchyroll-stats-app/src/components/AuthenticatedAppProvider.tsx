@@ -41,7 +41,12 @@ export function AuthenticatedAppProvider({ children }: { children: React.ReactNo
 
   const logout = useCallback(async () => {
     localStorage.removeItem('cr_display_email');
-    await fetch('/api/auth', { method: 'DELETE' });
+    const csrfRes = await fetch('/api/csrf');
+    const { csrfToken } = await csrfRes.json();
+    await fetch('/api/auth', {
+      method: 'DELETE',
+      headers: { 'X-CSRF-Token': csrfToken },
+    });
     router.push('/login');
   }, [router]);
 

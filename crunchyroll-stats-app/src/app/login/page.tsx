@@ -38,10 +38,14 @@ export default function LoginPage() {
     setIsLoading(true);
 
     try {
+      const csrfRes = await fetch('/api/csrf');
+      const { csrfToken } = await csrfRes.json();
+
       const response = await fetch('/api/auth', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'X-CSRF-Token': csrfToken,
         },
         body: JSON.stringify({ email, password, rememberMe }),
       });
