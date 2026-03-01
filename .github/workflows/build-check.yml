@@ -1,0 +1,48 @@
+name: Build Check
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  rust-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Cache cargo registry and build
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            crunchyroll-stats-api/target
+          key: ${{ runner.os }}-cargo-${{ hashFiles('crunchyroll-stats-api/Cargo.lock') }}
+      - name: Build
+        working-directory: crunchyroll-stats-api
+        run: cargo build --release
+      - name: Check for warnings
+        working-directory: crunchyroll-stats-api
+        run: cargo clippy -- -D warnings
+
+  nextjs-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: crunchyroll-stats-app/package-lock.json
+      - name: Install dependencies
+        working-directory: crunchyroll-stats-app
+        run: npm ci
+      - name: Type check
+        working-directory: crunchyroll-stats-app
+        run: npx tsc --noEmit
+      - name: Lint
+        working-directory: crunchyroll-stats-app
+        run: npm run lint
+      - name: Build
+        working-directory: crunchyroll-stats-app
+        run: npm run build
