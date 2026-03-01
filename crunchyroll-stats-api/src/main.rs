@@ -5,21 +5,27 @@ mod models;
 mod rate_limit;
 
 use actix_cors::Cors;
-use actix_web::{middleware::Logger, web, App, HttpRequest, HttpResponse, HttpServer, Result};
-use log::info;
+use actix_web::{web, App, HttpRequest, HttpResponse, HttpServer, Result};
 use std::env;
 use std::net::IpAddr;
 use auth::CrunchyrollClient;
 use cache::AppCache;
 use models::{ErrorResponse, HealthResponse, HistoryResponse, LoginRequest};
 use rate_limit::RateLimiter;
+use tracing_actix_web::TracingLogger;
 use validator::Validate;
 use zeroize::Zeroize;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     dotenv::dotenv().ok();
-    env_logger::init_from_env(env_logger::Env::new().default_filter_or("info"));
+
+    tracing_subscriber::fmt()
+        .with_env_filter(
+            tracing_subscriber::EnvFilter::try_from_default_env()
+                .unwrap_or_else(|_| tracing_subscriber::EnvFilter::new("info")),
+        )
+        .init();
 
     let host = env::var("HOST").unwrap_or_else(|_| "0.0.0.0".to_string());
     let port = env::var("PORT").unwrap_or_else(|_| "8080".to_string());
@@ -28,19 +34,19 @@ async fn main() -> std::io::Result<()> {
     let cache = AppCache::new();
     let rate_limiter = RateLimiter::new();
 
-    info!("Starting Crunchyroll API Server on {}", bind_address);
+    tracing::info!(bind = %bind_address, "Starting Crunchyroll API Server");
 
     HttpServer::new(move || {
         let cors = Cors::permissive();
 
         App::new()
-            .wrap(Logger::new("%a \"%r\" %s %b %T").exclude("/api/watch-history"))
+            .wrap(TracingLogger::default())
             .wrap(cors)
             .app_data(
                 web::JsonConfig::default()
                     .limit(4096)
                     .error_handler(|err, _req| {
-                        log::warn!("JSON parse error: {}", err);
+                        tracing::warn!(event = "json_parse_error", error = %err);
                         actix_web::error::InternalError::from_response(
                             err,
                             HttpResponse::BadRequest().json(ErrorResponse {
@@ -82,6 +88,7 @@ async fn get_watch_history(
     let ip = peer_ip(&http_req);
 
     if limiter.is_blocked(ip).await {
+        tracing::warn!(ip = %ip, event = "rate_limited");
         return Ok(HttpResponse::TooManyRequests().json(ErrorResponse {
             error: "Too many failed attempts. Try again later.".to_string(),
         }));
@@ -91,7 +98,7 @@ async fn get_watch_history(
     let mut login = req.into_inner();
 
     if let Err(e) = login.validate() {
-        log::warn!("Input validation failed: {}", e);
+        tracing::warn!(ip = %ip, event = "validation_failed", error = %e);
         login.zeroize();
         return Ok(HttpResponse::BadRequest().json(ErrorResponse {
             error: "Invalid request".to_string(),
@@ -102,12 +109,11 @@ async fn get_watch_history(
 
     // Check cache first
     if let Some(cached) = cache.get_history(&cache_key).await {
-        info!("Returning cached watch history ({} items)", cached.len());
-        // login is dropped here — ZeroizeOnDrop clears email/password
+        tracing::info!(ip = %ip, event = "cache_hit", items = cached.len());
         return Ok(HttpResponse::Ok().json(HistoryResponse { data: cached }));
     }
 
-    info!("Fetching watch history from Crunchyroll API");
+    tracing::info!(ip = %ip, event = "fetch_start");
     let limit = Some(100);
 
     // Authenticate and fetch, then zero out credentials before processing result.
@@ -116,12 +122,13 @@ async fn get_watch_history(
 
     match result {
         Ok(data) => {
+            tracing::info!(ip = %ip, event = "fetch_success", items = data.len());
             limiter.record_success(ip).await;
             cache.set_history(cache_key, data.clone()).await;
             Ok(HttpResponse::Ok().json(HistoryResponse { data }))
         }
         Err(e) => {
-            log::error!("Failed to fetch watch history: {}", e);
+            tracing::error!(ip = %ip, event = "fetch_failed", error = %e);
             limiter.record_failure(ip).await;
             Ok(HttpResponse::InternalServerError().json(ErrorResponse {
                 error: "Failed to fetch watch history".to_string(),
@@ -138,6 +145,6 @@ async fn fetch_watch_history(
     let client = CrunchyrollClient::new(email, password).await?;
     let history = history::History::new(&client);
     let items = history.fetch_history(limit).await?;
-    info!("Retrieved {} history items", items.len());
+    tracing::info!(event = "history_retrieved", items = items.len());
     Ok(items)
 }

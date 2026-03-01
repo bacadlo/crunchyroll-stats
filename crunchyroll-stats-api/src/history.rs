@@ -65,7 +65,7 @@ impl<'a> History<'a> {
                                     .err()
                                     .map(|error| error.to_string())
                                     .unwrap_or_else(|| "unknown error".to_string());
-                                log::warn!(
+                                tracing::warn!(
                                     "Watch history entry {} had no panel and could not be resolved (parent_type={}, parent_id={}). entry lookup error: {}. parent lookup error: {}",
                                     entry_id,
                                     parent_type,
@@ -80,7 +80,7 @@ impl<'a> History<'a> {
                                     .err()
                                     .map(|error| error.to_string())
                                     .unwrap_or_else(|| "unknown error".to_string());
-                                log::warn!(
+                                tracing::warn!(
                                     "Watch history entry {} had no panel and could not be resolved (parent_type={}, parent_id={}). entry lookup error: {}. parent lookup skipped because parent id matched entry id.",
                                     entry_id,
                                     parent_type,
@@ -116,7 +116,7 @@ impl<'a> History<'a> {
                                     raw_categories = series.categories.unwrap_or_default();
                                 }
                                 Err(error) => {
-                                    log::warn!(
+                                    tracing::warn!(
                                         "Failed to fetch series metadata for {}: {}",
                                         series_id,
                                         error
@@ -168,7 +168,7 @@ impl<'a> History<'a> {
                                 raw_categories.into_iter().map(|c| c.to_string()).collect()
                             }
                             Err(error) => {
-                                log::warn!(
+                                tracing::warn!(
                                     "Failed to fetch movie listing {}: {}",
                                     movie_listing_id,
                                     error

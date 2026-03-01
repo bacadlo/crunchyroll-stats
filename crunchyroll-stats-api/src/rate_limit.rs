@@ -62,11 +62,11 @@ impl RateLimiter {
         }
 
         entry.failures += 1;
-        log::warn!(
-            "Failed auth attempt from {} ({}/{})",
-            ip,
-            entry.failures,
-            MAX_FAILURES
+        tracing::warn!(
+            ip = %ip,
+            event = "auth_failure",
+            attempts = entry.failures,
+            max = MAX_FAILURES
         );
     }
 
