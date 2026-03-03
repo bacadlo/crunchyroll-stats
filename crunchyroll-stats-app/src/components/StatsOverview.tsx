@@ -55,13 +55,13 @@ export const StatsOverview: React.FC<StatsOverviewProps> = ({ stats }) => {
               {stats.topAnime.map((anime, index) => (
                 <div
                   key={anime.title}
-                  className="group flex items-center gap-3 pb-3 border-b border-gray-700 last:border-0 last:pb-0"
+                  className="group flex items-center gap-3 pb-3 border-b border-[var(--border)] last:border-0 last:pb-0"
                 >
                   <span className="text-lg font-bold text-primary-400 w-6 flex-shrink-0">
                     #{index + 1}
                   </span>
                   {anime.thumbnail ? (
-                    <div className="relative w-16 h-10 rounded-md overflow-hidden flex-shrink-0 bg-gradient-to-br from-primary-900/30 via-gray-900 to-purple-900/20 ring-1 ring-primary-800/40 shadow-sm">
+                    <div className="relative w-16 h-10 rounded-md overflow-hidden flex-shrink-0 bg-gradient-to-br from-primary-900/30 via-[var(--surface)] to-purple-900/20 ring-1 ring-primary-800/40 shadow-sm">
                       <Image
                         src={anime.thumbnail}
                         alt={anime.title}
@@ -76,17 +76,17 @@ export const StatsOverview: React.FC<StatsOverviewProps> = ({ stats }) => {
                     </div>
                   )}
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-white truncate">
+                    <p className="text-sm font-medium text-[var(--text)] truncate">
                       {anime.title}
                     </p>
-                    <p className="text-xs text-gray-400">
+                    <p className="text-xs text-[var(--text-muted)]">
                       {anime.count} episode{anime.count !== 1 ? 's' : ''}
                     </p>
                   </div>
                 </div>
               ))}
               {stats.topAnime.length === 0 && (
-                <p className="text-sm text-gray-400">No data available</p>
+                <p className="text-sm text-[var(--text-muted)]">No data available</p>
               )}
             </div>
           </CardContent>
@@ -102,13 +102,13 @@ export const StatsOverview: React.FC<StatsOverviewProps> = ({ stats }) => {
               {stats.recentlyWatched.slice(0, 5).map((item, index) => (
                 <div
                   key={item.id}
-                  className="group flex items-center gap-3 pb-3 border-b border-gray-700 last:border-0 last:pb-0"
+                  className="group flex items-center gap-3 pb-3 border-b border-[var(--border)] last:border-0 last:pb-0"
                 >
                   <span className="text-lg font-bold text-primary-400 w-6 flex-shrink-0">
                     #{index + 1}
                   </span>
                   {item.thumbnail ? (
-                    <div className="relative w-16 h-10 rounded-md overflow-hidden flex-shrink-0 bg-gradient-to-br from-primary-900/30 via-gray-900 to-purple-900/20 ring-1 ring-primary-800/40 shadow-sm">
+                    <div className="relative w-16 h-10 rounded-md overflow-hidden flex-shrink-0 bg-gradient-to-br from-primary-900/30 via-[var(--surface)] to-purple-900/20 ring-1 ring-primary-800/40 shadow-sm">
                       <Image
                         src={item.thumbnail}
                         alt={item.title}
@@ -123,14 +123,14 @@ export const StatsOverview: React.FC<StatsOverviewProps> = ({ stats }) => {
                     </div>
                   )}
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-white truncate">
+                    <p className="text-sm font-medium text-[var(--text)] truncate">
                       {item.title}
                     </p>
-                    <p className="text-xs text-gray-400 mt-1 truncate">
+                    <p className="text-xs text-[var(--text-muted)] mt-1 truncate">
                       {item.episodeTitle || 'Unknown'}
                     </p>
                   </div>
-                  <span className="text-xs text-gray-400 ml-2 flex-shrink-0">
+                  <span className="text-xs text-[var(--text-muted)] ml-2 flex-shrink-0">
                     {getCompletionPercent(item)}%
                   </span>
                 </div>

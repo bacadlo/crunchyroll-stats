@@ -37,7 +37,7 @@ export function StreakPeakCard({ longestStreakDays, longestStreakStart, longestS
       <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-primary-500/35 via-primary-500/70 to-primary-600/80" />
       <CardHeader className="pb-3 text-center pt-6">
         <CardTitle>Consistency & Peak Activity</CardTitle>
-        <p className="mt-1 text-sm text-gray-400">Track your longest run and biggest single day.</p>
+        <p className="mt-1 text-sm text-[var(--text-muted)]">Track your longest run and biggest single day.</p>
       </CardHeader>
       <CardContent className="text-center">
         <div className="grid gap-4 md:grid-cols-2">
@@ -47,7 +47,7 @@ export function StreakPeakCard({ longestStreakDays, longestStreakStart, longestS
             </p>
             <p className="stat-number mt-2 text-3xl text-primary-400">{streakLabel}</p>
             {streakRange && (
-              <p className="mt-1 text-xs text-gray-400">{streakRange}</p>
+              <p className="mt-1 text-xs text-[var(--text-muted)]">{streakRange}</p>
             )}
           </div>
 
@@ -56,7 +56,7 @@ export function StreakPeakCard({ longestStreakDays, longestStreakStart, longestS
               Peak Day
             </p>
             <p className="stat-number mt-2 text-xl text-primary-400">{formatDate(peakDayDate)}</p>
-            <p className="text-xs text-gray-400">{formatHours(peakDayHours)} watched</p>
+            <p className="text-xs text-[var(--text-muted)]">{formatHours(peakDayHours)} watched</p>
           </div>
         </div>
       </CardContent>

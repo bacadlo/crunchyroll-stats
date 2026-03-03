@@ -32,7 +32,7 @@ export function AnalyticsPanel() {
   if (!historyData) {
     return (
       <Card>
-        <CardContent className="py-10 text-center text-gray-400">
+        <CardContent className="py-10 text-center text-[var(--text-muted)]">
           No analytics available yet.
         </CardContent>
       </Card>
@@ -57,31 +57,25 @@ export function AnalyticsPanel() {
         <GenreInsightsCard totalGenres={summary.genres.total} topGenres={summary.genres.top3} />
       </div>
 
-      {/* Activity Calendar - full width */}
       <ActivityCalendar data={summary.activityCalendar} />
 
-      {/* Monthly Trend - full width */}
       <MonthlyTrendChart data={summary.monthlyTrend} />
 
-      {/* Watch patterns */}
       <div className="grid gap-6 md:grid-cols-2">
         <WatchTimeByDayChart data={summary.watchTimeByDayOfWeek} />
         <WatchTimeByHourChart data={summary.watchTimeByHour} />
       </div>
 
-      {/* Stats cards row */}
       <div className="grid gap-6 md:grid-cols-2">
         <CompletionRateCard rate={summary.averageCompletionRate} />
         <AverageSessionCard minutes={summary.averageSessionMinutes} />
       </div>
 
-      {/* Content breakdown */}
       <div className="grid gap-6 md:grid-cols-2">
         <SeriesCompletionChart data={summary.seriesCompletion} />
         <NewVsRewatchedChart data={summary.newVsRewatched} />
       </div>
 
-      {/* Genre trends - full width */}
       <GenreOverTimeChart data={summary.genreOverTime} />
     </div>
   );

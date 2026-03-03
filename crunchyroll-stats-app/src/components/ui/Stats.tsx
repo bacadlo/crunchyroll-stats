@@ -21,7 +21,7 @@ export const StatCard: React.FC<StatCardProps> = ({ title, value, subtitle, icon
         <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary-300">{title}</p>
         <p className="stat-number text-3xl text-primary-400 sm:text-4xl">{value}</p>
         {subtitle && (
-          <p className="text-xs text-gray-400">{subtitle}</p>
+          <p className="text-xs text-[var(--text-muted)]">{subtitle}</p>
         )}
       </CardContent>
     </Card>

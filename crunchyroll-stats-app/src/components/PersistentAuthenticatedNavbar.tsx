@@ -55,15 +55,15 @@ export function PersistentAuthenticatedNavbar() {
               aria-haspopup="menu"
               aria-expanded={isMenuOpen}
             >
-              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gray-600 sm:h-10 sm:w-10">
-                <User className="h-4 w-4 text-gray-300" />
+              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[var(--surface-alt)] sm:h-10 sm:w-10">
+                <User className="h-4 w-4 text-[var(--text-secondary)]" />
               </div>
-              <span className="hidden max-w-[10rem] truncate text-sm font-semibold text-gray-200 md:block">
+              <span className="hidden max-w-[10rem] truncate text-sm font-semibold text-[var(--text-secondary)] md:block">
                 {displayName}
               </span>
               <ChevronDown
                 className={cn(
-                  'h-4 w-4 text-gray-400 transition-transform',
+                  'h-4 w-4 text-[var(--text-muted)] transition-transform',
                   isMenuOpen && 'rotate-180'
                 )}
               />
@@ -71,7 +71,7 @@ export function PersistentAuthenticatedNavbar() {
 
             <div
               className={cn(
-                'absolute right-0 top-full z-30 mt-2 w-64 origin-top-right rounded-xl border border-[var(--border)] bg-[var(--card)] p-2 shadow-[0_16px_32px_rgba(15,23,42,0.2)] transition-all',
+                'absolute right-0 top-full z-30 mt-2 w-64 origin-top-right rounded-xl border border-[var(--border)] bg-[var(--card)] p-2 shadow-[0_16px_32px_var(--shadow-color)] transition-all',
                 isMenuOpen
                   ? 'pointer-events-auto translate-y-0 opacity-100'
                   : 'pointer-events-none -translate-y-1 opacity-0'
@@ -79,9 +79,9 @@ export function PersistentAuthenticatedNavbar() {
               role="menu"
             >
               <div className="border-b border-[var(--border)] px-2 py-2">
-                <p className="truncate text-sm font-semibold text-gray-100">{displayName}</p>
+                <p className="truncate text-sm font-semibold text-[var(--text)]">{displayName}</p>
                 {displayEmail && (
-                  <p className="truncate text-xs text-gray-400">{displayEmail}</p>
+                  <p className="truncate text-xs text-[var(--text-muted)]">{displayEmail}</p>
                 )}
               </div>
 

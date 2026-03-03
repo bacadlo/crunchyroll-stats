@@ -18,7 +18,7 @@ export function DashboardPanel() {
     return (
       <Card className={accentCardClass}>
         <div className={accentBar} />
-      <CardContent className="pt-10 pb-10 text-center text-gray-400">
+      <CardContent className="pt-10 pb-10 text-center text-[var(--text-muted)]">
           No watch history available yet.
         </CardContent>
       </Card>

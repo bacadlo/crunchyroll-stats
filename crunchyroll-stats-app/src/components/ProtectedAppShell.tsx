@@ -12,7 +12,7 @@ import { StatsOverview } from '@/components/StatsOverview';
 
 
 function SkeletonPulse({ className = '' }: { className?: string }) {
-  return <div className={`animate-pulse rounded-lg bg-gray-700 ${className}`} />;
+  return <div className={`animate-pulse rounded-lg bg-[var(--surface-hover)] ${className}`} />;
 }
 
 function DashboardSkeleton({ message }: { message: string }) {
@@ -22,13 +22,11 @@ function DashboardSkeleton({ message }: { message: string }) {
 
   return (
     <div className="space-y-6">
-      {/* Loading indicator */}
       <div className="flex items-center justify-center gap-3 py-2">
         <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-primary-600" />
-        <p className="text-sm text-gray-400">{message}</p>
+        <p className="text-sm text-[var(--text-muted)]">{message}</p>
       </div>
 
-      {/* Stat cards skeleton */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {Array.from({ length: 4 }).map((_, i) => (
           <div key={i} className={cardClass}>
@@ -41,7 +39,6 @@ function DashboardSkeleton({ message }: { message: string }) {
         ))}
       </div>
 
-      {/* Watch history table skeleton */}
       <div className={cardClass}>
         <div className={accentBar} />
         <div className="p-6 space-y-4">
@@ -98,8 +95,8 @@ function ProtectedAppFrame({ children }: { children: ReactNode }) {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
-              <h3 className="text-lg font-semibold text-white mb-2">Error Loading Data</h3>
-              <p className="text-gray-400 mb-6">{error}</p>
+              <h3 className="text-lg font-semibold text-[var(--text)] mb-2">Error Loading Data</h3>
+              <p className="text-[var(--text-muted)] mb-6">{error}</p>
               <div className="flex flex-col gap-3 sm:flex-row sm:justify-center">
                 <Button onClick={refreshData}>Try Again</Button>
                 <Button variant="outline" onClick={logout}>Back to Login</Button>

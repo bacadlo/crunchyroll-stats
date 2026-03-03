@@ -45,7 +45,7 @@ export function TopNavMenu() {
         aria-label="Toggle navigation menu"
         className={cn(
           'inline-flex items-center gap-2 rounded-full border px-3 py-2 text-sm font-semibold transition-all sm:gap-2.5 sm:px-4 sm:text-base',
-          'border-[var(--border)] text-gray-100 hover:border-primary-500/60 hover:text-primary-400'
+          'border-[var(--border)] text-[var(--text)] hover:border-primary-500/60 hover:text-primary-400'
         )}
         aria-expanded={isOpen}
         aria-haspopup="menu"
@@ -56,7 +56,7 @@ export function TopNavMenu() {
 
       <div
         className={cn(
-          'absolute left-0 top-full z-20 mt-3 w-[min(18rem,calc(100vw-2rem))] origin-top-left rounded-2xl border border-[var(--border)] bg-[var(--card)]/95 shadow-[0_20px_45px_rgba(15,23,42,0.2)] backdrop-blur-sm transition-all duration-200',
+          'absolute left-0 top-full z-20 mt-3 w-[min(18rem,calc(100vw-2rem))] origin-top-left rounded-2xl border border-[var(--border)] bg-[var(--card)]/95 shadow-[0_20px_45px_var(--shadow-color)] backdrop-blur-sm transition-all duration-200',
           isOpen
             ? 'pointer-events-auto translate-y-0 opacity-100'
             : 'pointer-events-none -translate-y-2 opacity-0'
@@ -81,7 +81,7 @@ export function TopNavMenu() {
                   'flex items-center gap-3 rounded-lg px-3 py-3 text-base font-medium transition-all duration-200',
                   isActive
                     ? 'bg-primary-900/30 text-primary-300 shadow-[inset_0_0_20px_rgba(255,106,0,0.08)]'
-                    : 'text-gray-300 hover:bg-gray-700 hover:text-gray-100'
+                    : 'text-[var(--text-secondary)] hover:bg-[var(--surface-hover)] hover:text-[var(--text)]'
                 )}
               >
                 <Icon size={20} />

@@ -22,7 +22,7 @@ export function NewVsRewatchedChart({ data }: Props) {
       <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-primary-500/35 via-primary-500/70 to-primary-600/80" />
       <CardHeader className="pb-3 pt-6 text-center">
         <CardTitle>New vs Rewatched</CardTitle>
-        <p className="mt-1 text-sm text-gray-400">
+        <p className="mt-1 text-sm text-[var(--text-muted)]">
           {total} total entries. {newPct}% unique content, {data.rewatched} rewatched entries.
         </p>
       </CardHeader>
@@ -37,8 +37,8 @@ export function NewVsRewatchedChart({ data }: Props) {
               cy="50%"
               outerRadius={80}
               label={({ name, percent }) => `${name} ${((percent ?? 0) * 100).toFixed(0)}%`}
-              labelLine={{ stroke: '#9ca3af' }}
-              stroke="#000"
+              labelLine={{ stroke: 'var(--chart-label)' }}
+              stroke="var(--chart-stroke)"
               strokeWidth={2}
             >
               {chartData.map((_, i) => (
@@ -46,11 +46,11 @@ export function NewVsRewatchedChart({ data }: Props) {
               ))}
             </Pie>
             <Tooltip
-              contentStyle={{ backgroundColor: '#1a1a1a', border: '1px solid #444', borderRadius: 8, color: '#f3f4f6' }}
+              contentStyle={{ backgroundColor: 'var(--chart-tooltip-bg)', border: '1px solid var(--chart-tooltip-border)', borderRadius: 8, color: 'var(--chart-tooltip-text)' }}
               formatter={(value?: number, name?: string) => [`${value ?? 0} entries`, name ?? '']}
             />
             <Legend
-              formatter={(value) => <span style={{ color: '#d1d5db' }}>{value}</span>}
+              formatter={(value) => <span style={{ color: 'var(--chart-tick)' }}>{value}</span>}
               iconType="circle"
             />
           </PieChart>

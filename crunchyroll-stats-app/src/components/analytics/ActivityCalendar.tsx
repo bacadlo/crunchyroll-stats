@@ -8,7 +8,7 @@ interface Props {
 }
 
 function getColor(hours: number, max: number): string {
-  if (hours === 0) return 'bg-gray-800';
+  if (hours === 0) return 'bg-[var(--calendar-empty)]';
   const ratio = hours / max;
   if (ratio < 0.25) return 'bg-primary-900';
   if (ratio < 0.5) return 'bg-primary-700';
@@ -47,7 +47,7 @@ export function ActivityCalendar({ data }: Props) {
       <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-primary-500/35 via-primary-500/70 to-primary-600/80" />
       <CardHeader className="pb-3 pt-6 text-center">
         <CardTitle>Activity Calendar</CardTitle>
-        <p className="mt-1 text-sm text-gray-400">
+        <p className="mt-1 text-sm text-[var(--text-muted)]">
           {activeDays} active days in the past year. {totalHours.toFixed(1)} total hours. Hover over cells for details.
         </p>
       </CardHeader>
@@ -55,15 +55,13 @@ export function ActivityCalendar({ data }: Props) {
         <div className="flex justify-center">
           <div className="overflow-x-auto">
             <div className="flex gap-[3px]">
-              {/* Day labels */}
               <div className="flex flex-col gap-[3px] mr-1">
                 {DAY_LABELS.map((label, i) => (
                   <div key={i} className="h-3 flex items-center">
-                    <span className="text-[9px] text-gray-500 w-6 text-right">{label}</span>
+                    <span className="text-[9px] text-[var(--text-faint)] w-6 text-right">{label}</span>
                   </div>
                 ))}
               </div>
-              {/* Grid */}
               <div className="grid grid-flow-col grid-rows-7 gap-[3px]" style={{ width: 'max-content' }}>
                 {cells.map((cell) => (
                   <div
@@ -74,10 +72,9 @@ export function ActivityCalendar({ data }: Props) {
                 ))}
               </div>
             </div>
-            {/* Legend */}
-            <div className="mt-3 flex items-center justify-center gap-1.5 text-[10px] text-gray-500">
+            <div className="mt-3 flex items-center justify-center gap-1.5 text-[10px] text-[var(--text-faint)]">
               <span>Less</span>
-              <div className="h-3 w-3 rounded-sm bg-gray-800" />
+              <div className="h-3 w-3 rounded-sm bg-[var(--calendar-empty)]" />
               <div className="h-3 w-3 rounded-sm bg-primary-900" />
               <div className="h-3 w-3 rounded-sm bg-primary-700" />
               <div className="h-3 w-3 rounded-sm bg-primary-600" />

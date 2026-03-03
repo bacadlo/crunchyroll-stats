@@ -129,7 +129,7 @@ export const WatchHistoryTable: React.FC<WatchHistoryTableProps> = ({ data, sear
     <div>
       <div className="space-y-3 md:hidden">
         {paginatedData.length === 0 ? (
-          <div className="rounded-lg border border-[var(--border)] px-4 py-8 text-center text-sm text-gray-400">
+          <div className="rounded-lg border border-[var(--border)] px-4 py-8 text-center text-sm text-[var(--text-muted)]">
             No watch history found matching your search.
           </div>
         ) : (
@@ -146,7 +146,7 @@ export const WatchHistoryTable: React.FC<WatchHistoryTableProps> = ({ data, sear
                   #{globalIndex}
                 </span>
                 {item.thumbnail ? (
-                    <div className="group relative h-12 w-20 flex-shrink-0 overflow-hidden rounded-md bg-gradient-to-br from-primary-900/30 via-gray-900 to-purple-900/20 ring-1 ring-primary-800/40">
+                    <div className="group relative h-12 w-20 flex-shrink-0 overflow-hidden rounded-md bg-gradient-to-br from-primary-900/30 via-[var(--surface)] to-purple-900/20 ring-1 ring-primary-800/40">
                       <Image
                         src={item.thumbnail}
                         alt={item.title}
@@ -162,8 +162,8 @@ export const WatchHistoryTable: React.FC<WatchHistoryTableProps> = ({ data, sear
                   )}
 
                   <div className="min-w-0 flex-1">
-                    <p className="truncate font-medium text-white">{item.title}</p>
-                    <p className="mt-1 truncate text-sm text-gray-400">
+                    <p className="truncate font-medium text-[var(--text)]">{item.title}</p>
+                    <p className="mt-1 truncate text-sm text-[var(--text-muted)]">
                       {item.episodeTitle || 'N/A'}
                     </p>
                   </div>
@@ -171,15 +171,15 @@ export const WatchHistoryTable: React.FC<WatchHistoryTableProps> = ({ data, sear
 
                 <div className="mt-3 grid grid-cols-2 gap-2 text-xs text-primary-400">
                   <div>
-                    <span className="block text-[11px] uppercase tracking-wide text-gray-500">Date</span>
+                    <span className="block text-[11px] uppercase tracking-wide text-[var(--text-faint)]">Date</span>
                     <span>{item.watchedAt ? formatDate(item.watchedAt) : 'N/A'}</span>
                   </div>
                   <div>
-                    <span className="block text-[11px] uppercase tracking-wide text-gray-500">Duration</span>
+                    <span className="block text-[11px] uppercase tracking-wide text-[var(--text-faint)]">Duration</span>
                     <span>{item.durationMs ? formatDuration(item.durationMs) : 'N/A'}</span>
                   </div>
                   <div className="col-span-2">
-                    <span className="mr-2 text-[11px] uppercase tracking-wide text-gray-500">Completion</span>
+                    <span className="mr-2 text-[11px] uppercase tracking-wide text-[var(--text-faint)]">Completion</span>
                     <span
                       className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${getCompletionColor(completion)}`}
                     >
@@ -196,23 +196,23 @@ export const WatchHistoryTable: React.FC<WatchHistoryTableProps> = ({ data, sear
       <div className="hidden overflow-x-auto md:block">
         <table className="w-full">
             <thead>
-              <tr className="border-b border-gray-700">
-              <th className="px-4 py-3 text-left font-semibold text-gray-100">#</th>
-              <th className="w-20 px-4 py-3 text-left font-semibold text-gray-100">Thumbnail</th>
+              <tr className="border-b border-[var(--border)]">
+              <th className="px-4 py-3 text-left font-semibold text-[var(--text)]">#</th>
+              <th className="w-20 px-4 py-3 text-left font-semibold text-[var(--text)]">Thumbnail</th>
               <th className="px-4 py-3 text-left">
                 <button
                   onClick={() => handleSort('title')}
-                  className="flex items-center gap-2 font-semibold text-gray-100 transition-colors hover:text-primary-400"
+                  className="flex items-center gap-2 font-semibold text-[var(--text)] transition-colors hover:text-primary-400"
                 >
                   Title
                   <SortIcon field="title" sortField={sortField} sortOrder={sortOrder} />
                 </button>
               </th>
-              <th className="px-4 py-3 text-left font-semibold text-gray-100">Episode</th>
+              <th className="px-4 py-3 text-left font-semibold text-[var(--text)]">Episode</th>
               <th className="px-4 py-3 text-left">
                 <button
                   onClick={() => handleSort('watchedAt')}
-                  className="flex items-center gap-2 font-semibold text-gray-100 transition-colors hover:text-primary-400"
+                  className="flex items-center gap-2 font-semibold text-[var(--text)] transition-colors hover:text-primary-400"
                 >
                   Date Watched
                   <SortIcon field="watchedAt" sortField={sortField} sortOrder={sortOrder} />
@@ -221,19 +221,19 @@ export const WatchHistoryTable: React.FC<WatchHistoryTableProps> = ({ data, sear
               <th className="px-4 py-3 text-left">
                 <button
                   onClick={() => handleSort('completion')}
-                  className="flex items-center gap-2 font-semibold text-gray-100 transition-colors hover:text-primary-400"
+                  className="flex items-center gap-2 font-semibold text-[var(--text)] transition-colors hover:text-primary-400"
                 >
                   Completion
                   <SortIcon field="completion" sortField={sortField} sortOrder={sortOrder} />
                 </button>
               </th>
-              <th className="px-4 py-3 text-left font-semibold text-gray-100">Duration</th>
+              <th className="px-4 py-3 text-left font-semibold text-[var(--text)]">Duration</th>
             </tr>
           </thead>
           <tbody>
             {paginatedData.length === 0 ? (
               <tr>
-                <td colSpan={6} className="px-4 py-8 text-center text-gray-400">
+                <td colSpan={6} className="px-4 py-8 text-center text-[var(--text-muted)]">
                   No watch history found matching your search.
                 </td>
               </tr>
@@ -244,14 +244,14 @@ export const WatchHistoryTable: React.FC<WatchHistoryTableProps> = ({ data, sear
                 return (
                     <tr
                       key={item.id}
-                      className="border-b border-gray-700 transition-colors hover:bg-gray-800"
+                      className="border-b border-[var(--border)] transition-colors hover:bg-[var(--surface)]"
                     >
                     <td className="px-4 py-4 font-semibold text-primary-400">
                       #{globalIndex}
                     </td>
                     <td className="px-4 py-4">
                       {item.thumbnail ? (
-                        <div className="group relative h-10 w-16 overflow-hidden rounded-md bg-gradient-to-br from-primary-900/30 via-gray-900 to-purple-900/20 ring-1 ring-primary-800/40 shadow-sm">
+                        <div className="group relative h-10 w-16 overflow-hidden rounded-md bg-gradient-to-br from-primary-900/30 via-[var(--surface)] to-purple-900/20 ring-1 ring-primary-800/40 shadow-sm">
                           <Image
                             src={item.thumbnail}
                             alt={item.title}
@@ -267,10 +267,10 @@ export const WatchHistoryTable: React.FC<WatchHistoryTableProps> = ({ data, sear
                       )}
                     </td>
                     <td className="px-4 py-4">
-                      <div className="font-medium text-white">{item.title}</div>
+                      <div className="font-medium text-[var(--text)]">{item.title}</div>
                     </td>
                     <td className="px-4 py-4">
-                      <div className="max-w-xs truncate text-sm text-gray-400">
+                      <div className="max-w-xs truncate text-sm text-[var(--text-muted)]">
                         {item.episodeTitle || 'N/A'}
                       </div>
                     </td>
@@ -296,20 +296,20 @@ export const WatchHistoryTable: React.FC<WatchHistoryTableProps> = ({ data, sear
       </div>
 
       {totalItems > 0 && (
-        <div className="flex flex-col items-center justify-between gap-4 border-t border-gray-700 px-4 py-4 sm:flex-row">
-          <div className="flex flex-col items-center gap-2 text-sm text-gray-400 sm:flex-row sm:gap-4">
+        <div className="flex flex-col items-center justify-between gap-4 border-t border-[var(--border)] px-4 py-4 sm:flex-row">
+          <div className="flex flex-col items-center gap-2 text-sm text-[var(--text-muted)] sm:flex-row sm:gap-4">
             <span>
               Showing {startIndex + 1}-{endIndex} of {totalItems}
             </span>
             <div className="flex items-center gap-2">
-              <label htmlFor="page-size" className="text-sm text-gray-400">
+              <label htmlFor="page-size" className="text-sm text-[var(--text-muted)]">
                 Per page:
               </label>
               <select
                 id="page-size"
                 value={itemsPerPage}
                 onChange={(e) => handleItemsPerPageChange(Number(e.target.value))}
-                className="rounded-md border border-gray-600 bg-gray-800 px-2 py-1 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
+                className="rounded-md border border-[var(--border)] bg-[var(--surface)] px-2 py-1 text-sm text-[var(--text)] focus:outline-none focus:ring-2 focus:ring-primary-500"
               >
                 {PAGE_SIZE_OPTIONS.map((size) => (
                   <option key={size} value={size}>
@@ -331,7 +331,7 @@ export const WatchHistoryTable: React.FC<WatchHistoryTableProps> = ({ data, sear
                 >
                   <ChevronLeft className="w-4 h-4" />
                 </Button>
-                <span className="text-sm text-gray-300">
+                <span className="text-sm text-[var(--text-secondary)]">
                   Page {safeCurrentPage} / {totalPages}
                 </span>
                 <Button
@@ -356,7 +356,7 @@ export const WatchHistoryTable: React.FC<WatchHistoryTableProps> = ({ data, sear
 
                 {getPageNumbers().map((page, idx) =>
                   page === 'ellipsis' ? (
-                    <span key={`ellipsis-${idx}`} className="px-2 text-gray-500">
+                    <span key={`ellipsis-${idx}`} className="px-2 text-[var(--text-faint)]">
                       ...
                     </span>
                   ) : (

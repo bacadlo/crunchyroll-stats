@@ -35,7 +35,7 @@ export function WatchTimeRangeCard({ hoursByRange }: WatchTimeRangeCardProps) {
       <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-primary-500/35 via-primary-500/70 to-primary-600/80" />
       <CardHeader className="pb-3 text-center pt-6">
         <CardTitle>Watch Time</CardTitle>
-        <p className="mt-1 text-sm text-gray-400">Switch ranges to compare total hours.</p>
+        <p className="mt-1 text-sm text-[var(--text-muted)]">Switch ranges to compare total hours.</p>
       </CardHeader>
       <CardContent className="space-y-5 text-center">
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 justify-items-center">
@@ -48,7 +48,7 @@ export function WatchTimeRangeCard({ hoursByRange }: WatchTimeRangeCardProps) {
                 'rounded-lg border px-3 py-2 text-xs font-semibold transition-all duration-200',
                 selectedRange === range
                   ? 'border-primary-600 bg-primary-600 text-white shadow-sm shadow-primary-600/30'
-                  : 'border-[var(--border)] bg-[var(--bg)] text-gray-300 hover:border-primary-500/60 hover:bg-primary-500/5 hover:text-primary-400'
+                  : 'border-[var(--border)] bg-[var(--bg)] text-[var(--text-secondary)] hover:border-primary-500/60 hover:bg-primary-500/5 hover:text-primary-400'
               )}
             >
               {RANGE_LABELS[range]}
