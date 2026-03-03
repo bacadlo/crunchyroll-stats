@@ -9,6 +9,7 @@ import { PersistentAuthenticatedNavbar } from '@/components/PersistentAuthentica
 import { DashboardPanel } from '@/components/panels/DashboardPanel';
 import { AnalyticsPanel } from '@/components/panels/AnalyticsPanel';
 import { StatsOverview } from '@/components/StatsOverview';
+import { DashboardInsightHeader } from '@/components/DashboardInsightHeader';
 
 
 function SkeletonPulse({ className = '' }: { className?: string }) {
@@ -65,7 +66,7 @@ function DashboardSkeleton({ message }: { message: string }) {
 
 function ProtectedAppFrame({ children }: { children: ReactNode }) {
   const pathname = usePathname();
-  const { historyData, isLoading, loadingMessage, error, refreshData, logout } = useAuthenticatedApp();
+  const { historyData, displayEmail, isLoading, loadingMessage, error, refreshData, logout } = useAuthenticatedApp();
   const isDashboardRoute = pathname === '/dashboard' || pathname.startsWith('/dashboard/');
   const isAnalyticsRoute = pathname === '/analytics' || pathname.startsWith('/analytics/');
   const isKnownPersistentRoute = isDashboardRoute || isAnalyticsRoute;
@@ -113,6 +114,13 @@ function ProtectedAppFrame({ children }: { children: ReactNode }) {
       <PersistentAuthenticatedNavbar />
       <div className="min-h-screen">
         <main className="max-w-7xl mx-auto px-4 py-6 sm:px-6 sm:py-8 space-y-6 sm:space-y-8">
+          {isDashboardRoute && historyData?.stats && (
+            <DashboardInsightHeader
+              stats={historyData.stats}
+              entries={historyData.data}
+              displayName={displayEmail ? displayEmail.split('@')[0] : 'User'}
+            />
+          )}
           {isDashboardRoute && historyData?.stats && <StatsOverview stats={historyData.stats} />}
           {isDashboardRoute && <DashboardPanel />}
           {isAnalyticsRoute && <AnalyticsPanel />}

@@ -44,14 +44,14 @@ export function TopNavMenu() {
         onClick={() => setIsOpen((prev) => !prev)}
         aria-label="Toggle navigation menu"
         className={cn(
-          'inline-flex items-center gap-2 rounded-full border px-3 py-2 text-sm font-semibold transition-all sm:gap-2.5 sm:px-4 sm:text-base',
+          'inline-flex items-center gap-1.5 rounded-full border px-2.5 py-2 text-sm font-semibold transition-all min-[360px]:gap-2 min-[360px]:px-3 sm:gap-2.5 sm:px-4 sm:text-base',
           'border-[var(--border)] text-[var(--text)] hover:border-primary-500/60 hover:text-primary-400'
         )}
         aria-expanded={isOpen}
         aria-haspopup="menu"
       >
         <Menu size={20} />
-        Menu
+        <span className="max-[359px]:sr-only">Menu</span>
       </button>
 
       <div
@@ -78,7 +78,7 @@ export function TopNavMenu() {
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  'flex items-center gap-3 rounded-lg px-3 py-3 text-base font-medium transition-all duration-200',
+                  'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200 sm:py-3 sm:text-base',
                   isActive
                     ? 'bg-primary-900/30 text-primary-300 shadow-[inset_0_0_20px_rgba(255,106,0,0.08)]'
                     : 'text-[var(--text-secondary)] hover:bg-[var(--surface-hover)] hover:text-[var(--text)]'

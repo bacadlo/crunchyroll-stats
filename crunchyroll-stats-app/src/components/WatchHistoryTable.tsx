@@ -139,7 +139,7 @@ export const WatchHistoryTable: React.FC<WatchHistoryTableProps> = ({ data, sear
           return (
               <article
                 key={item.id}
-                className="rounded-lg border border-[var(--border)] bg-[var(--card)] p-3 shadow-sm"
+                className="rounded-lg border border-[var(--border)] bg-[var(--card)] p-3.5 shadow-sm"
               >
               <div className="flex items-start gap-3">
                 <span className="text-lg font-semibold text-primary-600">
@@ -169,7 +169,7 @@ export const WatchHistoryTable: React.FC<WatchHistoryTableProps> = ({ data, sear
                   </div>
                 </div>
 
-                <div className="mt-3 grid grid-cols-2 gap-2 text-xs text-primary-400">
+                <div className="mt-3 grid grid-cols-1 gap-2 text-xs text-primary-400 min-[380px]:grid-cols-2">
                   <div>
                     <span className="block text-[11px] uppercase tracking-wide text-[var(--text-faint)]">Date</span>
                     <span>{item.watchedAt ? formatDate(item.watchedAt) : 'N/A'}</span>
@@ -178,7 +178,7 @@ export const WatchHistoryTable: React.FC<WatchHistoryTableProps> = ({ data, sear
                     <span className="block text-[11px] uppercase tracking-wide text-[var(--text-faint)]">Duration</span>
                     <span>{item.durationMs ? formatDuration(item.durationMs) : 'N/A'}</span>
                   </div>
-                  <div className="col-span-2">
+                  <div className="min-[380px]:col-span-2">
                     <span className="mr-2 text-[11px] uppercase tracking-wide text-[var(--text-faint)]">Completion</span>
                     <span
                       className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${getCompletionColor(completion)}`}

@@ -35,12 +35,12 @@ export function PersistentAuthenticatedNavbar() {
 
   return (
     <header className="sticky top-0 z-20 border-b border-[var(--border)] bg-[var(--card)]">
-      <div className="mx-auto grid max-w-7xl grid-cols-[auto_1fr_auto] items-center gap-2 px-4 py-3 sm:grid-cols-[1fr_auto_1fr] sm:gap-4 sm:px-6 sm:py-4">
+      <div className="mx-auto grid max-w-7xl grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2 px-3 py-3 sm:grid-cols-[1fr_auto_1fr] sm:gap-4 sm:px-6 sm:py-4">
         <TopNavMenu />
 
         <div className="flex min-w-0 items-center justify-self-center gap-2 sm:gap-3">
           <BrandLogoIcon size="sm" />
-          <h1 className="truncate text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-primary-600 to-blue-600 sm:text-2xl">
+          <h1 className="truncate text-base font-bold text-transparent bg-clip-text bg-gradient-to-r from-primary-600 to-blue-600 min-[380px]:text-lg sm:text-2xl">
             CrunchyStats
           </h1>
         </div>
@@ -50,7 +50,7 @@ export function PersistentAuthenticatedNavbar() {
             <button
               type="button"
               onClick={() => setIsMenuOpen((prev) => !prev)}
-              className="inline-flex items-center gap-2 rounded-full border border-[var(--border)] bg-[var(--card)] px-1.5 py-1 pr-2 transition-colors hover:border-primary-500/60 focus:outline-none focus:ring-2 focus:ring-primary-500"
+              className="inline-flex items-center gap-1.5 rounded-full border border-[var(--border)] bg-[var(--card)] px-1.5 py-1 pr-1.5 transition-colors hover:border-primary-500/60 focus:outline-none focus:ring-2 focus:ring-primary-500 min-[380px]:gap-2 min-[380px]:pr-2"
               aria-label="Open profile menu"
               aria-haspopup="menu"
               aria-expanded={isMenuOpen}
@@ -63,7 +63,7 @@ export function PersistentAuthenticatedNavbar() {
               </span>
               <ChevronDown
                 className={cn(
-                  'h-4 w-4 text-[var(--text-muted)] transition-transform',
+                  'hidden h-4 w-4 text-[var(--text-muted)] transition-transform min-[360px]:block',
                   isMenuOpen && 'rotate-180'
                 )}
               />
@@ -71,7 +71,7 @@ export function PersistentAuthenticatedNavbar() {
 
             <div
               className={cn(
-                'absolute right-0 top-full z-30 mt-2 w-64 origin-top-right rounded-xl border border-[var(--border)] bg-[var(--card)] p-2 shadow-[0_16px_32px_var(--shadow-color)] transition-all',
+                'absolute right-0 top-full z-30 mt-2 w-[min(16rem,calc(100vw-1rem))] origin-top-right rounded-xl border border-[var(--border)] bg-[var(--card)] p-2 shadow-[0_16px_32px_var(--shadow-color)] transition-all sm:w-64',
                 isMenuOpen
                   ? 'pointer-events-auto translate-y-0 opacity-100'
                   : 'pointer-events-none -translate-y-1 opacity-0'

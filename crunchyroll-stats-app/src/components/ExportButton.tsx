@@ -1,17 +1,31 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Button } from './ui/Button';
 import { HistoryEntry } from '@/types/watch-history';
-import { exportToCSV, exportToJSON, downloadFile } from '@/lib/utils';
+import { cn, exportToCSV, exportToJSON, downloadFile } from '@/lib/utils';
 import { Download, ChevronDown } from 'lucide-react';
 
 interface ExportButtonProps {
   data: HistoryEntry[];
+  className?: string;
 }
 
-export const ExportButton: React.FC<ExportButtonProps> = ({ data }) => {
+export const ExportButton: React.FC<ExportButtonProps> = ({ data, className }) => {
   const [isOpen, setIsOpen] = useState(false);
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setIsOpen(false);
+      }
+    };
+
+    document.addEventListener('keydown', onKeyDown);
+    return () => document.removeEventListener('keydown', onKeyDown);
+  }, [isOpen]);
 
   const handleExport = (format: 'csv' | 'json') => {
     const timestamp = new Date().toISOString().split('T')[0];
@@ -29,11 +43,13 @@ export const ExportButton: React.FC<ExportButtonProps> = ({ data }) => {
   };
 
   return (
-    <div className="relative">
+    <div className={cn('relative w-full sm:w-auto', className)}>
       <Button
         variant="outline"
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2"
+        className="flex w-full items-center justify-center gap-2 sm:w-auto"
+        aria-haspopup="menu"
+        aria-expanded={isOpen}
       >
         <Download className="w-4 h-4" />
         Export
@@ -46,7 +62,7 @@ export const ExportButton: React.FC<ExportButtonProps> = ({ data }) => {
             className="fixed inset-0 z-10"
             onClick={() => setIsOpen(false)}
           />
-          <div className="absolute right-0 mt-2 w-48 bg-[var(--card)] rounded-lg shadow-lg border border-[var(--border)] z-20">
+          <div className="absolute left-0 z-20 mt-2 w-44 rounded-lg border border-[var(--border)] bg-[var(--card)] shadow-lg sm:left-auto sm:right-0 sm:w-48">
             <button
               onClick={() => handleExport('csv')}
               className="w-full px-4 py-2 text-left text-sm text-[var(--text-secondary)] hover:bg-[var(--surface-hover)] rounded-t-lg transition-colors"
