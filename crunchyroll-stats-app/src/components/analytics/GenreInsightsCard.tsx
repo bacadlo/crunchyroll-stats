@@ -2,6 +2,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { GenreMetric } from '@/lib/analytics';
+import { Tag } from 'lucide-react';
 
 interface GenreInsightsCardProps {
   totalGenres: number;
@@ -33,7 +34,10 @@ export function GenreInsightsCard({ totalGenres, topGenres }: GenreInsightsCardP
           <p className="mb-3 text-sm font-semibold text-[var(--text-secondary)]">Top 3 Genres</p>
           <div className="space-y-2">
             {topGenres.length === 0 && (
-              <p className="text-sm text-[var(--text-muted)]">No genre data available.</p>
+              <p className="inline-flex items-center gap-2 text-sm text-[var(--text-muted)]">
+                <Tag className="h-4 w-4 text-primary-400" />
+                No genre data available.
+              </p>
             )}
             {topGenres.map((genre, index) => (
               <div

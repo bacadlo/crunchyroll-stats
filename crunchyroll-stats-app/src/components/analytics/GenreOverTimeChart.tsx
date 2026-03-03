@@ -3,6 +3,7 @@
 import { useMemo } from 'react';
 import { AreaChart, Area, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer, Label, CartesianGrid } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
+import { StateMessage } from '@/components/ui/StateMessage';
 
 interface Props {
   data: { month: string; [genre: string]: number | string }[];
@@ -17,7 +18,21 @@ export function GenreOverTimeChart({ data }: Props) {
   }, [data]);
 
   if (genres.length === 0) {
-    return null;
+    return (
+      <Card className="group relative border-primary-500/25 transition-all duration-300 hover:border-primary-500/45">
+        <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-primary-500/35 via-primary-500/70 to-primary-600/80" />
+        <CardHeader className="pb-3 pt-6 text-center">
+          <CardTitle>Genre Trends Over Time</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <StateMessage
+            title="Not enough genre data to chart over time."
+            description="Watch more titles across genres to unlock this view."
+            className="py-6"
+          />
+        </CardContent>
+      </Card>
+    );
   }
 
   return (
@@ -26,7 +41,7 @@ export function GenreOverTimeChart({ data }: Props) {
       <CardHeader className="pb-3 pt-6 text-center">
         <CardTitle>Genre Trends Over Time</CardTitle>
         <p className="mt-1 text-sm text-[var(--text-muted)]">
-          Top {genres.length} genres by hours watched per month (past year). Stacked to show total and proportions.
+          Top {genres.length} genres by hours watched per month. Stacked to show total and proportions.
         </p>
       </CardHeader>
       <CardContent>

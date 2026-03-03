@@ -1,9 +1,12 @@
 'use client';
 
 import { useMemo } from 'react';
+import { BarChart3 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/Card';
 import { useAuthenticatedApp } from '@/components/AuthenticatedAppProvider';
 import { calculateAnalyticsSummary } from '@/lib/analytics';
+import { StateMessage } from '@/components/ui/StateMessage';
+import { DataWindowHint } from '@/components/ui/DataWindowHint';
 import { WatchTimeRangeCard } from '@/components/analytics/WatchTimeRangeCard';
 import { GenreInsightsCard } from '@/components/analytics/GenreInsightsCard';
 import { StreakPeakCard } from '@/components/analytics/StreakPeakCard';
@@ -34,8 +37,25 @@ export function AnalyticsPanel() {
   if (!historyData) {
     return (
       <Card>
-        <CardContent className="py-10 text-center text-[var(--text-muted)]">
-          No analytics available yet.
+        <CardContent>
+          <StateMessage
+            title="No analytics available yet"
+            description="Watch history from the last 12 months is needed to generate analytics."
+            icon={BarChart3}
+          />
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (analyticsEntries.length === 0) {
+    return (
+      <Card>
+        <CardContent>
+          <StateMessage
+            title="No analyzable watch data yet"
+            description="We found account data, but there are no dated watch events in the last 12 months to chart. Watch a title and refresh to populate analytics."
+          />
         </CardContent>
       </Card>
     );
@@ -43,6 +63,9 @@ export function AnalyticsPanel() {
 
   return (
     <div className="space-y-6">
+      <div className="text-center">
+        <DataWindowHint />
+      </div>
       <ChartInsightRow insights={insights} />
       <div className="grid gap-6 md:grid-cols-2">
         <MostBingedSeriesCard data={summary.mostBingedSeries} />

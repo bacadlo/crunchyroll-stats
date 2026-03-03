@@ -2,6 +2,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { AnalyticsSummary } from '@/lib/analytics';
+import { Tv } from 'lucide-react';
 
 interface MostBingedSeriesCardProps {
   data: AnalyticsSummary['mostBingedSeries'];
@@ -45,7 +46,10 @@ export function MostBingedSeriesCard({ data }: MostBingedSeriesCardProps) {
           </>
         ) : (
           <div className="rounded-xl border border-[var(--border)] bg-[var(--bg)] px-4 py-5">
-            <p className="text-sm text-[var(--text-muted)]">No binge data captured yet.</p>
+            <p className="inline-flex items-center gap-2 text-sm text-[var(--text-muted)]">
+              <Tv className="h-4 w-4 text-primary-400" />
+              No binge data captured yet.
+            </p>
           </div>
         )}
       </CardContent>

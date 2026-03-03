@@ -45,6 +45,7 @@ export const StatsOverview: React.FC<StatsOverviewProps> = ({ stats, entries }) 
         <StatCard
           title="Average Completion"
           value={`${stats.averageCompletion}%`}
+          subtitle="Across all entries"
           icon={<TrendingUp className="w-6 h-6" />}
         />
       </div>
@@ -106,7 +107,7 @@ export const StatsOverview: React.FC<StatsOverviewProps> = ({ stats, entries }) 
                 </div>
               ))}
               {stats.topAnime.length === 0 && (
-                <p className="text-sm text-[var(--text-muted)]">No data available</p>
+                <p className="text-sm text-[var(--text-muted)]">No top anime yet.</p>
               )}
             </div>
           </CardContent>
@@ -116,6 +117,7 @@ export const StatsOverview: React.FC<StatsOverviewProps> = ({ stats, entries }) 
           <div className={panelAccentBar} />
           <CardHeader className="pb-3 pt-6 text-center">
             <CardTitle>Recently Watched</CardTitle>
+            <p className="mt-1 text-sm text-[var(--text-muted)]">Most recent entries in your watch history.</p>
           </CardHeader>
           <CardContent className="pt-2">
             <div className="space-y-3">

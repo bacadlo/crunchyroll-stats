@@ -31,7 +31,7 @@ export function WatchTimeByHourChart({ data }: Props) {
       <CardHeader className="pb-3 pt-6 text-center">
         <CardTitle>Watch Time by Hour of Day</CardTitle>
         <p className="mt-1 text-sm text-[var(--text-muted)]">
-          Peak hour: {peakHour?.hour ?? 0}:00 local ({peakHour?.hours.toFixed(1) ?? 0}h). Shows when you watch the most.
+          Peak hour: {peakHour?.hour ?? 0}:00 local ({peakHour?.hours.toFixed(1) ?? 0}h).
         </p>
       </CardHeader>
       <CardContent>

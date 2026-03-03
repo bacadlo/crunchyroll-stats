@@ -5,11 +5,14 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { WatchHistoryTable } from '@/components/WatchHistoryTable';
 import { FilterBar, MediaTypeFilter } from '@/components/FilterBar';
 import { ExportButton } from '@/components/ExportButton';
+import { StateMessage } from '@/components/ui/StateMessage';
+import { DataWindowHint } from '@/components/ui/DataWindowHint';
 import { useAuthenticatedApp } from '@/components/AuthenticatedAppProvider';
+import { Tv } from 'lucide-react';
 
 
 export function DashboardPanel() {
-  const { historyData } = useAuthenticatedApp();
+  const { historyData, refreshData } = useAuthenticatedApp();
   const [searchQuery, setSearchQuery] = useState('');
   const [mediaType, setMediaType] = useState<MediaTypeFilter>('all');
   const [dateFrom, setDateFrom] = useState('');
@@ -34,8 +37,36 @@ export function DashboardPanel() {
     return (
       <Card className={accentCardClass}>
         <div className={accentBar} />
-      <CardContent className="pt-10 pb-10 text-center text-[var(--text-muted)]">
-          No watch history available yet.
+        <CardContent>
+          <StateMessage
+            title="No watch history available yet"
+            description="Sign in and watch something on Crunchyroll in the last 12 months, then come back to see your stats."
+            icon={Tv}
+            actionLabel="Try refresh"
+            onAction={refreshData}
+          />
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (historyData.data.length === 0) {
+    return (
+      <Card className={accentCardClass}>
+        <div className={accentBar} />
+        <CardHeader className="pb-3 pt-6">
+          <CardTitle>Watch History (0)</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="mb-4 text-center">
+            <DataWindowHint />
+          </div>
+          <StateMessage
+            title="No watch history found"
+            description="We could not find any watch activity in the last 12 months. Try refreshing after watching something on Crunchyroll."
+            actionLabel="Refresh now"
+            onAction={refreshData}
+          />
         </CardContent>
       </Card>
     );
@@ -52,6 +83,9 @@ export function DashboardPanel() {
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
+          <div className="text-center sm:text-left">
+            <DataWindowHint />
+          </div>
           <FilterBar
             searchQuery={searchQuery}
             onSearchChange={setSearchQuery}
@@ -70,6 +104,8 @@ export function DashboardPanel() {
             mediaTypeFilter={mediaType}
             dateFrom={dateFrom}
             dateTo={dateTo}
+            hasActiveFilters={hasActiveFilters}
+            onClearFilters={clearFilters}
           />
         </div>
       </CardContent>

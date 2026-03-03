@@ -6,7 +6,7 @@ import { WatchTimeRange } from '@/lib/analytics';
 import { cn } from '@/lib/utils';
 
 const RANGE_LABELS: Record<WatchTimeRange, string> = {
-  all_time: 'All Time',
+  all_time: 'All Available',
   last_year: 'Last Year',
   last_month: 'Last Month',
   last_week: 'Last Week',

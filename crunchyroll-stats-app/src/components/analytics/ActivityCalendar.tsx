@@ -55,7 +55,7 @@ export function ActivityCalendar({ data }: Props) {
       <CardHeader className="pb-3 pt-6 text-center">
         <CardTitle>Activity Calendar</CardTitle>
         <p className="mt-1 text-sm text-[var(--text-muted)]">
-          {activeDays} active days in the past year. {totalHours.toFixed(1)} total hours. Tap or hover cells for details.
+          {activeDays} active days tracked. {totalHours.toFixed(1)} total hours.
         </p>
       </CardHeader>
       <CardContent>

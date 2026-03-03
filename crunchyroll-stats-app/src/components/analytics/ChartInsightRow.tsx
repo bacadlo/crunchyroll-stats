@@ -19,9 +19,9 @@ export function ChartInsightRow({ insights }: Props) {
   return (
     <section className="space-y-3" aria-label="Quick chart insights">
       <div className="px-1 text-center">
-        <p className="text-xs font-semibold uppercase tracking-[0.12em] text-primary-300">Quick Insights</p>
+        <p className="text-sm font-semibold uppercase tracking-[0.12em] text-primary-300">Quick Insights</p>
         <p className="mt-1 text-sm text-[var(--text-muted)]">
-          Short summaries to explain what your charts are showing right now.
+          Short summaries from your watch history.
         </p>
       </div>
       <div className="mx-auto grid max-w-6xl grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">

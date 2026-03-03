@@ -15,6 +15,8 @@ interface WatchHistoryTableProps {
   mediaTypeFilter: MediaTypeFilter;
   dateFrom: string;
   dateTo: string;
+  hasActiveFilters?: boolean;
+  onClearFilters?: () => void;
 }
 
 type SortField = 'title' | 'watchedAt' | 'completion';
@@ -53,6 +55,8 @@ export const WatchHistoryTable: React.FC<WatchHistoryTableProps> = ({
   mediaTypeFilter,
   dateFrom,
   dateTo,
+  hasActiveFilters = false,
+  onClearFilters,
 }) => {
   const [sortField, setSortField] = useState<SortField>('watchedAt');
   const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
@@ -154,6 +158,10 @@ export const WatchHistoryTable: React.FC<WatchHistoryTableProps> = ({
   const startIndex = (safeCurrentPage - 1) * itemsPerPage;
   const endIndex = Math.min(startIndex + itemsPerPage, totalItems);
   const paginatedData = filteredAndSortedData.slice(startIndex, endIndex);
+  const emptyTitle = hasActiveFilters ? 'No matches for current filters.' : 'No watch history available yet.';
+  const emptyDescription = hasActiveFilters
+    ? 'Try broadening your search, date range, or media type.'
+    : 'Your watch activity from the last 12 months will appear here after data is available.';
 
   const getPageNumbers = (): (number | 'ellipsis')[] => {
     if (totalPages <= 5) {
@@ -184,8 +192,14 @@ export const WatchHistoryTable: React.FC<WatchHistoryTableProps> = ({
     <div>
       <div className="space-y-3 md:hidden">
         {paginatedData.length === 0 ? (
-          <div className="rounded-lg border border-[var(--border)] px-4 py-8 text-center text-sm text-[var(--text-muted)]">
-            No watch history found matching your current filters.
+          <div className="rounded-lg border border-[var(--border)] px-4 py-8 text-center">
+            <p className="text-sm font-semibold text-[var(--text)]">{emptyTitle}</p>
+            <p className="mt-1 text-sm text-[var(--text-muted)]">{emptyDescription}</p>
+            {hasActiveFilters && onClearFilters && (
+              <Button type="button" variant="outline" size="sm" className="mt-4" onClick={onClearFilters}>
+                Clear filters
+              </Button>
+            )}
           </div>
         ) : (
         paginatedData.map((item, index) => {
@@ -290,8 +304,14 @@ export const WatchHistoryTable: React.FC<WatchHistoryTableProps> = ({
           <tbody>
             {paginatedData.length === 0 ? (
               <tr>
-                <td colSpan={hideEpisodeColumn ? 6 : 7} className="px-4 py-8 text-center text-[var(--text-muted)]">
-                  No watch history found matching your current filters.
+                <td colSpan={hideEpisodeColumn ? 6 : 7} className="px-4 py-8 text-center">
+                  <p className="text-sm font-semibold text-[var(--text)]">{emptyTitle}</p>
+                  <p className="mt-1 text-sm text-[var(--text-muted)]">{emptyDescription}</p>
+                  {hasActiveFilters && onClearFilters && (
+                    <Button type="button" variant="outline" size="sm" className="mt-4" onClick={onClearFilters}>
+                      Clear filters
+                    </Button>
+                  )}
                 </td>
               </tr>
             ) : (

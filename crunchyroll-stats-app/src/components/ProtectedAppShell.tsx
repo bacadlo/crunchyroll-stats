@@ -2,8 +2,10 @@
 
 import { ReactNode } from 'react';
 import { usePathname } from 'next/navigation';
+import { AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Card, CardContent } from '@/components/ui/Card';
+import { StateMessage } from '@/components/ui/StateMessage';
 import { AuthenticatedAppProvider, useAuthenticatedApp } from '@/components/AuthenticatedAppProvider';
 import { PersistentAuthenticatedNavbar } from '@/components/PersistentAuthenticatedNavbar';
 import { DashboardPanel } from '@/components/panels/DashboardPanel';
@@ -85,19 +87,26 @@ function ProtectedAppFrame({ children }: { children: ReactNode }) {
   }
 
   if (error) {
+    const accentCardClass =
+      'group relative max-w-md w-full border-primary-500/25 transition-all duration-300 hover:border-primary-500/45';
+    const accentBar = 'absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-primary-500/35 via-primary-500/70 to-primary-600/80';
+
     return (
       <>
         <PersistentAuthenticatedNavbar />
         <div className="min-h-[calc(100vh-73px)] flex items-center justify-center px-4 sm:px-6">
-          <Card className="max-w-md w-full">
+          <Card className={accentCardClass}>
+            <div className={accentBar} />
             <CardContent className="pt-6 text-center">
-              <div className="text-red-600 mb-4">
-                <svg className="w-12 h-12 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
-              <h3 className="text-lg font-semibold text-[var(--text)] mb-2">Error Loading Data</h3>
-              <p className="text-[var(--text-muted)] mb-6">{error}</p>
+              <StateMessage
+                tone="error"
+                icon={AlertTriangle}
+                title="Error Loading Data"
+                description={error}
+              />
+              <p className="mt-1 text-sm text-[var(--error-text)]">
+                This could be a temporary issue with Crunchyroll&apos;s servers.
+              </p>
               <div className="flex flex-col gap-3 sm:flex-row sm:justify-center">
                 <Button onClick={refreshData}>Try Again</Button>
                 <Button variant="outline" onClick={logout}>Back to Login</Button>
