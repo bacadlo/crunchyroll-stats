@@ -10,7 +10,7 @@ interface ThemeContextValue {
 }
 
 const ThemeContext = createContext<ThemeContextValue>({
-  theme: 'light',
+  theme: 'dark',
   toggleTheme: () => {},
 });
 
@@ -19,13 +19,15 @@ export function useTheme() {
 }
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setTheme] = useState<Theme>('light');
+  const [theme, setTheme] = useState<Theme>('dark');
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     const stored = localStorage.getItem('theme') as Theme | null;
     if (stored === 'dark' || stored === 'light') {
       setTheme(stored);
+    } else if (window.matchMedia('(prefers-color-scheme: light)').matches) {
+      setTheme('light');
     }
     setMounted(true);
   }, []);
@@ -33,10 +35,10 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (!mounted) return;
     const root = document.documentElement;
-    if (theme === 'dark') {
-      root.classList.add('dark');
+    if (theme === 'light') {
+      root.classList.add('light');
     } else {
-      root.classList.remove('dark');
+      root.classList.remove('light');
     }
     localStorage.setItem('theme', theme);
   }, [theme, mounted]);

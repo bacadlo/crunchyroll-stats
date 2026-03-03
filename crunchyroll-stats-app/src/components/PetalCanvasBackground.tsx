@@ -71,7 +71,7 @@ export function PetalCanvasBackground() {
     let height = 0;
     let dpr = 1;
     let frameId = 0;
-    let isDark = document.documentElement.classList.contains('dark');
+    let isDark = !document.documentElement.classList.contains('light');
     const petals: Petal[] = [];
 
     const resizeCanvas = () => {
@@ -138,7 +138,7 @@ export function PetalCanvasBackground() {
     }
 
     const themeObserver = new MutationObserver(() => {
-      isDark = document.documentElement.classList.contains('dark');
+      isDark = !document.documentElement.classList.contains('light');
     });
     themeObserver.observe(document.documentElement, {
       attributes: true,

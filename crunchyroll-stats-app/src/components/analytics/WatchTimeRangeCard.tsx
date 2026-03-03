@@ -47,8 +47,8 @@ export function WatchTimeRangeCard({ hoursByRange }: WatchTimeRangeCardProps) {
               className={cn(
                 'rounded-lg border px-3 py-2 text-xs font-semibold transition-all duration-200',
                 selectedRange === range
-                  ? 'border-primary-600 bg-primary-600 text-white shadow-sm shadow-primary-600/30'
-                  : 'border-[var(--border)] bg-[var(--bg)] text-[var(--text-secondary)] hover:border-primary-500/60 hover:bg-primary-500/5 hover:text-primary-400'
+                  ? 'border-primary-500/60 bg-black text-primary-400 shadow-sm'
+                  : 'border-[var(--border)] bg-[var(--bg)] text-[var(--text-secondary)] hover:border-primary-500/60 hover:bg-primary-500/5 hover:text-white'
               )}
             >
               {RANGE_LABELS[range]}

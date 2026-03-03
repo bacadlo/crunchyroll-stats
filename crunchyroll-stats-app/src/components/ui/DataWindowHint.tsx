@@ -11,7 +11,7 @@ export function DataWindowHint({ className }: DataWindowHintProps) {
   return (
     <p
       className={cn(
-        'inline-flex items-center gap-2 rounded-full border border-primary-500/25 bg-primary-900/20 px-3 py-1.5 text-xs text-primary-300',
+        'inline-flex items-center gap-2 rounded-full border border-primary-500/25 bg-primary-900/20 px-3 py-1.5 text-xs text-[var(--text)]',
         className
       )}
     >

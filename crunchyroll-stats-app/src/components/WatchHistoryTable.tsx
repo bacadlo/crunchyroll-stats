@@ -21,6 +21,7 @@ interface WatchHistoryTableProps {
 
 type SortField = 'title' | 'watchedAt' | 'completion';
 type SortOrder = 'asc' | 'desc';
+type AriaSort = 'ascending' | 'descending' | 'none';
 
 const PAGE_SIZE_OPTIONS = [10, 20, 50] as const;
 
@@ -35,6 +36,11 @@ function getCompletionColor(percent: number) {
   if (percent >= 90) return 'text-green-400 bg-green-900/30';
   if (percent >= 50) return 'text-yellow-400 bg-yellow-900/30';
   return 'text-red-400 bg-red-900/30';
+}
+
+function getAriaSort(field: SortField, sortField: SortField, sortOrder: SortOrder): AriaSort {
+  if (field !== sortField) return 'none';
+  return sortOrder === 'asc' ? 'ascending' : 'descending';
 }
 
 function parseStartOfDay(dateString: string): number {
@@ -268,37 +274,43 @@ export const WatchHistoryTable: React.FC<WatchHistoryTableProps> = ({
         <table className="w-full">
             <thead>
               <tr className="border-b border-[var(--border)]">
-              <th className="px-4 py-3 text-left font-semibold text-[var(--text)]">#</th>
-              <th className="w-20 px-4 py-3 text-left font-semibold text-[var(--text)]">Thumbnail</th>
-              <th className="px-4 py-3 text-left">
+              <th scope="col" className="px-4 py-3 text-left font-semibold text-[var(--text)]">#</th>
+              <th scope="col" className="w-20 px-4 py-3 text-left font-semibold text-[var(--text)]">Thumbnail</th>
+              <th scope="col" aria-sort={getAriaSort('title', sortField, sortOrder)} className="px-4 py-3 text-left">
                 <button
+                  type="button"
                   onClick={() => handleSort('title')}
-                  className="flex items-center gap-2 font-semibold text-[var(--text)] transition-colors hover:text-primary-400"
+                  className="flex items-center gap-2 rounded-sm font-semibold text-[var(--text)] transition-colors hover:text-primary-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+                  aria-label={`Sort by title, currently ${getAriaSort('title', sortField, sortOrder)}`}
                 >
                   Title
                   <SortIcon field="title" sortField={sortField} sortOrder={sortOrder} />
                 </button>
               </th>
-              {!hideEpisodeColumn && <th className="px-4 py-3 text-left font-semibold text-[var(--text)]">Episode</th>}
-              <th className="px-4 py-3 text-left">
+              {!hideEpisodeColumn && <th scope="col" className="px-4 py-3 text-left font-semibold text-[var(--text)]">Episode</th>}
+              <th scope="col" aria-sort={getAriaSort('watchedAt', sortField, sortOrder)} className="px-4 py-3 text-left">
                 <button
+                  type="button"
                   onClick={() => handleSort('watchedAt')}
-                  className="flex items-center gap-2 font-semibold text-[var(--text)] transition-colors hover:text-primary-400"
+                  className="flex items-center gap-2 rounded-sm font-semibold text-[var(--text)] transition-colors hover:text-primary-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+                  aria-label={`Sort by date watched, currently ${getAriaSort('watchedAt', sortField, sortOrder)}`}
                 >
                   Date Watched
                   <SortIcon field="watchedAt" sortField={sortField} sortOrder={sortOrder} />
                 </button>
               </th>
-              <th className="px-4 py-3 text-left">
+              <th scope="col" aria-sort={getAriaSort('completion', sortField, sortOrder)} className="px-4 py-3 text-left">
                 <button
+                  type="button"
                   onClick={() => handleSort('completion')}
-                  className="flex items-center gap-2 font-semibold text-[var(--text)] transition-colors hover:text-primary-400"
+                  className="flex items-center gap-2 rounded-sm font-semibold text-[var(--text)] transition-colors hover:text-primary-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+                  aria-label={`Sort by completion, currently ${getAriaSort('completion', sortField, sortOrder)}`}
                 >
                   Completion
                   <SortIcon field="completion" sortField={sortField} sortOrder={sortOrder} />
                 </button>
               </th>
-              <th className="px-4 py-3 text-left font-semibold text-[var(--text)]">Duration</th>
+              <th scope="col" className="px-4 py-3 text-left font-semibold text-[var(--text)]">Duration</th>
             </tr>
           </thead>
           <tbody>

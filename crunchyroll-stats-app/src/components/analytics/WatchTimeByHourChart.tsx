@@ -2,6 +2,7 @@
 
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Label, CartesianGrid } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
+import { AccessibleChartRegion } from '@/components/analytics/AccessibleChartRegion';
 
 interface Props {
   data: { hour: number; hours: number }[];
@@ -23,7 +24,15 @@ function getHourColor(hour: number): string {
 }
 
 export function WatchTimeByHourChart({ data }: Props) {
-  const peakHour = data.reduce((max, d) => (d.hours > max.hours ? d : max), data[0]);
+  const peakHour = data.reduce((max, d) => (d.hours > max.hours ? d : max), data[0] ?? { hour: 0, hours: 0 });
+  const topThree = [...data]
+    .sort((a, b) => b.hours - a.hours)
+    .slice(0, 3)
+    .map((item) => `${item.hour}:00 to ${item.hour + 1}:00, ${item.hours.toFixed(1)} hours`);
+  const summaryItems = [
+    `Peak watch window is ${peakHour.hour}:00 to ${peakHour.hour + 1}:00 with ${peakHour.hours.toFixed(1)} hours.`,
+    ...topThree.map((line) => `Top hour ${line}.`),
+  ];
 
   return (
     <Card className="group relative h-full border-primary-500/25 transition-all duration-300 hover:border-primary-500/45">
@@ -35,28 +44,34 @@ export function WatchTimeByHourChart({ data }: Props) {
         </p>
       </CardHeader>
       <CardContent>
-        <ResponsiveContainer width="100%" height={280}>
-          <BarChart data={data} margin={{ bottom: 20, left: 10 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="var(--chart-grid)" />
-            <XAxis dataKey="hour" tick={{ fontSize: 11, fill: 'var(--chart-tick)' }} stroke="var(--chart-axis)" tickFormatter={(h: number) => `${h}:00`}>
-              <Label value="Hour of Day (Local)" position="insideBottom" offset={-10} style={{ fontSize: 12, fill: 'var(--chart-label)' }} />
-            </XAxis>
-            <YAxis tick={{ fontSize: 12, fill: 'var(--chart-tick)' }} stroke="var(--chart-axis)">
-              <Label value="Hours" angle={-90} position="insideLeft" style={{ fontSize: 12, fill: 'var(--chart-label)', textAnchor: 'middle' }} />
-            </YAxis>
-            <Tooltip
-              contentStyle={{ backgroundColor: 'var(--chart-tooltip-bg)', border: '1px solid var(--chart-tooltip-border)', borderRadius: 8, color: 'var(--chart-tooltip-text)' }}
-              labelStyle={{ color: 'var(--chart-tooltip-text)' }}
-              formatter={(value?: number) => [`${(value ?? 0).toFixed(1)} hours`, 'Watch Time']}
-              labelFormatter={(h) => `${h}:00 local`}
-            />
-            <Bar dataKey="hours" radius={[4, 4, 0, 0]} shape={(props: any) => {
-              const { x, y, width, height, payload } = props as { x: number; y: number; width: number; height: number; payload: { hour: number } };
-              const color = getHourColor(payload.hour);
-              return <rect x={x} y={y} width={width} height={height} rx={4} ry={4} fill={color} fillOpacity={0.6} />;
-            }} />
-          </BarChart>
-        </ResponsiveContainer>
+        <AccessibleChartRegion
+          title="Watch time by hour chart"
+          description="Bar chart showing local-hour watch-time totals across a 24 hour day."
+          summaryItems={summaryItems}
+        >
+          <ResponsiveContainer width="100%" height={280}>
+            <BarChart data={data} margin={{ bottom: 20, left: 10 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="var(--chart-grid)" />
+              <XAxis dataKey="hour" tick={{ fontSize: 11, fill: 'var(--chart-tick)' }} stroke="var(--chart-axis)" tickFormatter={(h: number) => `${h}:00`}>
+                <Label value="Hour of Day (Local)" position="insideBottom" offset={-10} style={{ fontSize: 12, fill: 'var(--chart-label)' }} />
+              </XAxis>
+              <YAxis tick={{ fontSize: 12, fill: 'var(--chart-tick)' }} stroke="var(--chart-axis)">
+                <Label value="Hours" angle={-90} position="insideLeft" style={{ fontSize: 12, fill: 'var(--chart-label)', textAnchor: 'middle' }} />
+              </YAxis>
+              <Tooltip
+                contentStyle={{ backgroundColor: 'var(--chart-tooltip-bg)', border: '1px solid var(--chart-tooltip-border)', borderRadius: 8, color: 'var(--chart-tooltip-text)' }}
+                labelStyle={{ color: 'var(--chart-tooltip-text)' }}
+                formatter={(value?: number) => [`${(value ?? 0).toFixed(1)} hours`, 'Watch Time']}
+                labelFormatter={(h) => `${h}:00 local`}
+              />
+              <Bar dataKey="hours" radius={[4, 4, 0, 0]} shape={(props: any) => {
+                const { x, y, width, height, payload } = props as { x: number; y: number; width: number; height: number; payload: { hour: number } };
+                const color = getHourColor(payload.hour);
+                return <rect x={x} y={y} width={width} height={height} rx={4} ry={4} fill={color} fillOpacity={0.6} />;
+              }} />
+            </BarChart>
+          </ResponsiveContainer>
+        </AccessibleChartRegion>
         <div className="mt-2 flex flex-wrap items-center justify-center gap-3 text-xs text-[var(--text-muted)]">
           <div className="flex items-center gap-1"><div className="h-2.5 w-2.5 rounded-sm" style={{ backgroundColor: '#1976d2' }} /><span>Late Night (0-2)</span></div>
           <div className="flex items-center gap-1"><div className="h-2.5 w-2.5 rounded-sm" style={{ backgroundColor: '#7f70d6' }} /><span>Pre-dawn (3-5)</span></div>
