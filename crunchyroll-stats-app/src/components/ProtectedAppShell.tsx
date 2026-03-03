@@ -66,7 +66,7 @@ function DashboardSkeleton({ message }: { message: string }) {
 
 function ProtectedAppFrame({ children }: { children: ReactNode }) {
   const pathname = usePathname();
-  const { historyData, displayEmail, isLoading, loadingMessage, error, refreshData, logout } = useAuthenticatedApp();
+  const { historyData, displayEmail, lastRefreshedAt, isLoading, isRefreshing, loadingMessage, error, refreshData, logout } = useAuthenticatedApp();
   const isDashboardRoute = pathname === '/dashboard' || pathname.startsWith('/dashboard/');
   const isAnalyticsRoute = pathname === '/analytics' || pathname.startsWith('/analytics/');
   const isKnownPersistentRoute = isDashboardRoute || isAnalyticsRoute;
@@ -116,12 +116,14 @@ function ProtectedAppFrame({ children }: { children: ReactNode }) {
         <main className="max-w-7xl mx-auto px-4 py-6 sm:px-6 sm:py-8 space-y-6 sm:space-y-8">
           {isDashboardRoute && historyData?.stats && (
             <DashboardInsightHeader
-              stats={historyData.stats}
               entries={historyData.data}
               displayName={displayEmail ? displayEmail.split('@')[0] : 'User'}
+              lastRefreshedAt={lastRefreshedAt}
+              isRefreshing={isRefreshing}
+              onRefresh={refreshData}
             />
           )}
-          {isDashboardRoute && historyData?.stats && <StatsOverview stats={historyData.stats} />}
+          {isDashboardRoute && historyData?.stats && <StatsOverview stats={historyData.stats} entries={historyData.data} />}
           {isDashboardRoute && <DashboardPanel />}
           {isAnalyticsRoute && <AnalyticsPanel />}
           {!isKnownPersistentRoute ? children : null}

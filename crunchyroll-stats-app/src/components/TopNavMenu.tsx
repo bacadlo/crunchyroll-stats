@@ -39,12 +39,35 @@ export function TopNavMenu() {
 
   return (
     <div ref={menuRef} className="relative">
+      <nav className="hidden items-center gap-2 md:flex">
+        {MENU_ITEMS.map((item) => {
+          const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
+          const Icon = item.icon;
+          return (
+            <Link
+              key={item.href}
+              href={item.href}
+              className={cn(
+                'inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-semibold transition-colors',
+                isActive
+                  ? 'border-primary-500/60 bg-primary-900/25 text-primary-300'
+                  : 'border-[var(--border)] text-[var(--text-secondary)] hover:border-primary-500/50 hover:text-[var(--text)]'
+              )}
+              aria-current={isActive ? 'page' : undefined}
+            >
+              <Icon size={16} />
+              {item.label}
+            </Link>
+          );
+        })}
+      </nav>
+
       <button
         type="button"
         onClick={() => setIsOpen((prev) => !prev)}
         aria-label="Toggle navigation menu"
         className={cn(
-          'inline-flex items-center gap-1.5 rounded-full border px-2.5 py-2 text-sm font-semibold transition-all min-[360px]:gap-2 min-[360px]:px-3 sm:gap-2.5 sm:px-4 sm:text-base',
+          'inline-flex items-center gap-1.5 rounded-full border px-2.5 py-2 text-sm font-semibold transition-all min-[360px]:gap-2 min-[360px]:px-3 sm:gap-2.5 sm:px-4 sm:text-base md:hidden',
           'border-[var(--border)] text-[var(--text)] hover:border-primary-500/60 hover:text-primary-400'
         )}
         aria-expanded={isOpen}
@@ -56,7 +79,7 @@ export function TopNavMenu() {
 
       <div
         className={cn(
-          'absolute left-0 top-full z-20 mt-3 w-[min(18rem,calc(100vw-2rem))] origin-top-left rounded-2xl border border-[var(--border)] bg-[var(--card)]/95 shadow-[0_20px_45px_var(--shadow-color)] backdrop-blur-sm transition-all duration-200',
+          'absolute left-0 top-full z-20 mt-3 w-[min(18rem,calc(100vw-2rem))] origin-top-left rounded-2xl border border-[var(--border)] bg-[var(--card)]/95 shadow-[0_20px_45px_var(--shadow-color)] backdrop-blur-sm transition-all duration-200 md:hidden',
           isOpen
             ? 'pointer-events-auto translate-y-0 opacity-100'
             : 'pointer-events-none -translate-y-2 opacity-0'

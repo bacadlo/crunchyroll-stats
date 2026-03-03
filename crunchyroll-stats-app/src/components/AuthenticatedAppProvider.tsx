@@ -7,6 +7,7 @@ import { WatchHistoryResponse } from '@/types/watch-history';
 interface AuthenticatedAppContextValue {
   historyData: WatchHistoryResponse | null;
   displayEmail: string;
+  lastRefreshedAt: number | null;
   isLoading: boolean;
   isRefreshing: boolean;
   loadingMessage: string;
@@ -29,6 +30,7 @@ export function AuthenticatedAppProvider({ children }: { children: React.ReactNo
   const router = useRouter();
   const [historyData, setHistoryData] = useState<WatchHistoryResponse | null>(null);
   const [displayEmail, setDisplayEmail] = useState('');
+  const [lastRefreshedAt, setLastRefreshedAt] = useState<number | null>(null);
 
   useEffect(() => {
     setDisplayEmail(localStorage.getItem('cr_display_email') || '');
@@ -73,6 +75,7 @@ export function AuthenticatedAppProvider({ children }: { children: React.ReactNo
 
         const historyResult = (await historyRes.json()) as WatchHistoryResponse;
         setHistoryData(historyResult);
+        setLastRefreshedAt(Date.now());
 
         setError('');
       } catch (err) {
@@ -110,6 +113,7 @@ export function AuthenticatedAppProvider({ children }: { children: React.ReactNo
     () => ({
       historyData,
       displayEmail,
+      lastRefreshedAt,
       isLoading,
       isRefreshing,
       loadingMessage,
@@ -117,7 +121,7 @@ export function AuthenticatedAppProvider({ children }: { children: React.ReactNo
       refreshData: () => fetchAllData(true),
       logout,
     }),
-    [historyData, displayEmail, isLoading, isRefreshing, loadingMessage, error, fetchAllData, logout]
+    [historyData, displayEmail, lastRefreshedAt, isLoading, isRefreshing, loadingMessage, error, fetchAllData, logout]
   );
 
   return (

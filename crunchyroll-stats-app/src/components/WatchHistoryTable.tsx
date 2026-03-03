@@ -1,15 +1,20 @@
 'use client';
 
-import React, { useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import Image from 'next/image';
 import { HistoryEntry } from '@/types/watch-history';
 import { formatDate, formatDuration, getCompletionPercent } from '@/lib/utils';
 import { ArrowDown, ArrowUp, ArrowUpDown, ChevronLeft, ChevronRight, Tv } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
+import { MediaTypeFilter } from '@/components/FilterBar';
+import { normalizeMediaType } from '@/lib/media-type';
 
 interface WatchHistoryTableProps {
   data: HistoryEntry[];
   searchQuery: string;
+  mediaTypeFilter: MediaTypeFilter;
+  dateFrom: string;
+  dateTo: string;
 }
 
 type SortField = 'title' | 'watchedAt' | 'completion';
@@ -30,19 +35,29 @@ function getCompletionColor(percent: number) {
   return 'text-red-400 bg-red-900/30';
 }
 
-export const WatchHistoryTable: React.FC<WatchHistoryTableProps> = ({ data, searchQuery }) => {
+function parseStartOfDay(dateString: string): number {
+  return new Date(`${dateString}T00:00:00.000Z`).getTime();
+}
+
+function parseEndOfDay(dateString: string): number {
+  return new Date(`${dateString}T23:59:59.999Z`).getTime();
+}
+
+export const WatchHistoryTable: React.FC<WatchHistoryTableProps> = ({
+  data,
+  searchQuery,
+  mediaTypeFilter,
+  dateFrom,
+  dateTo,
+}) => {
   const [sortField, setSortField] = useState<SortField>('watchedAt');
   const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState<number>(20);
 
-  const prevSearchQueryRef = useRef(searchQuery);
-  if (prevSearchQueryRef.current !== searchQuery) {
-    prevSearchQueryRef.current = searchQuery;
-    if (currentPage !== 1) {
-      setCurrentPage(1);
-    }
-  }
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, mediaTypeFilter, dateFrom, dateTo]);
 
   const handleSort = (field: SortField) => {
     setCurrentPage(1);
@@ -59,16 +74,49 @@ export const WatchHistoryTable: React.FC<WatchHistoryTableProps> = ({ data, sear
     setCurrentPage(1);
   };
 
+  const isSeries = mediaTypeFilter === 'series';
+  const hideEpisodeColumn = isSeries || mediaTypeFilter === 'movie';
+
   const filteredAndSortedData = useMemo(() => {
     let filtered = data;
 
-    if (searchQuery) {
+    if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
-      filtered = data.filter(
-        (item) =>
-          item.title.toLowerCase().includes(query) ||
-          (item.episodeTitle?.toLowerCase().includes(query) ?? false)
-      );
+      if (isSeries) {
+        filtered = filtered.filter((item) => item.title.toLowerCase().includes(query));
+      } else {
+        filtered = filtered.filter(
+          (item) =>
+            item.title.toLowerCase().includes(query) ||
+            (item.episodeTitle?.toLowerCase().includes(query) ?? false)
+        );
+      }
+    }
+
+    if (isSeries) {
+      // Deduplicate by series title, keeping the most recently watched entry
+      const seriesMap = new Map<string, HistoryEntry>();
+      for (const item of filtered) {
+        const existing = seriesMap.get(item.title);
+        if (!existing || (item.watchedAt && (!existing.watchedAt || item.watchedAt > existing.watchedAt))) {
+          seriesMap.set(item.title, item);
+        }
+      }
+      filtered = Array.from(seriesMap.values());
+    } else if (mediaTypeFilter !== 'all') {
+      filtered = filtered.filter((item) => normalizeMediaType(item.mediaType) === mediaTypeFilter);
+    }
+
+    if (dateFrom || dateTo) {
+      const fromMs = dateFrom ? parseStartOfDay(dateFrom) : Number.NEGATIVE_INFINITY;
+      const toMs = dateTo ? parseEndOfDay(dateTo) : Number.POSITIVE_INFINITY;
+
+      filtered = filtered.filter((item) => {
+        if (!item.watchedAt) return false;
+        const watchedMs = new Date(item.watchedAt).getTime();
+        if (Number.isNaN(watchedMs)) return false;
+        return watchedMs >= fromMs && watchedMs <= toMs;
+      });
     }
 
     return [...filtered].sort((a, b) => {
@@ -91,7 +139,7 @@ export const WatchHistoryTable: React.FC<WatchHistoryTableProps> = ({ data, sear
 
       return sortOrder === 'asc' ? comparison : -comparison;
     });
-  }, [data, searchQuery, sortField, sortOrder]);
+  }, [data, searchQuery, mediaTypeFilter, isSeries, dateFrom, dateTo, sortField, sortOrder]);
 
   const totalItems = filteredAndSortedData.length;
   const totalPages = Math.max(1, Math.ceil(totalItems / itemsPerPage));
@@ -130,7 +178,7 @@ export const WatchHistoryTable: React.FC<WatchHistoryTableProps> = ({ data, sear
       <div className="space-y-3 md:hidden">
         {paginatedData.length === 0 ? (
           <div className="rounded-lg border border-[var(--border)] px-4 py-8 text-center text-sm text-[var(--text-muted)]">
-            No watch history found matching your search.
+            No watch history found matching your current filters.
           </div>
         ) : (
         paginatedData.map((item, index) => {
@@ -163,9 +211,11 @@ export const WatchHistoryTable: React.FC<WatchHistoryTableProps> = ({ data, sear
 
                   <div className="min-w-0 flex-1">
                     <p className="truncate font-medium text-[var(--text)]">{item.title}</p>
-                    <p className="mt-1 truncate text-sm text-[var(--text-muted)]">
-                      {item.episodeTitle || 'N/A'}
-                    </p>
+                    {!hideEpisodeColumn && (
+                      <p className="mt-1 truncate text-sm text-[var(--text-muted)]">
+                        {item.episodeTitle || 'N/A'}
+                      </p>
+                    )}
                   </div>
                 </div>
 
@@ -208,7 +258,7 @@ export const WatchHistoryTable: React.FC<WatchHistoryTableProps> = ({ data, sear
                   <SortIcon field="title" sortField={sortField} sortOrder={sortOrder} />
                 </button>
               </th>
-              <th className="px-4 py-3 text-left font-semibold text-[var(--text)]">Episode</th>
+              {!hideEpisodeColumn && <th className="px-4 py-3 text-left font-semibold text-[var(--text)]">Episode</th>}
               <th className="px-4 py-3 text-left">
                 <button
                   onClick={() => handleSort('watchedAt')}
@@ -233,8 +283,8 @@ export const WatchHistoryTable: React.FC<WatchHistoryTableProps> = ({ data, sear
           <tbody>
             {paginatedData.length === 0 ? (
               <tr>
-                <td colSpan={6} className="px-4 py-8 text-center text-[var(--text-muted)]">
-                  No watch history found matching your search.
+                <td colSpan={hideEpisodeColumn ? 6 : 7} className="px-4 py-8 text-center text-[var(--text-muted)]">
+                  No watch history found matching your current filters.
                 </td>
               </tr>
             ) : (
@@ -269,11 +319,13 @@ export const WatchHistoryTable: React.FC<WatchHistoryTableProps> = ({ data, sear
                     <td className="px-4 py-4">
                       <div className="font-medium text-[var(--text)]">{item.title}</div>
                     </td>
-                    <td className="px-4 py-4">
-                      <div className="max-w-xs truncate text-sm text-[var(--text-muted)]">
-                        {item.episodeTitle || 'N/A'}
-                      </div>
-                    </td>
+                    {!hideEpisodeColumn && (
+                      <td className="px-4 py-4">
+                        <div className="max-w-xs truncate text-sm text-[var(--text-muted)]">
+                          {item.episodeTitle || 'N/A'}
+                        </div>
+                      </td>
+                    )}
                     <td className="px-4 py-4 text-sm text-primary-400">
                       {item.watchedAt ? formatDate(item.watchedAt) : 'N/A'}
                     </td>

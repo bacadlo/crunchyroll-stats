@@ -18,14 +18,10 @@ describe('calculateDashboardInsight', () => {
       createEntry({
         watchedAt: '2026-03-02T11:00:00.000Z',
         progressMs: 2 * 60 * 60 * 1000,
-        genres: ['Action'],
-        title: 'Current Show',
       }),
       createEntry({
         watchedAt: '2026-02-24T11:00:00.000Z',
         progressMs: 60 * 60 * 1000,
-        genres: ['Action'],
-        title: 'Previous Show',
       }),
     ];
 
@@ -33,9 +29,6 @@ describe('calculateDashboardInsight', () => {
     expect(summary.currentWeekHours).toBe(2);
     expect(summary.trendDirection).toBe('up');
     expect(summary.trendText).toBe('+100% vs last week');
-    expect(summary.topGenre).toBe('Action');
-    expect(summary.topTitle).toBe('Current Show');
-    expect(summary.activeDays).toBe(1);
   });
 
   it('returns down trend when prior week had activity and current week has none', () => {
@@ -52,26 +45,19 @@ describe('calculateDashboardInsight', () => {
     expect(summary.trendText).toBe('down from 3.00h last week');
   });
 
-  it('weights genres and picks top genre/title from current week', () => {
+  it('builds headline from current week time', () => {
     const entries = [
       createEntry({
         watchedAt: '2026-03-03T02:00:00.000Z',
         progressMs: 60 * 60 * 1000,
-        title: 'Show A',
-        genres: ['Action', 'Comedy'],
       }),
       createEntry({
         watchedAt: '2026-03-03T03:00:00.000Z',
         progressMs: 60 * 60 * 1000,
-        title: 'Show A',
-        genres: ['Action'],
       }),
     ];
 
     const summary = calculateDashboardInsight(entries, NOW);
-    expect(summary.topGenre).toBe('Action');
-    expect(summary.topTitle).toBe('Show A');
-    expect(summary.headline).toContain('You watched');
-    expect(summary.detail).toContain('Top title: Show A.');
+    expect(summary.headline).toBe('You watched 2.00h this week');
   });
 });

@@ -1,4 +1,4 @@
- 'use client';
+'use client';
 
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/Card';
@@ -10,6 +10,7 @@ interface AnalyticsMetricGridProps {
     movies: number;
     episodes: number;
   };
+  metricKeys?: MetricKey[];
 }
 
 type MetricKey = 'series' | 'movies' | 'episodes';
@@ -40,10 +41,17 @@ const METRICS: Array<{
   },
 ] as const;
 
-export function AnalyticsMetricGrid({ totals }: AnalyticsMetricGridProps) {
+export function AnalyticsMetricGrid({ totals, metricKeys }: AnalyticsMetricGridProps) {
+  const visibleKeys = metricKeys ?? METRICS.map((metric) => metric.key);
+  const visibleMetrics = visibleKeys
+    .map((key) => METRICS.find((metric) => metric.key === key))
+    .filter((metric): metric is (typeof METRICS)[number] => Boolean(metric));
+
+  const gridColsClass = visibleMetrics.length >= 3 ? 'md:grid-cols-3' : 'md:grid-cols-2';
+
   return (
-    <div className="grid gap-4 md:grid-cols-3">
-      {METRICS.map((metric) => (
+    <div className={`grid gap-4 ${gridColsClass}`}>
+      {visibleMetrics.map((metric) => (
         <Card
           key={metric.key}
           className="group relative border-primary-500/25 transition-all duration-300 hover:-translate-y-0.5 hover:border-primary-500/45"

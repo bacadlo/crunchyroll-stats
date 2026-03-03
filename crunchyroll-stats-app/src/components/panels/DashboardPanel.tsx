@@ -3,16 +3,32 @@
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { WatchHistoryTable } from '@/components/WatchHistoryTable';
-import { FilterBar } from '@/components/FilterBar';
+import { FilterBar, MediaTypeFilter } from '@/components/FilterBar';
 import { ExportButton } from '@/components/ExportButton';
 import { useAuthenticatedApp } from '@/components/AuthenticatedAppProvider';
+
 
 export function DashboardPanel() {
   const { historyData } = useAuthenticatedApp();
   const [searchQuery, setSearchQuery] = useState('');
+  const [mediaType, setMediaType] = useState<MediaTypeFilter>('all');
+  const [dateFrom, setDateFrom] = useState('');
+  const [dateTo, setDateTo] = useState('');
   const accentCardClass =
     'group relative border-primary-500/25 transition-all duration-300 hover:border-primary-500/45';
   const accentBar = 'absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-primary-500/35 via-primary-500/70 to-primary-600/80';
+  const hasActiveFilters =
+    searchQuery.trim().length > 0
+    || mediaType !== 'all'
+    || dateFrom.length > 0
+    || dateTo.length > 0;
+
+  const clearFilters = () => {
+    setSearchQuery('');
+    setMediaType('all');
+    setDateFrom('');
+    setDateTo('');
+  };
 
   if (!historyData) {
     return (
@@ -36,8 +52,25 @@ export function DashboardPanel() {
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          <FilterBar searchQuery={searchQuery} onSearchChange={setSearchQuery} />
-          <WatchHistoryTable data={historyData.data} searchQuery={searchQuery} />
+          <FilterBar
+            searchQuery={searchQuery}
+            onSearchChange={setSearchQuery}
+            mediaType={mediaType}
+            onMediaTypeChange={setMediaType}
+            dateFrom={dateFrom}
+            dateTo={dateTo}
+            onDateFromChange={setDateFrom}
+            onDateToChange={setDateTo}
+            onClearFilters={clearFilters}
+            hasActiveFilters={hasActiveFilters}
+          />
+          <WatchHistoryTable
+            data={historyData.data}
+            searchQuery={searchQuery}
+            mediaTypeFilter={mediaType}
+            dateFrom={dateFrom}
+            dateTo={dateTo}
+          />
         </div>
       </CardContent>
     </Card>

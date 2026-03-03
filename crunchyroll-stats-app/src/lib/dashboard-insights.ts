@@ -7,13 +7,9 @@ export type TrendDirection = 'up' | 'down' | 'flat';
 
 export interface DashboardInsightSummary {
   currentWeekHours: number;
-  activeDays: number;
-  topGenre: string | null;
-  topTitle: string | null;
   trendDirection: TrendDirection;
   trendText: string;
   headline: string;
-  detail: string;
 }
 
 function parseWatchedAt(dateString?: string): number | null {
@@ -26,10 +22,6 @@ function formatHours(hours: number): string {
   return hours >= 10 ? `${hours.toFixed(1)}h` : `${hours.toFixed(2)}h`;
 }
 
-function toUtcDayKey(timestamp: number): string {
-  return new Date(timestamp).toISOString().slice(0, 10);
-}
-
 export function calculateDashboardInsight(
   entries: HistoryEntry[],
   nowMs = Date.now()
@@ -39,9 +31,6 @@ export function calculateDashboardInsight(
 
   let currentWeekHours = 0;
   let previousWeekHours = 0;
-  const currentWeekDays = new Set<string>();
-  const genreHours = new Map<string, number>();
-  const titleCounts = new Map<string, number>();
 
   for (const entry of entries) {
     const watchedAt = parseWatchedAt(entry.watchedAt);
@@ -52,36 +41,10 @@ export function calculateDashboardInsight(
 
     if (watchedAt >= currentWeekStart && watchedAt <= nowMs) {
       currentWeekHours += progressHours;
-      currentWeekDays.add(toUtcDayKey(watchedAt));
-
-      const title = entry.title.trim();
-      if (title) {
-        titleCounts.set(title, (titleCounts.get(title) ?? 0) + 1);
-      }
-
-      const rawGenres = Array.isArray(entry.genres) ? entry.genres : [];
-      const uniqueGenres = Array.from(
-        new Set(
-          rawGenres
-            .map((genre) => genre.trim())
-            .filter((genre) => genre.length > 0)
-        )
-      );
-
-      if (uniqueGenres.length > 0) {
-        const weightedHours = progressHours / uniqueGenres.length;
-        for (const genre of uniqueGenres) {
-          genreHours.set(genre, (genreHours.get(genre) ?? 0) + weightedHours);
-        }
-      }
     } else if (watchedAt >= previousWeekStart && watchedAt < currentWeekStart) {
       previousWeekHours += progressHours;
     }
   }
-
-  const topGenre = Array.from(genreHours.entries()).sort((a, b) => b[1] - a[1])[0]?.[0] ?? null;
-  const topTitle = Array.from(titleCounts.entries()).sort((a, b) => b[1] - a[1])[0]?.[0] ?? null;
-  const activeDays = currentWeekDays.size;
 
   let trendDirection: TrendDirection = 'flat';
   let trendText = 'new activity this week';
@@ -102,18 +65,10 @@ export function calculateDashboardInsight(
     ? `You watched ${formatHours(currentWeekHours)} this week`
     : 'No watch activity in the last 7 days';
 
-  const detail = currentWeekHours > 0
-    ? `Active on ${activeDays} day${activeDays !== 1 ? 's' : ''}${topGenre ? `, mostly ${topGenre}` : ''}${topTitle ? `. Top title: ${topTitle}.` : '.'}`
-    : 'Watch an episode this week to restart your momentum.';
-
   return {
     currentWeekHours,
-    activeDays,
-    topGenre,
-    topTitle,
     trendDirection,
     trendText,
     headline,
-    detail,
   };
 }

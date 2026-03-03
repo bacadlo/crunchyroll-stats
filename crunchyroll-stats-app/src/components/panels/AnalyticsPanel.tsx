@@ -41,7 +41,7 @@ export function AnalyticsPanel() {
 
   return (
     <div className="space-y-6">
-      <AnalyticsMetricGrid totals={summary.totals} />
+      <AnalyticsMetricGrid totals={summary.totals} metricKeys={['episodes', 'movies']} />
       <div className="grid gap-6 md:grid-cols-2">
         <MostBingedSeriesCard data={summary.mostBingedSeries} />
         <StreakPeakCard
