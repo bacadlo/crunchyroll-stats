@@ -2,20 +2,63 @@
 @import "tailwindcss";
 
 :root {
-  --bg: #000000;
-  --card: #000000;
-  --border: #1a1a1a;
+  --bg: #f9fafb;
+  --card: #ffffff;
+  --border: #e5e7eb;
+  --text: #111827;
+  --text-secondary: #374151;
+  --text-muted: #6b7280;
+  --text-faint: #9ca3af;
+  --surface: #f3f4f6;
+  --surface-hover: #e5e7eb;
+  --surface-alt: #d1d5db;
+  --ring-offset: #ffffff;
+  --chart-grid: #e5e7eb;
+  --chart-axis: #9ca3af;
+  --chart-tick: #374151;
+  --chart-label: #6b7280;
+  --chart-tooltip-bg: #ffffff;
+  --chart-tooltip-border: #e5e7eb;
+  --chart-tooltip-text: #111827;
+  --chart-stroke: #111827;
+  --calendar-empty: #f3f4f6;
+  --error-bg: #fef2f2;
+  --error-border: #fecaca;
+  --error-text: #dc2626;
+  --shadow-color: rgba(0, 0, 0, 0.08);
 }
 
 .dark {
   --bg: #000000;
   --card: #000000;
   --border: #1a1a1a;
+  --text: #f3f4f6;
+  --text-secondary: #d1d5db;
+  --text-muted: #9ca3af;
+  --text-faint: #6b7280;
+  --surface: #1f2937;
+  --surface-hover: #374151;
+  --surface-alt: #4b5563;
+  --ring-offset: #111827;
+  --chart-grid: #333333;
+  --chart-axis: #555555;
+  --chart-tick: #d1d5db;
+  --chart-label: #9ca3af;
+  --chart-tooltip-bg: #1a1a1a;
+  --chart-tooltip-border: #444444;
+  --chart-tooltip-text: #f3f4f6;
+  --chart-stroke: #000000;
+  --calendar-empty: #1f2937;
+  --error-bg: #450a0a;
+  --error-border: #7f1d1d;
+  --error-text: #fca5a5;
+  --shadow-color: rgba(15, 23, 42, 0.2);
 }
 
 @layer base {
   body {
-    @apply text-gray-100 antialiased;
+    @apply antialiased;
+    color: var(--text);
     background-color: var(--bg);
     font-family: var(--font-body), sans-serif;
   }
