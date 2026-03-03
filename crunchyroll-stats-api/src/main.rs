@@ -106,11 +106,16 @@ async fn get_watch_history(
     }
 
     let cache_key = AppCache::cache_key(&login.email);
+    let force_refresh = login.force_refresh;
 
-    // Check cache first
-    if let Some(cached) = cache.get_history(&cache_key).await {
-        tracing::info!(ip = %ip, event = "cache_hit", items = cached.len());
-        return Ok(HttpResponse::Ok().json(HistoryResponse { data: cached }));
+    // Check cache first (skip on force refresh)
+    if !force_refresh {
+        if let Some(cached) = cache.get_history(&cache_key).await {
+            tracing::info!(ip = %ip, event = "cache_hit", items = cached.len());
+            return Ok(HttpResponse::Ok().json(HistoryResponse { data: cached }));
+        }
+    } else {
+        tracing::info!(ip = %ip, event = "cache_bypass_forced");
     }
 
     tracing::info!(ip = %ip, event = "fetch_start");

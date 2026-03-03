@@ -1,15 +1,27 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { getRustWatchHistory } from '@/lib/crunchyroll/rust-api-client';
 import { calculateStats } from '@/lib/utils';
-import { getCached, setCache } from '@/lib/server-cache';
+import { getCached, setCache, deleteCache, canRefresh, recordRefresh } from '@/lib/server-cache';
 import { WatchHistoryResponse } from '@/types/watch-history';
 import { validateSession, SessionError } from '@/lib/session';
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
     const session = await validateSession();
-
     const cacheKey = `history:${session.email}`;
+    const isRefresh = request.nextUrl.searchParams.get('refresh') === 'true';
+
+    if (isRefresh) {
+      if (!canRefresh(cacheKey)) {
+        return NextResponse.json(
+          { error: 'Please wait before refreshing again.' },
+          { status: 429 }
+        );
+      }
+      deleteCache(cacheKey);
+      recordRefresh(cacheKey);
+    }
+
     const cached = getCached<WatchHistoryResponse>(cacheKey);
     if (cached) {
       console.log(`Returning cached watch history (${cached.data.length} items)`);
@@ -18,7 +30,7 @@ export async function GET() {
 
     console.log('Fetching watch history via Rust API...');
 
-    const watchHistory = await getRustWatchHistory(session.email, session.password);
+    const watchHistory = await getRustWatchHistory(session.email, session.password, isRefresh);
 
     console.log(`Received ${watchHistory.length} items from Rust API`);
 

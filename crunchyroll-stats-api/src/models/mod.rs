@@ -12,6 +12,8 @@ pub struct LoginRequest {
     pub email: String,
     #[validate(length(min = 1, max = 128))]
     pub password: String,
+    #[serde(default)]
+    pub force_refresh: bool,
 }
 
 #[derive(Debug, Serialize)]
