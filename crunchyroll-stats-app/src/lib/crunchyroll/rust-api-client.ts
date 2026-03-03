@@ -10,7 +10,8 @@ interface RustImage {
 
 export async function getRustWatchHistory(
   email: string,
-  password: string
+  password: string,
+  forceRefresh = false
 ): Promise<HistoryEntry[]> {
   try {
     console.log('Calling Rust API server...');
@@ -18,6 +19,7 @@ export async function getRustWatchHistory(
     const response = await axios.post(`${RUST_API_URL}/api/watch-history`, {
       email,
       password,
+      force_refresh: forceRefresh || undefined,
     });
 
     console.log(`Received ${response.data.data.length} items from Rust API`);

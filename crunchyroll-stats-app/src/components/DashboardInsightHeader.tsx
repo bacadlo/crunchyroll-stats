@@ -12,6 +12,7 @@ interface DashboardInsightHeaderProps {
   displayName: string;
   lastRefreshedAt: number | null;
   isRefreshing: boolean;
+  refreshCooldown: boolean;
   onRefresh: () => Promise<void>;
 }
 
@@ -31,6 +32,7 @@ export function DashboardInsightHeader({
   displayName,
   lastRefreshedAt,
   isRefreshing,
+  refreshCooldown,
   onRefresh,
 }: DashboardInsightHeaderProps) {
   const summary = useMemo(() => calculateDashboardInsight(entries), [entries]);
@@ -64,11 +66,11 @@ export function DashboardInsightHeader({
             size="sm"
             onClick={() => void onRefresh()}
             isLoading={isRefreshing}
-            disabled={isRefreshing}
+            disabled={isRefreshing || refreshCooldown}
             className="justify-self-end"
           >
             {!isRefreshing && <RefreshCw className="mr-2 h-4 w-4" />}
-            Refresh
+            {refreshCooldown ? 'Wait to refresh' : 'Refresh'}
           </Button>
         </div>
         <div className="mt-4 flex flex-col items-center text-center">

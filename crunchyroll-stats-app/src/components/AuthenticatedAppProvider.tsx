@@ -4,12 +4,15 @@ import React, { createContext, useCallback, useContext, useEffect, useMemo, useR
 import { useRouter } from 'next/navigation';
 import { WatchHistoryResponse } from '@/types/watch-history';
 
+const REFRESH_COOLDOWN_MS = 2 * 60 * 1000; // 2 minutes
+
 interface AuthenticatedAppContextValue {
   historyData: WatchHistoryResponse | null;
   displayEmail: string;
   lastRefreshedAt: number | null;
   isLoading: boolean;
   isRefreshing: boolean;
+  refreshCooldown: boolean;
   loadingMessage: string;
   error: string;
   refreshData: () => Promise<void>;
@@ -37,6 +40,7 @@ export function AuthenticatedAppProvider({ children }: { children: React.ReactNo
   }, []);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [refreshCooldown, setRefreshCooldown] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState('Fetching your history...');
   const [error, setError] = useState('');
   const initialFetchRef = useRef(false);
@@ -61,7 +65,8 @@ export function AuthenticatedAppProvider({ children }: { children: React.ReactNo
           setIsLoading(true);
         }
 
-        const historyRes = await fetch('/api/watch-history');
+        const url = refresh ? '/api/watch-history?refresh=true' : '/api/watch-history';
+        const historyRes = await fetch(url);
 
         if (historyRes.status === 401) {
           await logout();
@@ -76,6 +81,11 @@ export function AuthenticatedAppProvider({ children }: { children: React.ReactNo
         const historyResult = (await historyRes.json()) as WatchHistoryResponse;
         setHistoryData(historyResult);
         setLastRefreshedAt(Date.now());
+
+        if (refresh) {
+          setRefreshCooldown(true);
+          setTimeout(() => setRefreshCooldown(false), REFRESH_COOLDOWN_MS);
+        }
 
         setError('');
       } catch (err) {
@@ -116,12 +126,13 @@ export function AuthenticatedAppProvider({ children }: { children: React.ReactNo
       lastRefreshedAt,
       isLoading,
       isRefreshing,
+      refreshCooldown,
       loadingMessage,
       error,
       refreshData: () => fetchAllData(true),
       logout,
     }),
-    [historyData, displayEmail, lastRefreshedAt, isLoading, isRefreshing, loadingMessage, error, fetchAllData, logout]
+    [historyData, displayEmail, lastRefreshedAt, isLoading, isRefreshing, refreshCooldown, loadingMessage, error, fetchAllData, logout]
   );
 
   return (

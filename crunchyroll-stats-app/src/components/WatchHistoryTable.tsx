@@ -36,11 +36,15 @@ function getCompletionColor(percent: number) {
 }
 
 function parseStartOfDay(dateString: string): number {
-  return new Date(`${dateString}T00:00:00.000Z`).getTime();
+  const [year, month, day] = dateString.split('-').map(Number);
+  if (!year || !month || !day) return Number.NaN;
+  return new Date(year, month - 1, day, 0, 0, 0, 0).getTime();
 }
 
 function parseEndOfDay(dateString: string): number {
-  return new Date(`${dateString}T23:59:59.999Z`).getTime();
+  const [year, month, day] = dateString.split('-').map(Number);
+  if (!year || !month || !day) return Number.NaN;
+  return new Date(year, month - 1, day, 23, 59, 59, 999).getTime();
 }
 
 export const WatchHistoryTable: React.FC<WatchHistoryTableProps> = ({
@@ -110,6 +114,9 @@ export const WatchHistoryTable: React.FC<WatchHistoryTableProps> = ({
     if (dateFrom || dateTo) {
       const fromMs = dateFrom ? parseStartOfDay(dateFrom) : Number.NEGATIVE_INFINITY;
       const toMs = dateTo ? parseEndOfDay(dateTo) : Number.POSITIVE_INFINITY;
+      if (Number.isNaN(fromMs) || Number.isNaN(toMs)) {
+        return [];
+      }
 
       filtered = filtered.filter((item) => {
         if (!item.watchedAt) return false;

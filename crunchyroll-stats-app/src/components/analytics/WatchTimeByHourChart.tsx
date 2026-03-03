@@ -31,7 +31,7 @@ export function WatchTimeByHourChart({ data }: Props) {
       <CardHeader className="pb-3 pt-6 text-center">
         <CardTitle>Watch Time by Hour of Day</CardTitle>
         <p className="mt-1 text-sm text-[var(--text-muted)]">
-          Peak hour: {peakHour?.hour ?? 0}:00 UTC ({peakHour?.hours.toFixed(1) ?? 0}h). Shows when you watch the most.
+          Peak hour: {peakHour?.hour ?? 0}:00 local ({peakHour?.hours.toFixed(1) ?? 0}h). Shows when you watch the most.
         </p>
       </CardHeader>
       <CardContent>
@@ -39,7 +39,7 @@ export function WatchTimeByHourChart({ data }: Props) {
           <BarChart data={data} margin={{ bottom: 20, left: 10 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="var(--chart-grid)" />
             <XAxis dataKey="hour" tick={{ fontSize: 11, fill: 'var(--chart-tick)' }} stroke="var(--chart-axis)" tickFormatter={(h: number) => `${h}:00`}>
-              <Label value="Hour of Day (UTC)" position="insideBottom" offset={-10} style={{ fontSize: 12, fill: 'var(--chart-label)' }} />
+              <Label value="Hour of Day (Local)" position="insideBottom" offset={-10} style={{ fontSize: 12, fill: 'var(--chart-label)' }} />
             </XAxis>
             <YAxis tick={{ fontSize: 12, fill: 'var(--chart-tick)' }} stroke="var(--chart-axis)">
               <Label value="Hours" angle={-90} position="insideLeft" style={{ fontSize: 12, fill: 'var(--chart-label)', textAnchor: 'middle' }} />
@@ -48,7 +48,7 @@ export function WatchTimeByHourChart({ data }: Props) {
               contentStyle={{ backgroundColor: 'var(--chart-tooltip-bg)', border: '1px solid var(--chart-tooltip-border)', borderRadius: 8, color: 'var(--chart-tooltip-text)' }}
               labelStyle={{ color: 'var(--chart-tooltip-text)' }}
               formatter={(value?: number) => [`${(value ?? 0).toFixed(1)} hours`, 'Watch Time']}
-              labelFormatter={(h) => `${h}:00 UTC`}
+              labelFormatter={(h) => `${h}:00 local`}
             />
             <Bar dataKey="hours" radius={[4, 4, 0, 0]} shape={(props: any) => {
               const { x, y, width, height, payload } = props as { x: number; y: number; width: number; height: number; payload: { hour: number } };

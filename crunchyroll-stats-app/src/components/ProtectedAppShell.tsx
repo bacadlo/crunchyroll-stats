@@ -66,7 +66,7 @@ function DashboardSkeleton({ message }: { message: string }) {
 
 function ProtectedAppFrame({ children }: { children: ReactNode }) {
   const pathname = usePathname();
-  const { historyData, displayEmail, lastRefreshedAt, isLoading, isRefreshing, loadingMessage, error, refreshData, logout } = useAuthenticatedApp();
+  const { historyData, displayEmail, lastRefreshedAt, isLoading, isRefreshing, refreshCooldown, loadingMessage, error, refreshData, logout } = useAuthenticatedApp();
   const isDashboardRoute = pathname === '/dashboard' || pathname.startsWith('/dashboard/');
   const isAnalyticsRoute = pathname === '/analytics' || pathname.startsWith('/analytics/');
   const isKnownPersistentRoute = isDashboardRoute || isAnalyticsRoute;
@@ -120,6 +120,7 @@ function ProtectedAppFrame({ children }: { children: ReactNode }) {
               displayName={displayEmail ? displayEmail.split('@')[0] : 'User'}
               lastRefreshedAt={lastRefreshedAt}
               isRefreshing={isRefreshing}
+              refreshCooldown={refreshCooldown}
               onRefresh={refreshData}
             />
           )}

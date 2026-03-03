@@ -18,6 +18,13 @@ function getColor(hours: number, max: number): string {
 
 const DAY_LABELS = ['Mon', '', 'Wed', '', 'Fri', '', 'Sun'];
 
+function createDayKeyLocal(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
 export function ActivityCalendar({ data }: Props) {
   const { cells, maxHours, activeDays, totalHours } = useMemo(() => {
     const hoursMap = new Map<string, number>();
@@ -36,7 +43,7 @@ export function ActivityCalendar({ data }: Props) {
     for (let i = 364; i >= 0; i--) {
       const d = new Date(today);
       d.setDate(d.getDate() - i);
-      const key = d.toISOString().slice(0, 10);
+      const key = createDayKeyLocal(d);
       result.push({ date: key, hours: hoursMap.get(key) ?? 0 });
     }
     return { cells: result, maxHours: max || 1, activeDays: active, totalHours: total };

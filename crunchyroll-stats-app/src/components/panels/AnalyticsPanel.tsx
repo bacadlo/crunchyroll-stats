@@ -5,7 +5,6 @@ import { Card, CardContent } from '@/components/ui/Card';
 import { useAuthenticatedApp } from '@/components/AuthenticatedAppProvider';
 import { calculateAnalyticsSummary } from '@/lib/analytics';
 import { WatchTimeRangeCard } from '@/components/analytics/WatchTimeRangeCard';
-import { AnalyticsMetricGrid } from '@/components/analytics/AnalyticsMetricGrid';
 import { GenreInsightsCard } from '@/components/analytics/GenreInsightsCard';
 import { StreakPeakCard } from '@/components/analytics/StreakPeakCard';
 import { MostBingedSeriesCard } from '@/components/analytics/MostBingedSeriesCard';
@@ -18,6 +17,8 @@ import { NewVsRewatchedChart } from '@/components/analytics/NewVsRewatchedChart'
 import { AverageSessionCard } from '@/components/analytics/AverageSessionCard';
 import { ActivityCalendar } from '@/components/analytics/ActivityCalendar';
 import { GenreOverTimeChart } from '@/components/analytics/GenreOverTimeChart';
+import { ChartInsightRow } from '@/components/analytics/ChartInsightRow';
+import { buildChartInsights } from '@/lib/chart-insights';
 
 export function AnalyticsPanel() {
   const { historyData } = useAuthenticatedApp();
@@ -28,6 +29,7 @@ export function AnalyticsPanel() {
     () => calculateAnalyticsSummary(analyticsEntries),
     [analyticsEntries]
   );
+  const insights = useMemo(() => buildChartInsights(summary), [summary]);
 
   if (!historyData) {
     return (
@@ -41,7 +43,7 @@ export function AnalyticsPanel() {
 
   return (
     <div className="space-y-6">
-      <AnalyticsMetricGrid totals={summary.totals} metricKeys={['episodes', 'movies']} />
+      <ChartInsightRow insights={insights} />
       <div className="grid gap-6 md:grid-cols-2">
         <MostBingedSeriesCard data={summary.mostBingedSeries} />
         <StreakPeakCard

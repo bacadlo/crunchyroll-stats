@@ -12,8 +12,12 @@ interface StreakPeakCardProps {
 
 function formatDate(date: string | null): string {
   if (!date) return 'N/A';
-  const parsed = new Date(`${date}T00:00:00.000Z`);
+  const [year, month, day] = date.split('-').map(Number);
+  if (!year || !month || !day) return 'N/A';
+
+  const parsed = new Date(year, month - 1, day);
   if (Number.isNaN(parsed.getTime())) return 'N/A';
+
   return parsed.toLocaleDateString('en-US', {
     year: 'numeric',
     month: 'short',
@@ -26,10 +30,16 @@ function formatHours(hours: number): string {
   return `${hours.toFixed(1)} Hours`;
 }
 
-export function StreakPeakCard({ longestStreakDays, longestStreakStart, longestStreakEnd, peakDayDate, peakDayHours }: StreakPeakCardProps) {
+export function StreakPeakCard({
+  longestStreakDays,
+  longestStreakStart,
+  longestStreakEnd,
+  peakDayDate,
+  peakDayHours,
+}: StreakPeakCardProps) {
   const streakLabel = longestStreakDays === 1 ? '1 Day' : `${longestStreakDays} Days`;
   const streakRange = longestStreakStart && longestStreakEnd
-    ? `${formatDate(longestStreakStart)} – ${formatDate(longestStreakEnd)}`
+    ? `${formatDate(longestStreakStart)} - ${formatDate(longestStreakEnd)}`
     : null;
 
   return (

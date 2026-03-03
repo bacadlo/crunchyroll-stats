@@ -8,13 +8,13 @@ interface Props {
 }
 
 const DAY_COLORS: Record<string, string> = {
-  Mon: '#1976d2',
-  Tue: '#7f70d6',
-  Wed: '#bd66cb',
-  Thu: '#ec5bb1',
-  Fri: '#ff5a8f',
-  Sat: '#ff863e',
-  Sun: '#ffa600',
+  Monday: '#1976d2',
+  Tuesday: '#7f70d6',
+  Wednesday: '#bd66cb',
+  Thursday: '#ec5bb1',
+  Friday: '#ff5a8f',
+  Saturday: '#ff863e',
+  Sunday: '#ffa600',
 };
 
 export function WatchTimeByDayChart({ data }: Props) {

@@ -16,7 +16,7 @@ beforeEach(() => {
 // Empty / edge-case inputs
 // ---------------------------------------------------------------------------
 
-describe('calculateAnalyticsSummary — empty input', () => {
+describe('calculateAnalyticsSummary - empty input', () => {
   it('returns zeroed summary for an empty array', () => {
     const result = calculateAnalyticsSummary([]);
 
@@ -40,7 +40,7 @@ describe('calculateAnalyticsSummary — empty input', () => {
 // Totals counting
 // ---------------------------------------------------------------------------
 
-describe('calculateAnalyticsSummary — totals', () => {
+describe('calculateAnalyticsSummary - totals', () => {
   it('counts distinct titles, series, episodes, and movies', () => {
     const entries = [
       createEntry({ title: 'Anime A', seriesId: 's1', contentId: 'ep1' }),
@@ -94,7 +94,7 @@ describe('calculateAnalyticsSummary — totals', () => {
 // Watch hours by range
 // ---------------------------------------------------------------------------
 
-describe('calculateAnalyticsSummary — watchedHoursByRange', () => {
+describe('calculateAnalyticsSummary - watchedHoursByRange', () => {
   it('accumulates all_time regardless of date', () => {
     const entries = [
       createEntry({ progressMs: 3_600_000, watchedAt: '2020-01-01T00:00:00.000Z' }),
@@ -127,7 +127,7 @@ describe('calculateAnalyticsSummary — watchedHoursByRange', () => {
 // Streak detection
 // ---------------------------------------------------------------------------
 
-describe('calculateAnalyticsSummary — streaks', () => {
+describe('calculateAnalyticsSummary - streaks', () => {
   it('detects a 5-day consecutive streak', () => {
     const entries = createSeriesRun(5);
     const result = calculateAnalyticsSummary(entries);
@@ -176,7 +176,7 @@ describe('calculateAnalyticsSummary — streaks', () => {
 // Peak day
 // ---------------------------------------------------------------------------
 
-describe('calculateAnalyticsSummary — peakDay', () => {
+describe('calculateAnalyticsSummary - peakDay', () => {
   it('identifies the day with the most watch time', () => {
     const entries = [
       createEntry({ watchedAt: '2025-06-01T10:00:00.000Z', progressMs: 3_600_000, contentId: 'a' }),
@@ -186,7 +186,7 @@ describe('calculateAnalyticsSummary — peakDay', () => {
 
     const result = calculateAnalyticsSummary(entries);
     expect(result.peakDay.date).toBe('2025-06-01');
-    expect(result.peakDay.hours).toBe(2); // 2 × 1h
+    expect(result.peakDay.hours).toBe(2); // 2  1h
   });
 });
 
@@ -194,7 +194,7 @@ describe('calculateAnalyticsSummary — peakDay', () => {
 // Genre metrics
 // ---------------------------------------------------------------------------
 
-describe('calculateAnalyticsSummary — genres', () => {
+describe('calculateAnalyticsSummary - genres', () => {
   it('counts unique genres and sorts top 3 by hours', () => {
     const entries = [
       createEntry({ genres: ['Action', 'Comedy'], progressMs: 7_200_000, contentId: 'a' }),
@@ -216,7 +216,7 @@ describe('calculateAnalyticsSummary — genres', () => {
 
     const result = calculateAnalyticsSummary(entries);
     expect(result.genres.total).toBe(1);
-    expect(result.genres.top3[0].hours).toBeCloseTo(1); // counted once, not 3×
+    expect(result.genres.top3[0].hours).toBeCloseTo(1); // counted once, not 3
   });
 
   it('handles entries with no genres', () => {
@@ -231,7 +231,7 @@ describe('calculateAnalyticsSummary — genres', () => {
 // Binge detection
 // ---------------------------------------------------------------------------
 
-describe('calculateAnalyticsSummary — mostBingedSeries', () => {
+describe('calculateAnalyticsSummary - mostBingedSeries', () => {
   it('detects a binge session with 3+ episodes on the same day', () => {
     const entries = createBingeSession(5, { title: 'Binge Show', seriesId: 'binge-1' });
     const result = calculateAnalyticsSummary(entries);
@@ -278,11 +278,11 @@ describe('calculateAnalyticsSummary — mostBingedSeries', () => {
 // Watch time distributions
 // ---------------------------------------------------------------------------
 
-describe('calculateAnalyticsSummary — time distributions', () => {
-  it('watchTimeByDayOfWeek has 7 entries ordered Mon-Sun', () => {
+describe('calculateAnalyticsSummary - time distributions', () => {
+  it('watchTimeByDayOfWeek has 7 entries ordered Monday-Sunday', () => {
     const result = calculateAnalyticsSummary([createEntry()]);
     const days = result.watchTimeByDayOfWeek.map((d) => d.day);
-    expect(days).toEqual(['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']);
+    expect(days).toEqual(['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']);
   });
 
   it('watchTimeByHour has 24 entries', () => {
@@ -292,11 +292,12 @@ describe('calculateAnalyticsSummary — time distributions', () => {
     expect(result.watchTimeByHour[23].hour).toBe(23);
   });
 
-  it('assigns watch time to the correct UTC hour', () => {
-    // 2025-06-15T14:00:00.000Z → hour 14
-    const entries = [createEntry({ progressMs: 3_600_000, watchedAt: '2025-06-15T14:00:00.000Z' })];
+  it('assigns watch time to the correct local hour', () => {
+    const watchedAt = '2025-06-15T14:00:00.000Z';
+    const expectedLocalHour = new Date(watchedAt).getHours();
+    const entries = [createEntry({ progressMs: 3_600_000, watchedAt })];
     const result = calculateAnalyticsSummary(entries);
-    expect(result.watchTimeByHour[14].hours).toBe(1);
+    expect(result.watchTimeByHour[expectedLocalHour].hours).toBe(1);
   });
 });
 
@@ -304,10 +305,10 @@ describe('calculateAnalyticsSummary — time distributions', () => {
 // Monthly trend
 // ---------------------------------------------------------------------------
 
-describe('calculateAnalyticsSummary — monthlyTrend', () => {
+describe('calculateAnalyticsSummary - monthlyTrend', () => {
   it('groups entries by year-month within the past year', () => {
     const now = new Date();
-    const thisMonth = `${now.getUTCFullYear()}-${String(now.getUTCMonth() + 1).padStart(2, '0')}`;
+    const thisMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
     const entries = [
       createEntry({ progressMs: 3_600_000, watchedAt: now.toISOString(), contentId: 'a' }),
       createEntry({ progressMs: 1_800_000, watchedAt: now.toISOString(), contentId: 'b' }),
@@ -348,7 +349,7 @@ describe('calculateAnalyticsSummary — monthlyTrend', () => {
 // Completion rate
 // ---------------------------------------------------------------------------
 
-describe('calculateAnalyticsSummary — averageCompletionRate', () => {
+describe('calculateAnalyticsSummary - averageCompletionRate', () => {
   it('computes average completion as ratio (0-1)', () => {
     const entries = [
       createEntry({ progressMs: 1200000, durationMs: 1200000, contentId: 'a' }), // 100%
@@ -361,7 +362,7 @@ describe('calculateAnalyticsSummary — averageCompletionRate', () => {
 
   it('caps individual completion at 1.0', () => {
     const entries = [
-      createEntry({ progressMs: 2000000, durationMs: 1000000 }), // 200% → capped to 1
+      createEntry({ progressMs: 2000000, durationMs: 1000000 }), // 200%  capped to 1
     ];
 
     const result = calculateAnalyticsSummary(entries);
@@ -383,7 +384,7 @@ describe('calculateAnalyticsSummary — averageCompletionRate', () => {
 // New vs rewatched
 // ---------------------------------------------------------------------------
 
-describe('calculateAnalyticsSummary — newVsRewatched', () => {
+describe('calculateAnalyticsSummary - newVsRewatched', () => {
   it('counts unique content as new, repeated content as rewatched', () => {
     const entries = [
       createEntry({ contentId: 'ep-1' }),
@@ -393,7 +394,7 @@ describe('calculateAnalyticsSummary — newVsRewatched', () => {
 
     const result = calculateAnalyticsSummary(entries);
     expect(result.newVsRewatched.new).toBe(1);      // ep-2 seen once
-    expect(result.newVsRewatched.rewatched).toBe(2); // ep-1 seen twice → adds count
+    expect(result.newVsRewatched.rewatched).toBe(2); // ep-1 seen twice  adds count
   });
 
   it('returns all new when no content is repeated', () => {
@@ -413,7 +414,7 @@ describe('calculateAnalyticsSummary — newVsRewatched', () => {
 // Session clustering
 // ---------------------------------------------------------------------------
 
-describe('calculateAnalyticsSummary — averageSessionMinutes', () => {
+describe('calculateAnalyticsSummary - averageSessionMinutes', () => {
   it('clusters watches within 30-min gaps into sessions', () => {
     const base = new Date('2025-06-15T10:00:00.000Z').getTime();
     const entries = [
@@ -446,7 +447,7 @@ describe('calculateAnalyticsSummary — averageSessionMinutes', () => {
 // Activity calendar
 // ---------------------------------------------------------------------------
 
-describe('calculateAnalyticsSummary — activityCalendar', () => {
+describe('calculateAnalyticsSummary - activityCalendar', () => {
   it('only includes entries from the past year', () => {
     const recent = new Date(Date.now() - 10 * 24 * 60 * 60 * 1000);
     const old = new Date(Date.now() - 400 * 24 * 60 * 60 * 1000);
@@ -494,7 +495,7 @@ describe('calculateAnalyticsSummary — activityCalendar', () => {
 // Series completion
 // ---------------------------------------------------------------------------
 
-describe('calculateAnalyticsSummary — seriesCompletion', () => {
+describe('calculateAnalyticsSummary - seriesCompletion', () => {
   it('returns top 10 series by episode count', () => {
     const entries = Array.from({ length: 12 }, (_, i) =>
       createEntry({
@@ -525,7 +526,7 @@ describe('calculateAnalyticsSummary — seriesCompletion', () => {
 // Genre over time
 // ---------------------------------------------------------------------------
 
-describe('calculateAnalyticsSummary — genreOverTime', () => {
+describe('calculateAnalyticsSummary - genreOverTime', () => {
   it('tracks top 5 genres by month within the past year', () => {
     const now = new Date();
     const entries = [
@@ -548,7 +549,7 @@ describe('calculateAnalyticsSummary — genreOverTime', () => {
 // Negative progressMs handling
 // ---------------------------------------------------------------------------
 
-describe('calculateAnalyticsSummary — edge cases', () => {
+describe('calculateAnalyticsSummary - edge cases', () => {
   it('clamps negative progressMs to 0', () => {
     const entries = [createEntry({ progressMs: -5000 })];
     const result = calculateAnalyticsSummary(entries);
@@ -571,3 +572,4 @@ describe('calculateAnalyticsSummary — edge cases', () => {
     expect(result.longestStreakDays).toBe(0);
   });
 });
+

@@ -75,7 +75,22 @@ function getEntryProgressMs(entry: HistoryEntry): number {
 }
 
 function createDayKey(date: Date): string {
-  return date.toISOString().slice(0, 10);
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+function createMonthKey(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  return `${year}-${month}`;
+}
+
+function parseDayKeyLocal(dayKey: string): number {
+  const [year, month, day] = dayKey.split('-').map(Number);
+  if (!year || !month || !day) return Number.NaN;
+  return new Date(year, month - 1, day).getTime();
 }
 
 type AnalyticsMediaType = 'episode' | 'movie' | 'season' | 'series';
@@ -257,7 +272,8 @@ export function calculateAnalyticsSummary(entries: HistoryEntry[]): AnalyticsSum
   let previousDayMs: number | null = null;
 
   for (const day of sortedDays) {
-    const dayMs = new Date(`${day}T00:00:00.000Z`).getTime();
+    const dayMs = parseDayKeyLocal(day);
+    if (Number.isNaN(dayMs)) continue;
     if (previousDayMs === null || dayMs - previousDayMs !== DAY_MS) {
       currentStreak = 1;
       currentStreakStart = day;
@@ -329,7 +345,7 @@ export function calculateAnalyticsSummary(entries: HistoryEntry[]): AnalyticsSum
 
   // Watch time by day of week
   const dayOfWeekMs = [0, 0, 0, 0, 0, 0, 0]; // Sun-Sat
-  const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
   // Watch time by hour of day
   const hourMs = new Array<number>(24).fill(0);
   // Monthly trend
@@ -358,14 +374,14 @@ export function calculateAnalyticsSummary(entries: HistoryEntry[]): AnalyticsSum
     const watchedMs = watchedDate.getTime();
 
     // Day of week
-    dayOfWeekMs[watchedDate.getUTCDay()] += progressMs;
+    dayOfWeekMs[watchedDate.getDay()] += progressMs;
 
     // Hour of day
-    hourMs[watchedDate.getUTCHours()] += progressMs;
+    hourMs[watchedDate.getHours()] += progressMs;
 
     // Monthly trend (past year)
     if (watchedMs >= oneYearAgo) {
-      const monthKey = `${watchedDate.getUTCFullYear()}-${String(watchedDate.getUTCMonth() + 1).padStart(2, '0')}`;
+      const monthKey = createMonthKey(watchedDate);
       monthlyMs.set(monthKey, (monthlyMs.get(monthKey) ?? 0) + progressMs);
     }
 
@@ -393,7 +409,7 @@ export function calculateAnalyticsSummary(entries: HistoryEntry[]): AnalyticsSum
 
     // Genre over time (past year)
     if (watchedMs >= oneYearAgo) {
-      const monthKey = `${watchedDate.getUTCFullYear()}-${String(watchedDate.getUTCMonth() + 1).padStart(2, '0')}`;
+      const monthKey = createMonthKey(watchedDate);
       const rawGenres = entry.genres ?? [];
       for (const g of rawGenres) {
         const trimmed = g.trim();
@@ -475,7 +491,8 @@ export function calculateAnalyticsSummary(entries: HistoryEntry[]): AnalyticsSum
   // Activity calendar (past year, sparse)
   const activityCalendar: { date: string; hours: number }[] = [];
   for (const [day, ms] of dayWatchMs.entries()) {
-    const dayDate = new Date(`${day}T00:00:00.000Z`).getTime();
+    const dayDate = parseDayKeyLocal(day);
+    if (Number.isNaN(dayDate)) continue;
     if (dayDate >= oneYearAgo) {
       activityCalendar.push({ date: day, hours: parseFloat(hoursFromMs(ms).toFixed(2)) });
     }
