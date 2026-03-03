@@ -63,10 +63,17 @@ export default function HomePage() {
           <FeatureCard
             icon={<Shield className="w-10 h-10" />}
             title="Secure & Private"
-            description="Your credentials are never stored. All data is fetched directly from Crunchyroll."
+            description="Your password is zeroed from memory after each request. Watch data is cached briefly, then discarded — no database, no long-term storage."
           />
         </div>
       </main>
+
+      <footer className="px-4 pb-6 sm:px-6">
+        <p className="mx-auto max-w-7xl text-center text-[10px] leading-relaxed text-[var(--text-faint)]">
+          This is an independent, fan-made project and is not affiliated with,
+          endorsed by, or associated with Crunchyroll or Sony Group Corporation.
+        </p>
+      </footer>
     </div>
   );
 }

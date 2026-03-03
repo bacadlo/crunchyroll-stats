@@ -27,8 +27,8 @@ const orbitron = localFont({
 });
 
 export const metadata: Metadata = {
-  title: 'Crunchyroll Watch List',
-  description: 'Track and analyze your Crunchyroll watch history',
+  title: 'CrunchyStats — Anime Watch History Tracker',
+  description: 'An independent tool to track and analyze your Crunchyroll watch history. Not affiliated with Crunchyroll or Sony.',
 };
 
 export default function RootLayout({

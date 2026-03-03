@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/Input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { BrandLogoIcon } from '@/components/BrandLogoIcon';
+import { LoginTrustPanel } from '@/components/login/LoginTrustPanel';
 import { AlertCircle, Eye, EyeOff } from 'lucide-react';
 
 export default function LoginPage() {
@@ -162,6 +163,10 @@ export default function LoginPage() {
                 </Button>
               </form>
 
+              <div className="mt-6">
+                <LoginTrustPanel />
+              </div>
+
               <div className="mt-6 border-t border-[var(--border)] pt-6">
                 <p className="text-center text-sm text-[var(--text-muted)]">
                   <Link href="/" className="font-medium text-primary-600 hover:text-primary-700">
@@ -170,11 +175,10 @@ export default function LoginPage() {
                 </p>
               </div>
 
-              <div className="mt-6">
-                <p className="text-center text-xs text-[var(--text-muted)]">
-                  Note: Your credentials are used only for authentication. We do not store your password or data.
-                </p>
-              </div>
+              <p className="mt-6 text-center text-[10px] leading-relaxed text-[var(--text-faint)]">
+                This is an independent, fan-made project and is not affiliated with,
+                endorsed by, or associated with Crunchyroll or Sony Group Corporation.
+              </p>
             </CardContent>
           </Card>
         </div>
