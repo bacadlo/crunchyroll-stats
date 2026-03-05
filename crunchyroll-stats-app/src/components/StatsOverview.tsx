@@ -23,10 +23,6 @@ export const StatsOverview: React.FC<StatsOverviewProps> = ({ stats, entries }) 
     return calculateAnalyticsSummary(analyticsEntries).totals;
   }, [analyticsEntries]);
 
-  const panelCardClass =
-    'group relative border-primary-500/25 transition-all duration-300 hover:border-primary-500/45';
-  const panelAccentBar = 'absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-primary-500/35 via-primary-500/70 to-primary-600/80';
-
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -66,8 +62,7 @@ export const StatsOverview: React.FC<StatsOverviewProps> = ({ stats, entries }) 
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card className={panelCardClass}>
-          <div className={panelAccentBar} />
+        <Card tier="standard" accent>
           <CardHeader className="pb-3 pt-6 text-center">
             <CardTitle>Top 5 Most Watched Anime</CardTitle>
           </CardHeader>
@@ -113,8 +108,7 @@ export const StatsOverview: React.FC<StatsOverviewProps> = ({ stats, entries }) 
           </CardContent>
         </Card>
 
-        <Card className={panelCardClass}>
-          <div className={panelAccentBar} />
+        <Card tier="standard" accent>
           <CardHeader className="pb-3 pt-6 text-center">
             <CardTitle>Recently Watched</CardTitle>
             <p className="mt-1 text-sm text-[var(--text-muted)]">Most recent entries in your watch history.</p>

@@ -19,10 +19,6 @@ function SkeletonPulse({ className = '' }: { className?: string }) {
 }
 
 function DashboardSkeleton({ message }: { message: string }) {
-  const cardClass =
-    'group relative rounded-xl border border-primary-500/25';
-  const accentBar = 'absolute inset-x-0 top-0 h-1 rounded-t-xl bg-gradient-to-r from-primary-500/35 via-primary-500/70 to-primary-600/80';
-
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-center gap-3 py-2">
@@ -32,18 +28,16 @@ function DashboardSkeleton({ message }: { message: string }) {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {Array.from({ length: 4 }).map((_, i) => (
-          <div key={i} className={cardClass}>
-            <div className={accentBar} />
+          <Card key={i} tier="standard" accent>
             <div className="p-5 space-y-3">
               <SkeletonPulse className="h-4 w-24" />
               <SkeletonPulse className="h-8 w-16" />
             </div>
-          </div>
+          </Card>
         ))}
       </div>
 
-      <div className={cardClass}>
-        <div className={accentBar} />
+      <Card tier="hero" accent>
         <div className="p-6 space-y-4">
           <div className="flex justify-between items-center">
             <SkeletonPulse className="h-6 w-40" />
@@ -61,7 +55,7 @@ function DashboardSkeleton({ message }: { message: string }) {
             </div>
           ))}
         </div>
-      </div>
+      </Card>
     </div>
   );
 }
@@ -87,16 +81,11 @@ function ProtectedAppFrame({ children }: { children: ReactNode }) {
   }
 
   if (error) {
-    const accentCardClass =
-      'group relative max-w-md w-full border-primary-500/25 transition-all duration-300 hover:border-primary-500/45';
-    const accentBar = 'absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-primary-500/35 via-primary-500/70 to-primary-600/80';
-
     return (
       <>
         <PersistentAuthenticatedNavbar />
         <div className="min-h-[calc(100vh-73px)] flex items-center justify-center px-4 sm:px-6">
-          <Card className={accentCardClass}>
-            <div className={accentBar} />
+          <Card tier="hero" accent className="max-w-md w-full">
             <CardContent className="pt-6 text-center">
               <StateMessage
                 tone="error"

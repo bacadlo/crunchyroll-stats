@@ -51,8 +51,7 @@ export function DashboardInsightHeader({
   const userName = displayName.trim() || 'Viewer';
 
   return (
-    <Card className="group relative border-primary-500/25 transition-all duration-300 hover:border-primary-500/45">
-      <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-primary-500/35 via-primary-500/70 to-primary-600/80" />
+    <Card tier="hero" accent>
       <CardContent className="px-6 py-6">
         <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-3">
           <p className="justify-self-start text-xs text-[var(--text-secondary)] sm:text-sm" aria-live="polite">

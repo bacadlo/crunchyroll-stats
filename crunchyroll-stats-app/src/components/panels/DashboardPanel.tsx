@@ -17,9 +17,6 @@ export function DashboardPanel() {
   const [mediaType, setMediaType] = useState<MediaTypeFilter>('all');
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
-  const accentCardClass =
-    'group relative border-primary-500/25 transition-all duration-300 hover:border-primary-500/45';
-  const accentBar = 'absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-primary-500/35 via-primary-500/70 to-primary-600/80';
   const hasActiveFilters =
     searchQuery.trim().length > 0
     || mediaType !== 'all'
@@ -35,8 +32,7 @@ export function DashboardPanel() {
 
   if (!historyData) {
     return (
-      <Card className={accentCardClass}>
-        <div className={accentBar} />
+      <Card tier="hero" accent>
         <CardContent>
           <StateMessage
             title="No watch history available yet"
@@ -52,8 +48,7 @@ export function DashboardPanel() {
 
   if (historyData.data.length === 0) {
     return (
-      <Card className={accentCardClass}>
-        <div className={accentBar} />
+      <Card tier="hero" accent>
         <CardHeader className="pb-3 pt-6">
           <CardTitle>Watch History (0)</CardTitle>
         </CardHeader>
@@ -73,8 +68,7 @@ export function DashboardPanel() {
   }
 
   return (
-    <Card className={accentCardClass}>
-      <div className={accentBar} />
+    <Card tier="hero" accent>
       <CardHeader className="pb-3 pt-6">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <CardTitle>Watch History ({historyData.data.length})</CardTitle>

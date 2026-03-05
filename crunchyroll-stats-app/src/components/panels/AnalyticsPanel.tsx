@@ -36,7 +36,7 @@ export function AnalyticsPanel() {
 
   if (!historyData) {
     return (
-      <Card>
+      <Card tier="standard" accent>
         <CardContent>
           <StateMessage
             title="No analytics available yet"
@@ -50,7 +50,7 @@ export function AnalyticsPanel() {
 
   if (analyticsEntries.length === 0) {
     return (
-      <Card>
+      <Card tier="standard" accent>
         <CardContent>
           <StateMessage
             title="No analyzable watch data yet"

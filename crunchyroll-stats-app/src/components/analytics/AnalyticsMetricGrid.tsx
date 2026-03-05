@@ -54,9 +54,10 @@ export function AnalyticsMetricGrid({ totals, metricKeys }: AnalyticsMetricGridP
       {visibleMetrics.map((metric) => (
         <Card
           key={metric.key}
-          className="group relative border-primary-500/25 transition-all duration-300 hover:-translate-y-0.5 hover:border-primary-500/45"
+          tier="quiet"
+          accent
+          className="hover:-translate-y-0.5"
         >
-          <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-primary-500/35 via-primary-500/70 to-primary-600/80" />
           <CardContent className="py-6 text-center">
             <div className="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-primary-900/30 text-primary-400 shadow-inner shadow-primary-500/30">
               <metric.icon className="h-5 w-5" />

@@ -10,8 +10,7 @@ interface StatCardProps {
 
 export const StatCard: React.FC<StatCardProps> = ({ title, value, subtitle, icon }) => {
   return (
-    <Card className="group relative h-full border-primary-500/25 transition-all duration-300 hover:border-primary-500/45">
-      <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-primary-500/35 via-primary-500/70 to-primary-600/80" />
+    <Card tier="standard" accent className="h-full">
       <CardContent className="flex flex-col items-center justify-center gap-2 text-center pt-10">
         {icon && (
           <div className="flex items-center justify-center rounded-full bg-gradient-to-br from-primary-900/30 to-primary-800/30 p-2 text-primary-400 shadow-sm shadow-primary-500/30">

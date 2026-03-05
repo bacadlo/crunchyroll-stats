@@ -30,9 +30,10 @@ export function ChartInsightRow({ insights }: Props) {
         return (
           <Card
             key={key}
-            className="group relative border-primary-500/25 transition-all duration-300 hover:-translate-y-0.5 hover:border-primary-500/45"
+            tier="quiet"
+            accent
+            className="hover:-translate-y-0.5"
           >
-            <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-primary-500/35 via-primary-500/70 to-primary-600/80" />
             <CardContent className="flex min-h-[136px] flex-col items-center justify-between pt-4 pb-4 text-center">
               <div className="flex items-center justify-center gap-2">
                 <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary-900/35 text-primary-300 ring-1 ring-primary-500/30">

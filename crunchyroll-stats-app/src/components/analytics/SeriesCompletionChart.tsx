@@ -20,8 +20,7 @@ export function SeriesCompletionChart({ data }: Props) {
   ];
 
   return (
-    <Card className="group relative h-full border-primary-500/25 transition-all duration-300 hover:border-primary-500/45">
-      <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-primary-500/35 via-primary-500/70 to-primary-600/80" />
+    <Card tier="standard" accent className="h-full">
       <CardHeader className="pb-3 pt-6 text-center">
         <CardTitle>Top Series by Episodes Watched</CardTitle>
         <p className="mt-1 text-sm text-[var(--text-muted)]">
