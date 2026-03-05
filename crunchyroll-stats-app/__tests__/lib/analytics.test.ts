@@ -393,8 +393,8 @@ describe('calculateAnalyticsSummary - newVsRewatched', () => {
     ];
 
     const result = calculateAnalyticsSummary(entries);
-    expect(result.newVsRewatched.new).toBe(1);      // ep-2 seen once
-    expect(result.newVsRewatched.rewatched).toBe(2); // ep-1 seen twice  adds count
+    expect(result.newVsRewatched.new).toBe(1);       // ep-2 seen once
+    expect(result.newVsRewatched.rewatched).toBe(1); // ep-1 rewatched (1 unique item)
   });
 
   it('returns all new when no content is repeated', () => {
@@ -407,6 +407,39 @@ describe('calculateAnalyticsSummary - newVsRewatched', () => {
     const result = calculateAnalyticsSummary(entries);
     expect(result.newVsRewatched.new).toBe(3);
     expect(result.newVsRewatched.rewatched).toBe(0);
+  });
+
+  it('counts multiple rewatches as single rewatched item', () => {
+    const entries = [
+      createEntry({ contentId: 'ep-1' }),
+      createEntry({ contentId: 'ep-1' }), // rewatch 1
+      createEntry({ contentId: 'ep-1' }), // rewatch 2
+      createEntry({ contentId: 'ep-2' }),
+      createEntry({ contentId: 'ep-2' }), // rewatch
+    ];
+
+    const result = calculateAnalyticsSummary(entries);
+    expect(result.newVsRewatched.new).toBe(0);       // all content was rewatched
+    expect(result.newVsRewatched.rewatched).toBe(2); // 2 unique items were rewatched
+  });
+
+  it('correctly counts mixed new and rewatched content', () => {
+    const entries = [
+      // New content
+      createEntry({ contentId: 'a' }),
+      createEntry({ contentId: 'b' }),
+      createEntry({ contentId: 'c' }),
+      // Rewatched content
+      createEntry({ contentId: 'd' }),
+      createEntry({ contentId: 'd' }),
+      createEntry({ contentId: 'e' }),
+      createEntry({ contentId: 'e' }),
+      createEntry({ contentId: 'e' }), // 3 rewatches
+    ];
+
+    const result = calculateAnalyticsSummary(entries);
+    expect(result.newVsRewatched.new).toBe(3);       // a, b, c
+    expect(result.newVsRewatched.rewatched).toBe(2); // d (2x), e (3x)
   });
 });
 

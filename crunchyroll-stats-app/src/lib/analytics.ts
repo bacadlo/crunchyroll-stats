@@ -543,7 +543,7 @@ export function calculateAnalyticsSummary(entries: HistoryEntry[]): AnalyticsSum
   let rewatchedCount = 0;
   for (const count of contentIdSeen.values()) {
     if (count === 1) newCount += 1;
-    else rewatchedCount += count;
+    else rewatchedCount += 1;
   }
   const newVsRewatched = { new: newCount, rewatched: rewatchedCount };
 
