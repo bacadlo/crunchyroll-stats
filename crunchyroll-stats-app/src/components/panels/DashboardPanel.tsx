@@ -77,7 +77,7 @@ export function DashboardPanel() {
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          <div className="text-center sm:text-left">
+          <div className="text-center">
             <DataWindowHint />
           </div>
           <FilterBar

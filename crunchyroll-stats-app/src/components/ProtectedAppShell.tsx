@@ -12,6 +12,7 @@ import { DashboardPanel } from '@/components/panels/DashboardPanel';
 import { AnalyticsPanel } from '@/components/panels/AnalyticsPanel';
 import { StatsOverview } from '@/components/StatsOverview';
 import { DashboardInsightHeader } from '@/components/DashboardInsightHeader';
+import { DataWindowHint } from '@/components/ui/DataWindowHint';
 
 
 function SkeletonPulse({ className = '' }: { className?: string }) {
@@ -113,6 +114,7 @@ function ProtectedAppFrame({ children }: { children: ReactNode }) {
       <PersistentAuthenticatedNavbar />
       <div className="min-h-screen">
         <main className="max-w-7xl mx-auto px-4 py-6 sm:px-6 sm:py-8 space-y-6 sm:space-y-8">
+          {isOverviewRoute && historyData?.stats && <div className="text-center"><DataWindowHint /></div>}
           {isOverviewRoute && historyData?.stats && (
             <DashboardInsightHeader
               entries={historyData.data}
