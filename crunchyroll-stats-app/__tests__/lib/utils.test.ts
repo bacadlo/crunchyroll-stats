@@ -1,14 +1,13 @@
 import { describe, it, expect, beforeEach } from 'vitest';
+import { cn, calculateStats } from '@/lib/utils';
 import {
-  cn,
   getCompletionPercent,
   formatDate,
   formatDuration,
   formatTotalWatchTime,
-  calculateStats,
   exportToCSV,
   exportToJSON,
-} from '@/lib/utils';
+} from '@/lib/analytics';
 import { createEntry, createMovie, resetIdCounter } from '../helpers/fixtures';
 
 beforeEach(() => {

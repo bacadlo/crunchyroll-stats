@@ -5,8 +5,7 @@ import Image from 'next/image';
 import { HistoryEntry, WatchHistoryStats } from '@/types/watch-history';
 import { StatCard } from './ui/Stats';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/Card';
-import { formatTotalWatchTime, getCompletionPercent } from '@/lib/utils';
-import { calculateAnalyticsSummary } from '@/lib/analytics';
+import { calculateAnalyticsSummary, formatTotalWatchTime, getCompletionPercent } from '@/lib/analytics';
 import { Tv, Clock, TrendingUp, BarChart3, Film } from 'lucide-react';
 import { ActivityCalendar } from '@/components/analytics/ActivityCalendar';
 
@@ -31,19 +30,19 @@ export const StatsOverview: React.FC<StatsOverviewProps> = ({ stats, entries }) 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         <StatCard
           title="Episodes Watched"
-          value={totals.episodes}
+          value={summary.totals.episodes}
           subtitle="Individual episodes completed"
           icon={<Tv className="w-6 h-6" />}
         />
         <StatCard
           title="Total Watch Time"
-          value={formatTotalWatchTime(stats.totalWatchTime)}
-          subtitle={`${Math.round(stats.totalWatchTime / 60)} hours total`}
+          value={formatTotalWatchTime(Math.round(summary.watchedHoursByRange.all_time * 60))}
+          subtitle={`${Math.round(summary.watchedHoursByRange.all_time)} hours total`}
           icon={<Clock className="w-6 h-6" />}
         />
         <StatCard
           title="Average Completion"
-          value={`${stats.averageCompletion}%`}
+          value={`${Math.round(summary.averageCompletionRate * 100)}%`}
           subtitle="Across all entries"
           icon={<TrendingUp className="w-6 h-6" />}
         />

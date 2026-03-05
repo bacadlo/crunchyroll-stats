@@ -1,4 +1,8 @@
 import { HistoryEntry, WatchHistoryStats } from '@/types/watch-history';
+import { getCompletionPercent } from '@/lib/analytics';
+
+// Re-export so existing API route imports don't break
+export { getCompletionPercent, formatDate, formatDuration, formatTotalWatchTime, exportToCSV, exportToJSON, downloadFile } from '@/lib/analytics';
 
 type ClassValue =
   | string
@@ -34,46 +38,6 @@ export function cn(...inputs: ClassValue[]): string {
 
   for (const input of inputs) add(input);
   return classes.join(' ');
-}
-
-export function getCompletionPercent(item: HistoryEntry): number {
-  if (!item.progressMs || !item.durationMs || item.durationMs === 0) return 0;
-  return Math.min(100, Math.round((item.progressMs / item.durationMs) * 100));
-}
-
-export function formatDate(dateString: string): string {
-  const date = new Date(dateString);
-  return date.toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-  });
-}
-
-export function formatDuration(ms: number): string {
-  const totalSeconds = Math.floor(ms / 1000);
-  const hours = Math.floor(totalSeconds / 3600);
-  const minutes = Math.floor((totalSeconds % 3600) / 60);
-
-  if (hours > 0) {
-    return `${hours}h ${minutes}m`;
-  }
-  return `${minutes}m`;
-}
-
-export function formatTotalWatchTime(minutes: number): string {
-  const hours = Math.floor(minutes / 60);
-  const days = Math.floor(hours / 24);
-
-  if (days > 0) {
-    const remainingHours = hours % 24;
-    return `${days}d ${remainingHours}h`;
-  }
-  if (hours > 0) {
-    const remainingMinutes = minutes % 60;
-    return `${hours}h ${remainingMinutes}m`;
-  }
-  return `${minutes}m`;
 }
 
 export function calculateStats(allHistory: HistoryEntry[]): WatchHistoryStats {
@@ -121,45 +85,4 @@ export function calculateStats(allHistory: HistoryEntry[]): WatchHistoryStats {
     averageCompletion: Math.round(averageCompletion),
     recentlyWatched,
   };
-}
-
-function sanitizeCsvValue(value: string): string {
-  // Prevent CSV injection: prefix dangerous leading characters with a single quote
-  if (/^[=+\-@\t\r]/.test(value)) {
-    return `'${value}`;
-  }
-  // Escape double quotes within the value
-  return value.replace(/"/g, '""');
-}
-
-export function exportToCSV(data: HistoryEntry[]): string {
-  const headers = ['Title', 'Episode', 'Date Watched', 'Completion %', 'Duration'];
-  const rows = data.map(item => [
-    item.title,
-    item.episodeTitle || '',
-    item.watchedAt ? formatDate(item.watchedAt) : '',
-    getCompletionPercent(item).toString(),
-    item.durationMs ? formatDuration(item.durationMs) : '',
-  ]);
-
-  return [
-    headers.join(','),
-    ...rows.map(row => row.map(cell => `"${sanitizeCsvValue(cell)}"`).join(',')),
-  ].join('\n');
-}
-
-export function exportToJSON(data: HistoryEntry[]): string {
-  return JSON.stringify(data, null, 2);
-}
-
-export function downloadFile(content: string, filename: string, mimeType: string) {
-  const blob = new Blob([content], { type: mimeType });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement('a');
-  link.href = url;
-  link.download = filename;
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-  URL.revokeObjectURL(url);
 }

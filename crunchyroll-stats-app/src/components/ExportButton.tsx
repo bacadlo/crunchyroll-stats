@@ -3,7 +3,8 @@
 import React, { useEffect, useId, useRef, useState } from 'react';
 import { Button } from './ui/Button';
 import { HistoryEntry } from '@/types/watch-history';
-import { cn, exportToCSV, exportToJSON, downloadFile } from '@/lib/utils';
+import { cn } from '@/lib/utils';
+import { exportToCSV, exportToJSON, downloadFile } from '@/lib/analytics';
 import { Download, ChevronDown } from 'lucide-react';
 
 interface ExportButtonProps {

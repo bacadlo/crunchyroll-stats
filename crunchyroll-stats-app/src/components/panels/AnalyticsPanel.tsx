@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, type ReactNode } from 'react';
 import { BarChart3 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/Card';
 import { useAuthenticatedApp } from '@/components/AuthenticatedAppProvider';
@@ -21,6 +21,15 @@ import { AverageSessionCard } from '@/components/analytics/AverageSessionCard';
 import { GenreOverTimeChart } from '@/components/analytics/GenreOverTimeChart';
 import { ChartInsightRow } from '@/components/analytics/ChartInsightRow';
 import { buildChartInsights } from '@/lib/chart-insights';
+
+function SectionHeading({ children }: { children: ReactNode }) {
+  return (
+    <div className="flex items-center gap-3 pt-4">
+      <h2 className="text-base font-semibold text-[var(--text)] whitespace-nowrap sm:text-lg">{children}</h2>
+      <div className="h-px flex-1 bg-[var(--border)]" />
+    </div>
+  );
+}
 
 export function AnalyticsPanel() {
   const { historyData } = useAuthenticatedApp();
@@ -66,8 +75,15 @@ export function AnalyticsPanel() {
         <DataWindowHint />
       </div>
       <ChartInsightRow insights={insights} />
+
+      {/* Watching Patterns */}
+      <SectionHeading>Watching Patterns</SectionHeading>
+      <MonthlyTrendChart data={summary.monthlyTrend} />
       <div className="grid gap-6 md:grid-cols-2">
-        <MostBingedSeriesCard data={summary.mostBingedSeries} />
+        <WatchTimeByDayChart data={summary.watchTimeByDayOfWeek} />
+        <WatchTimeByHourChart data={summary.watchTimeByHour} />
+      </div>
+      <div className="grid gap-6 md:grid-cols-2">
         <StreakPeakCard
           longestStreakDays={summary.longestStreakDays}
           longestStreakStart={summary.longestStreakStart}
@@ -75,30 +91,25 @@ export function AnalyticsPanel() {
           peakDayDate={summary.peakDay.date}
           peakDayHours={summary.peakDay.hours}
         />
-      </div>
-      <div className="grid gap-6 md:grid-cols-2">
-        <WatchTimeRangeCard hoursByRange={summary.watchedHoursByRange} />
-        <GenreInsightsCard totalGenres={summary.genres.total} topGenres={summary.genres.top3} />
-      </div>
-
-      <MonthlyTrendChart data={summary.monthlyTrend} />
-
-      <div className="grid gap-6 md:grid-cols-2">
-        <WatchTimeByDayChart data={summary.watchTimeByDayOfWeek} />
-        <WatchTimeByHourChart data={summary.watchTimeByHour} />
-      </div>
-
-      <div className="grid gap-6 md:grid-cols-2">
-        <CompletionRateCard rate={summary.averageCompletionRate} />
         <AverageSessionCard minutes={summary.averageSessionMinutes} />
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2">
-        <SeriesCompletionChart data={summary.seriesCompletion} />
+      {/* Content & Genres */}
+      <SectionHeading>Content &amp; Genres</SectionHeading>
+      <div className="grid gap-6 md:grid-cols-3">
+        <MostBingedSeriesCard data={summary.mostBingedSeries} />
+        <GenreInsightsCard totalGenres={summary.genres.total} topGenres={summary.genres.top3} />
         <NewVsRewatchedChart data={summary.newVsRewatched} />
       </div>
-
       <GenreOverTimeChart data={summary.genreOverTime} />
+
+      {/* Completion */}
+      <SectionHeading>Completion</SectionHeading>
+      <div className="grid gap-6 md:grid-cols-2">
+        <CompletionRateCard rate={summary.averageCompletionRate} />
+        <WatchTimeRangeCard hoursByRange={summary.watchedHoursByRange} />
+      </div>
+      <SeriesCompletionChart data={summary.seriesCompletion} />
     </div>
   );
 }

@@ -3,7 +3,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import Image from 'next/image';
 import { HistoryEntry } from '@/types/watch-history';
-import { formatDate, formatDuration, getCompletionPercent } from '@/lib/utils';
+import { formatDate, formatDuration, getCompletionPercent } from '@/lib/analytics';
 import { ArrowDown, ArrowUp, ArrowUpDown, ChevronLeft, ChevronRight, Tv } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { MediaTypeFilter } from '@/components/FilterBar';
