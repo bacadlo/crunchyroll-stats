@@ -8,7 +8,7 @@ import { BarChart3, LayoutDashboard, Menu } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const MENU_ITEMS = [
-  { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+  { href: '/overview', label: 'Overview', icon: LayoutDashboard },
   { href: '/analytics', label: 'Analytics', icon: BarChart3 },
 ];
 

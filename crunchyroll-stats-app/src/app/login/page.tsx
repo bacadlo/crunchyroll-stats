@@ -21,7 +21,7 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    router.prefetch('/dashboard');
+    router.prefetch('/overview');
   }, [router]);
 
   useEffect(() => {
@@ -66,7 +66,7 @@ export default function LoginPage() {
       }
 
       localStorage.setItem('cr_display_email', data.email);
-      router.push('/dashboard');
+      router.push('/overview');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Authentication failed');
     } finally {

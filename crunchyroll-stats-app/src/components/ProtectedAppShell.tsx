@@ -63,9 +63,9 @@ function DashboardSkeleton({ message }: { message: string }) {
 function ProtectedAppFrame({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const { historyData, displayEmail, lastRefreshedAt, isLoading, isRefreshing, refreshCooldown, loadingMessage, error, refreshData, logout } = useAuthenticatedApp();
-  const isDashboardRoute = pathname === '/dashboard' || pathname.startsWith('/dashboard/');
+  const isOverviewRoute = pathname === '/overview' || pathname.startsWith('/overview/');
   const isAnalyticsRoute = pathname === '/analytics' || pathname.startsWith('/analytics/');
-  const isKnownPersistentRoute = isDashboardRoute || isAnalyticsRoute;
+  const isKnownPersistentRoute = isOverviewRoute || isAnalyticsRoute;
 
   if (isLoading) {
     return (
@@ -112,7 +112,7 @@ function ProtectedAppFrame({ children }: { children: ReactNode }) {
       <PersistentAuthenticatedNavbar />
       <div className="min-h-screen">
         <main className="max-w-7xl mx-auto px-4 py-6 sm:px-6 sm:py-8 space-y-6 sm:space-y-8">
-          {isDashboardRoute && historyData?.stats && (
+          {isOverviewRoute && historyData?.stats && (
             <DashboardInsightHeader
               entries={historyData.data}
               displayName={displayEmail ? displayEmail.split('@')[0] : 'User'}
@@ -122,8 +122,8 @@ function ProtectedAppFrame({ children }: { children: ReactNode }) {
               onRefresh={refreshData}
             />
           )}
-          {isDashboardRoute && historyData?.stats && <StatsOverview stats={historyData.stats} entries={historyData.data} />}
-          {isDashboardRoute && <DashboardPanel />}
+          {isOverviewRoute && historyData?.stats && <StatsOverview stats={historyData.stats} entries={historyData.data} />}
+          {isOverviewRoute && <DashboardPanel />}
           {isAnalyticsRoute && <AnalyticsPanel />}
           {!isKnownPersistentRoute ? children : null}
         </main>

@@ -18,7 +18,6 @@ import { CompletionRateCard } from '@/components/analytics/CompletionRateCard';
 import { SeriesCompletionChart } from '@/components/analytics/SeriesCompletionChart';
 import { NewVsRewatchedChart } from '@/components/analytics/NewVsRewatchedChart';
 import { AverageSessionCard } from '@/components/analytics/AverageSessionCard';
-import { ActivityCalendar } from '@/components/analytics/ActivityCalendar';
 import { GenreOverTimeChart } from '@/components/analytics/GenreOverTimeChart';
 import { ChartInsightRow } from '@/components/analytics/ChartInsightRow';
 import { buildChartInsights } from '@/lib/chart-insights';
@@ -81,8 +80,6 @@ export function AnalyticsPanel() {
         <WatchTimeRangeCard hoursByRange={summary.watchedHoursByRange} />
         <GenreInsightsCard totalGenres={summary.genres.total} topGenres={summary.genres.top3} />
       </div>
-
-      <ActivityCalendar data={summary.activityCalendar} />
 
       <MonthlyTrendChart data={summary.monthlyTrend} />
 

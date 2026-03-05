@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from './ui/Card';
 import { formatTotalWatchTime, getCompletionPercent } from '@/lib/utils';
 import { calculateAnalyticsSummary } from '@/lib/analytics';
 import { Tv, Clock, TrendingUp, BarChart3, Film } from 'lucide-react';
+import { ActivityCalendar } from '@/components/analytics/ActivityCalendar';
 
 interface StatsOverviewProps {
   stats: WatchHistoryStats;
@@ -19,9 +20,11 @@ export const StatsOverview: React.FC<StatsOverviewProps> = ({ stats, entries }) 
     return entries.filter((entry) => !!entry.watchedAt);
   }, [entries]);
 
-  const totals = useMemo(() => {
-    return calculateAnalyticsSummary(analyticsEntries).totals;
+  const summary = useMemo(() => {
+    return calculateAnalyticsSummary(analyticsEntries);
   }, [analyticsEntries]);
+
+  const totals = summary.totals;
 
   return (
     <div className="space-y-6">
@@ -60,6 +63,8 @@ export const StatsOverview: React.FC<StatsOverviewProps> = ({ stats, entries }) 
           icon={<Film className="w-6 h-6" />}
         />
       </div>
+
+      <ActivityCalendar data={summary.activityCalendar} />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card tier="standard" accent>
