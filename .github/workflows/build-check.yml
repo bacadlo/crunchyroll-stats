@@ -18,12 +18,9 @@ jobs:
             ~/.cargo/git
             crunchyroll-stats-api/target
           key: ${{ runner.os }}-cargo-${{ hashFiles('crunchyroll-stats-api/Cargo.lock') }}
-      - name: Build
+      - name: Clippy (compile + lint)
         working-directory: crunchyroll-stats-api
-        run: cargo build --release
-      - name: Check for warnings
-        working-directory: crunchyroll-stats-api
-        run: cargo clippy -- -D warnings
+        run: cargo clippy --release -- -D warnings
 
   nextjs-build:
     runs-on: ubuntu-latest
@@ -31,7 +28,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '24'
           cache: 'npm'
           cache-dependency-path: crunchyroll-stats-app/package-lock.json
       - name: Install dependencies

@@ -134,7 +134,7 @@ crunchyroll-stats/
 │   ├── package.json
 │   └── Dockerfile
 ├── .github/workflows/
-│   ├── build-check.yml             # Rust build+clippy, Next.js typecheck+lint+build
+│   ├── build-check.yml             # Rust clippy, Next.js typecheck+lint+build
 │   └── security-audit.yml          # Weekly cargo audit + npm audit
 ├── docker-compose.yml
 └── .env.api / .env.app             # Environment config (not committed)
