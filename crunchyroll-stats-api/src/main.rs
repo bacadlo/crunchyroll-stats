@@ -141,7 +141,7 @@ async fn get_watch_history(
         }
     }
 }
-
+ 
 async fn fetch_watch_history(
     email: &str,
     password: &str,

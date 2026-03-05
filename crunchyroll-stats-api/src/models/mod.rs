@@ -5,7 +5,7 @@ pub use history::{HistoryEntry, HistoryResponse, Image};
 use serde::{Deserialize, Serialize};
 use validator::Validate;
 use zeroize::{Zeroize, ZeroizeOnDrop};
-
+ 
 #[derive(Deserialize, Validate, Zeroize, ZeroizeOnDrop)]
 pub struct LoginRequest {
     #[validate(email, length(max = 254))]
