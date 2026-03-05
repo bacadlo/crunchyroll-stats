@@ -4,12 +4,13 @@ import { useEffect, useId, useRef, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { BrandLogoIcon } from '@/components/BrandLogoIcon';
-import { BarChart3, LayoutDashboard, Menu } from 'lucide-react';
+import { BarChart3, LayoutDashboard, Menu, ScrollText } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const MENU_ITEMS = [
   { href: '/overview', label: 'Overview', icon: LayoutDashboard },
   { href: '/analytics', label: 'Analytics', icon: BarChart3 },
+  { href: '/history', label: 'History', icon: ScrollText },
 ];
 
 export function TopNavMenu() {

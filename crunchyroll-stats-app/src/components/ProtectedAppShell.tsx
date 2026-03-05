@@ -64,8 +64,9 @@ function ProtectedAppFrame({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const { historyData, displayEmail, lastRefreshedAt, isLoading, isRefreshing, refreshCooldown, loadingMessage, error, refreshData, logout } = useAuthenticatedApp();
   const isOverviewRoute = pathname === '/overview' || pathname.startsWith('/overview/');
+  const isHistoryRoute = pathname === '/history' || pathname.startsWith('/history/');
   const isAnalyticsRoute = pathname === '/analytics' || pathname.startsWith('/analytics/');
-  const isKnownPersistentRoute = isOverviewRoute || isAnalyticsRoute;
+  const isKnownPersistentRoute = isOverviewRoute || isHistoryRoute || isAnalyticsRoute;
 
   if (isLoading) {
     return (
@@ -123,7 +124,7 @@ function ProtectedAppFrame({ children }: { children: ReactNode }) {
             />
           )}
           {isOverviewRoute && historyData?.stats && <StatsOverview stats={historyData.stats} entries={historyData.data} />}
-          {isOverviewRoute && <DashboardPanel />}
+          {isHistoryRoute && <DashboardPanel />}
           {isAnalyticsRoute && <AnalyticsPanel />}
           {!isKnownPersistentRoute ? children : null}
         </main>
