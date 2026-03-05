@@ -226,8 +226,8 @@ export function calculateAnalyticsSummary(entries: HistoryEntry[]): AnalyticsSum
 
   const titles = new Set<string>();
   const series = new Set<string>();
-  const movies = new Set<string>();
-  const episodes = new Set<string>();
+  let movieCount = 0;
+  let episodeCount = 0;
   const genresByKey = new Map<string, GenreAccumulator>();
   const dayWatchMs = new Map<string, number>();
   const watchedDays = new Set<string>();
@@ -263,16 +263,11 @@ export function calculateAnalyticsSummary(entries: HistoryEntry[]): AnalyticsSum
     if (analyticsMediaType === 'episode') {
       const seriesKey = (entry.seriesId ?? entry.title).trim().toLowerCase();
       if (seriesKey) series.add(seriesKey);
-
-      const episodeKey = (entry.contentId ?? `${entry.title}::${entry.episodeTitle ?? ''}`)
-        .trim()
-        .toLowerCase();
-      if (episodeKey) episodes.add(episodeKey);
+      episodeCount += 1;
     }
 
     if (analyticsMediaType === 'movie') {
-      const movieKey = (entry.contentId ?? entry.title).trim().toLowerCase();
-      if (movieKey) movies.add(movieKey);
+      movieCount += 1;
     }
 
     if (analyticsMediaType === 'season' || analyticsMediaType === 'series') {
@@ -613,8 +608,8 @@ export function calculateAnalyticsSummary(entries: HistoryEntry[]): AnalyticsSum
     totals: {
       titles: titles.size,
       series: series.size,
-      movies: movies.size,
-      episodes: episodes.size,
+      movies: movieCount,
+      episodes: episodeCount,
     },
     genres: {
       total: genresByKey.size,

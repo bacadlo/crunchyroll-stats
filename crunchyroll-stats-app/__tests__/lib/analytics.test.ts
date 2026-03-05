@@ -41,7 +41,7 @@ describe('calculateAnalyticsSummary - empty input', () => {
 // ---------------------------------------------------------------------------
 
 describe('calculateAnalyticsSummary - totals', () => {
-  it('counts distinct titles, series, episodes, and movies', () => {
+  it('counts distinct titles and series; counts all episode and movie watches', () => {
     const entries = [
       createEntry({ title: 'Anime A', seriesId: 's1', contentId: 'ep1' }),
       createEntry({ title: 'Anime A', seriesId: 's1', contentId: 'ep2' }),
@@ -51,10 +51,10 @@ describe('calculateAnalyticsSummary - totals', () => {
 
     const result = calculateAnalyticsSummary(entries);
 
-    expect(result.totals.titles).toBe(3); // Anime A, Anime B, Movie X
-    expect(result.totals.series).toBe(2); // s1, s2
-    expect(result.totals.episodes).toBe(3); // ep1, ep2, ep3
-    expect(result.totals.movies).toBe(1);
+    expect(result.totals.titles).toBe(3); // Anime A, Anime B, Movie X (unique)
+    expect(result.totals.series).toBe(2); // s1, s2 (unique)
+    expect(result.totals.episodes).toBe(3); // 3 episode watches
+    expect(result.totals.movies).toBe(1);  // 1 movie watch
   });
 
   it('deduplicates titles case-insensitively', () => {
@@ -65,6 +65,29 @@ describe('calculateAnalyticsSummary - totals', () => {
 
     const result = calculateAnalyticsSummary(entries);
     expect(result.totals.titles).toBe(1);
+  });
+
+  it('counts rewatched episodes in total episode count', () => {
+    const entries = [
+      createEntry({ title: 'Anime A', seriesId: 's1', contentId: 'ep1' }),
+      createEntry({ title: 'Anime A', seriesId: 's1', contentId: 'ep1' }), // rewatch
+      createEntry({ title: 'Anime A', seriesId: 's1', contentId: 'ep1' }), // rewatch again
+    ];
+
+    const result = calculateAnalyticsSummary(entries);
+    expect(result.totals.titles).toBe(1);    // 1 unique title
+    expect(result.totals.series).toBe(1);    // 1 unique series
+    expect(result.totals.episodes).toBe(3);  // 3 episode watches (including rewatches)
+  });
+
+  it('counts rewatched movies in total movie count', () => {
+    const entries = [
+      createMovie({ title: 'Movie X', contentId: 'movie1' }),
+      createMovie({ title: 'Movie X', contentId: 'movie1' }), // rewatch
+    ];
+
+    const result = calculateAnalyticsSummary(entries);
+    expect(result.totals.movies).toBe(2); // 2 movie watches
   });
 
   it('skips entries with unrecognized mediaType', () => {
