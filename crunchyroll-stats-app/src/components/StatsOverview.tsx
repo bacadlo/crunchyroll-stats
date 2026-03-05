@@ -6,7 +6,7 @@ import { HistoryEntry, WatchHistoryStats } from '@/types/watch-history';
 import { StatCard } from './ui/Stats';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/Card';
 import { calculateAnalyticsSummary, formatTotalWatchTime, getCompletionPercent } from '@/lib/analytics';
-import { Tv, Clock, TrendingUp, BarChart3, Film } from 'lucide-react';
+import { Tv, Clock, TrendingUp, BarChart3, Film, Library } from 'lucide-react';
 import { ActivityCalendar } from '@/components/analytics/ActivityCalendar';
 
 interface StatsOverviewProps {
@@ -29,10 +29,10 @@ export const StatsOverview: React.FC<StatsOverviewProps> = ({ stats, entries }) 
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         <StatCard
-          title="Episodes Watched"
-          value={summary.totals.episodes}
-          subtitle="Individual episodes completed"
-          icon={<Tv className="w-6 h-6" />}
+          title="Total Titles Watched"
+          value={totals.series + totals.movies}
+          subtitle="Series and movies combined"
+          icon={<Library className="w-6 h-6" />}
         />
         <StatCard
           title="Total Watch Time"
@@ -48,7 +48,13 @@ export const StatsOverview: React.FC<StatsOverviewProps> = ({ stats, entries }) 
         />
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <StatCard
+          title="Episodes Watched"
+          value={summary.totals.episodes}
+          subtitle="Individual episodes completed"
+          icon={<Tv className="w-6 h-6" />}
+        />
         <StatCard
           title="Series Watched"
           value={totals.series}
