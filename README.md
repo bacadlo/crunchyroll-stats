@@ -19,14 +19,18 @@ A full-stack analytics dashboard for Crunchyroll watch history. Rust backend, Ne
 
 - **Watch History** — browse your last year of activity with real-time search, sorting, and pagination
 - **Analytics Dashboard** — computed from your watch data with the following insights:
-  - **Watch Time** — total hours tracked across multiple time ranges (today, last week, last month, last year)
+  - **Watch Time** — total hours across multiple time ranges (today, last week, last month, last year)
   - **Library Totals** — unique titles, series, movies, and episodes watched
   - **Genre Breakdown** — top 3 genres ranked by hours watched, with title counts per genre
   - **Longest Streak** — consecutive days with at least one watch session
   - **Peak Day** — the single day you watched the most, with total hours
-  - **Most Binged Series** — the series you watched 3+ episodes of in one day, ranked by episode count and hours
+  - **Most Binged Series** — series watched 3+ episodes of in one day, ranked by episode count and hours
+  - **Completion Rate** — percentage of started series with all available episodes watched
+  - **Average Session** — mean watch time per day across your active days
+  - **Charts** — monthly trend, hours by day of week, hours by hour of day, top series by episode count, new vs. rewatched split, genre share over time
+  - **Activity Calendar** — heatmap of daily watch hours over the past year
 - **Data Export** — download history as CSV or JSON
-- **Theming** — dark and light mode with system preference detection
+- **Theming** — dark and light mode toggle, persisted to localStorage
 - **Session Security** — httpOnly cookie-based sessions with CSRF protection, server-side expiration, and rate limiting
 - **Security Headers** — CSP, X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Permissions-Policy
 - **Multi-Layer Caching** — 60-minute TTL on both Rust API and Next.js server layers to minimize redundant API calls
@@ -40,7 +44,7 @@ Browser ──▸ Cloudflare (SSL) -> Nginx -> Next.js (port 3000) ──▸ Rus
 ```
 
 - **Next.js** handles authentication, serves the frontend, and proxies data requests to the Rust backend via internal Docker networking
-- **Rust API** authenticates with Crunchyroll, fetches watch history (capped to the last 365 days), resolves genre metadata per series/movie, and caches results in memory
+- **Rust API** authenticates with Crunchyroll, fetches watch history (capped to the last 365 days), resolves genre metadata per series/movie, caches results in memory, and enforces per-IP rate limiting
 - **Containers** communicate over an isolated Docker network; only the frontend is exposed externally
 
 ## Getting Started
@@ -107,35 +111,3 @@ Starts at `http://localhost:3000`.
 | `NEXT_PUBLIC_APP_URL` | `http://localhost:3000` | Public-facing app URL |
 | `SESSION_SECRET` | — | 64-char hex string for cookie signing |
 | `NODE_ENV` | `development` | `development` or `production` |
-
-## Project Structure
-
-```
-crunchyroll-stats/
-├── crunchyroll-stats-api/          # Rust backend
-│   ├── src/
-│   │   ├── main.rs                 # HTTP routes, server bootstrap
-│   │   ├── auth.rs                 # Crunchyroll credential auth
-│   │   ├── history.rs              # Watch history pagination + genre resolution
-│   │   ├── cache.rs                # In-memory TTL cache
-│   │   └── models/                 # Request/response data models
-│   ├── Cargo.toml
-│   └── Dockerfile
-├── crunchyroll-stats-app/          # Next.js frontend
-│   ├── src/
-│   │   ├── app/                    # App Router pages + API routes
-│   │   ├── components/
-│   │   │   ├── analytics/          # Chart and insight components
-│   │   │   ├── panels/             # Dashboard, history panels
-│   │   │   ├── ui/                 # Reusable UI primitives
-│   │   │   └── *.tsx               # Auth shell, navbar, filters, export
-│   │   ├── lib/                    # Analytics engine, API client, caching
-│   │   └── types/                  # TypeScript interfaces
-│   ├── package.json
-│   └── Dockerfile
-├── .github/workflows/
-│   ├── build-check.yml             # Rust clippy, Next.js typecheck+lint+build
-│   └── security-audit.yml          # Weekly cargo audit + npm audit
-├── docker-compose.yml
-└── .env.api / .env.app             # Environment config (not committed)
-```
