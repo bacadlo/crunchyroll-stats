@@ -8,6 +8,28 @@ interface RustImage {
   width: number;
 }
 
+export class InvalidCredentialsError extends Error {
+  constructor() {
+    super('Invalid email or password');
+    this.name = 'InvalidCredentialsError';
+  }
+}
+
+export async function validateCredentials(email: string, password: string): Promise<void> {
+  try {
+    await axios.post(`${RUST_API_URL}/api/auth`, { email, password });
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      if (error.response?.status === 401) {
+        throw new InvalidCredentialsError();
+      }
+      const errorMsg = error.response?.data?.error || error.message;
+      throw new Error(`Authentication service error: ${errorMsg}`);
+    }
+    throw new Error('Authentication service unavailable');
+  }
+}
+
 export async function getRustWatchHistory(
   email: string,
   password: string,

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { validateCsrfToken } from '@/lib/csrf';
+import { validateCredentials, InvalidCredentialsError } from '@/lib/crunchyroll/rust-api-client';
 
 const loginSchema = z.object({
   email: z.string().min(1, 'Email is required').email('Invalid email address'),
@@ -19,9 +20,6 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-
-    console.log('Login attempt for:', body.email);
-
     const result = loginSchema.safeParse(body);
     if (!result.success) {
       return NextResponse.json(
@@ -31,10 +29,11 @@ export async function POST(request: NextRequest) {
     }
 
     const { email, password, rememberMe } = result.data;
+
+    await validateCredentials(email, password);
+
     const maxAge = rememberMe ? 60 * 60 * 24 * 30 : 60 * 60;
     const expiresAt = Date.now() + maxAge * 1000;
-
-    console.log('Credentials validated, storing session...');
 
     const response = NextResponse.json({
       success: true,
@@ -62,14 +61,18 @@ export async function POST(request: NextRequest) {
 
     return response;
   } catch (error) {
+    if (error instanceof InvalidCredentialsError) {
+      return NextResponse.json(
+        { success: false, error: 'Invalid email or password' },
+        { status: 401 }
+      );
+    }
+
     console.error('Authentication error:', error);
 
     return NextResponse.json(
-      {
-        success: false,
-        error: error instanceof Error ? error.message : 'Authentication failed',
-      },
-      { status: 401 }
+      { success: false, error: 'Authentication service unavailable' },
+      { status: 503 }
     );
   }
 }
