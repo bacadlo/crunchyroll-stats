@@ -6,10 +6,22 @@ vi.mock('@/lib/csrf', () => ({
   validateCsrfToken: vi.fn(),
 }));
 
+vi.mock('@/lib/crunchyroll/rust-api-client', () => ({
+  validateCredentials: vi.fn(),
+  InvalidCredentialsError: class InvalidCredentialsError extends Error {
+    constructor() {
+      super('Invalid email or password');
+      this.name = 'InvalidCredentialsError';
+    }
+  },
+}));
+
 import { POST, DELETE } from '@/app/api/auth/route';
 import { validateCsrfToken } from '@/lib/csrf';
+import { validateCredentials, InvalidCredentialsError } from '@/lib/crunchyroll/rust-api-client';
 
 const mockValidateCsrf = vi.mocked(validateCsrfToken);
+const mockValidateCredentials = vi.mocked(validateCredentials);
 
 function makePostRequest(body: unknown, csrfToken?: string): NextRequest {
   return new NextRequest('http://localhost/api/auth', {
@@ -33,10 +45,12 @@ function makeDeleteRequest(csrfToken?: string): NextRequest {
 
 beforeEach(() => {
   vi.clearAllMocks();
+  // Default: credentials are valid
+  mockValidateCredentials.mockResolvedValue(undefined);
 });
 
 // ---------------------------------------------------------------------------
-// POST /api/auth
+// POST /api/auth — CSRF validation
 // ---------------------------------------------------------------------------
 
 describe('POST /api/auth — CSRF validation', () => {
@@ -58,7 +72,18 @@ describe('POST /api/auth — CSRF validation', () => {
     expect(response.status).toBe(403);
     expect(body.success).toBe(false);
   });
+
+  it('does not call validateCredentials when CSRF fails', async () => {
+    mockValidateCsrf.mockReturnValue(false);
+    await POST(makePostRequest({ email: 'a@b.com', password: 'pass' }, 'bad-token'));
+
+    expect(mockValidateCredentials).not.toHaveBeenCalled();
+  });
 });
+
+// ---------------------------------------------------------------------------
+// POST /api/auth — input validation
+// ---------------------------------------------------------------------------
 
 describe('POST /api/auth — input validation', () => {
   beforeEach(() => {
@@ -96,7 +121,71 @@ describe('POST /api/auth — input validation', () => {
 
     expect(response.status).toBe(400);
   });
+
+  it('does not call validateCredentials when input is invalid', async () => {
+    await POST(makePostRequest({ email: 'not-an-email', password: 'pass' }, 'valid-token'));
+
+    expect(mockValidateCredentials).not.toHaveBeenCalled();
+  });
 });
+
+// ---------------------------------------------------------------------------
+// POST /api/auth — credential validation
+// ---------------------------------------------------------------------------
+
+describe('POST /api/auth — credential validation', () => {
+  beforeEach(() => {
+    mockValidateCsrf.mockReturnValue(true);
+  });
+
+  it('returns 401 when credentials are invalid', async () => {
+    mockValidateCredentials.mockRejectedValue(new InvalidCredentialsError());
+
+    const response = await POST(
+      makePostRequest({ email: 'user@example.com', password: 'wrongpass' }, 'valid-token')
+    );
+    const body = await response.json() as { success: boolean; error: string };
+
+    expect(response.status).toBe(401);
+    expect(body.success).toBe(false);
+    expect(body.error).toMatch(/invalid email or password/i);
+  });
+
+  it('does not set cr_session cookie when credentials are invalid', async () => {
+    mockValidateCredentials.mockRejectedValue(new InvalidCredentialsError());
+
+    const response = await POST(
+      makePostRequest({ email: 'user@example.com', password: 'wrongpass' }, 'valid-token')
+    );
+
+    expect(response.cookies.get('cr_session')).toBeUndefined();
+  });
+
+  it('returns 503 when the authentication service is unavailable', async () => {
+    mockValidateCredentials.mockRejectedValue(new Error('Authentication service unavailable'));
+
+    const response = await POST(
+      makePostRequest({ email: 'user@example.com', password: 'secret' }, 'valid-token')
+    );
+    const body = await response.json() as { success: boolean; error: string };
+
+    expect(response.status).toBe(503);
+    expect(body.success).toBe(false);
+  });
+
+  it('calls validateCredentials with the parsed email and password', async () => {
+    const response = await POST(
+      makePostRequest({ email: 'user@example.com', password: 'secret' }, 'valid-token')
+    );
+
+    expect(response.status).toBe(200);
+    expect(mockValidateCredentials).toHaveBeenCalledWith('user@example.com', 'secret');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// POST /api/auth — successful login
+// ---------------------------------------------------------------------------
 
 describe('POST /api/auth — successful login', () => {
   beforeEach(() => {
@@ -173,12 +262,16 @@ describe('POST /api/auth — successful login', () => {
   });
 });
 
+// ---------------------------------------------------------------------------
+// POST /api/auth — malformed request
+// ---------------------------------------------------------------------------
+
 describe('POST /api/auth — malformed request', () => {
   beforeEach(() => {
     mockValidateCsrf.mockReturnValue(true);
   });
 
-  it('returns 401 when body is not valid JSON', async () => {
+  it('returns 503 when body is not valid JSON', async () => {
     const request = new NextRequest('http://localhost/api/auth', {
       method: 'POST',
       headers: {
@@ -189,7 +282,7 @@ describe('POST /api/auth — malformed request', () => {
     });
     const response = await POST(request);
 
-    expect(response.status).toBe(401);
+    expect(response.status).toBe(503);
   });
 });
 
