@@ -17,6 +17,11 @@ pub struct LoginRequest {
 }
 
 #[derive(Debug, Serialize)]
+pub struct AuthResponse {
+    pub success: bool,
+}
+
+#[derive(Debug, Serialize)]
 pub struct ErrorResponse {
     pub error: String,
 }
