@@ -11,31 +11,31 @@
     "test:watch": "vitest"
   },
   "dependencies": {
-    "axios": "1.13.5",
+    "axios": "1.14.0",
     "date-fns": "4.1.0",
-    "lucide-react": "0.574.0",
-    "next": "16.1.7",
+    "lucide-react": "1.7.0",
+    "next": "16.2.1",
     "react": "19.2.4",
     "react-dom": "19.2.4",
-    "react-hook-form": "7.71.2",
-    "recharts": "3.7.0",
+    "react-hook-form": "7.72.0",
+    "recharts": "3.8.1",
     "uuid": "13.0.0",
     "zod": "4.3.6"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
-    "@types/node": "^25.2.3",
+    "@types/node": "^25.5.0",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@types/uuid": "^10.0.0",
-    "@vitejs/plugin-react": "^5.1.4",
-    "autoprefixer": "^10.4.24",
+    "@vitejs/plugin-react": "^5.2.0",
+    "autoprefixer": "^10.4.27",
     "babel-plugin-react-compiler": "1.0.0",
-    "eslint": "^10.0.0",
-    "eslint-config-next": "16.1.6",
-    "postcss": "^8.5.6",
-    "tailwindcss": "^4.1.18",
-    "typescript": "^5",
-    "vitest": "^4.0.18"
+    "eslint": "^10.1.0",
+    "eslint-config-next": "16.2.1",
+    "postcss": "^8.5.8",
+    "tailwindcss": "^4.2.2",
+    "typescript": "^6.0.2",
+    "vitest": "^4.1.2"
   }
 }
