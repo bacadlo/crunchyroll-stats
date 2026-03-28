@@ -10,7 +10,7 @@ use std::env;
 use std::net::IpAddr;
 use auth::CrunchyrollClient;
 use cache::AppCache;
-use models::{ErrorResponse, HealthResponse, HistoryResponse, LoginRequest};
+use models::{AuthResponse, ErrorResponse, HealthResponse, HistoryResponse, LoginRequest};
 use rate_limit::RateLimiter;
 use tracing_actix_web::TracingLogger;
 use validator::Validate;
@@ -59,6 +59,7 @@ async fn main() -> std::io::Result<()> {
             .app_data(web::Data::from(cache.clone()))
             .app_data(web::Data::from(rate_limiter.clone()))
             .route("/health", web::get().to(health_check))
+            .route("/api/auth", web::post().to(validate_credentials))
             .route("/api/watch-history", web::post().to(get_watch_history))
     })
     .bind(&bind_address)?
@@ -77,6 +78,49 @@ fn peer_ip(req: &HttpRequest) -> IpAddr {
     req.peer_addr()
         .map(|addr| addr.ip())
         .unwrap_or(IpAddr::V4(std::net::Ipv4Addr::UNSPECIFIED))
+}
+
+async fn validate_credentials(
+    http_req: HttpRequest,
+    req: web::Json<LoginRequest>,
+    limiter: web::Data<RateLimiter>,
+) -> Result<HttpResponse> {
+    let ip = peer_ip(&http_req);
+
+    if limiter.is_blocked(ip).await {
+        tracing::warn!(ip = %ip, event = "rate_limited");
+        return Ok(HttpResponse::TooManyRequests().json(ErrorResponse {
+            error: "Too many failed attempts. Try again later.".to_string(),
+        }));
+    }
+
+    let mut login = req.into_inner();
+
+    if let Err(e) = login.validate() {
+        tracing::warn!(ip = %ip, event = "validation_failed", error = %e);
+        login.zeroize();
+        return Ok(HttpResponse::BadRequest().json(ErrorResponse {
+            error: "Invalid request".to_string(),
+        }));
+    }
+
+    let result = CrunchyrollClient::new(&login.email, &login.password).await;
+    login.zeroize();
+
+    match result {
+        Ok(_) => {
+            tracing::info!(ip = %ip, event = "auth_success");
+            limiter.record_success(ip).await;
+            Ok(HttpResponse::Ok().json(AuthResponse { success: true }))
+        }
+        Err(e) => {
+            tracing::warn!(ip = %ip, event = "auth_failed", error = %e);
+            limiter.record_failure(ip).await;
+            Ok(HttpResponse::Unauthorized().json(ErrorResponse {
+                error: "Invalid credentials".to_string(),
+            }))
+        }
+    }
 }
 
 async fn get_watch_history(
