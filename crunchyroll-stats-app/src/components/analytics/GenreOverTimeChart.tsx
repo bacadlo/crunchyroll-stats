@@ -79,7 +79,7 @@ export function GenreOverTimeChart({ data }: Props) {
               <Tooltip
                 contentStyle={{ backgroundColor: '#2a2a2a', border: '1px solid #444444', borderRadius: 8, color: '#f0f0f0' }}
                 labelStyle={{ color: '#f0f0f0' }}
-                formatter={(value?: number, name?: string) => [`${(value ?? 0).toFixed(1)}h`, name ?? '']}
+                formatter={(value, name) => [`${Number(value ?? 0).toFixed(1)}h`, String(name ?? '')]}
               />
               <Legend
                 formatter={(value) => <span style={{ color: 'var(--chart-tick)' }}>{value}</span>}

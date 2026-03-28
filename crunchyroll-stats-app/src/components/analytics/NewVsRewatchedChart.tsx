@@ -58,7 +58,7 @@ export function NewVsRewatchedChart({ data }: Props) {
               </Pie>
               <Tooltip
                 contentStyle={{ backgroundColor: 'var(--chart-tooltip-bg)', border: '1px solid var(--chart-tooltip-border)', borderRadius: 8, color: 'var(--chart-tooltip-text)' }}
-                formatter={(value?: number, name?: string) => [`${value ?? 0} entries`, name ?? '']}
+                formatter={(value, name) => [`${value ?? 0} entries`, String(name ?? '')]}
               />
               <Legend
                 formatter={(value) => <span style={{ color: 'var(--chart-tick)' }}>{value}</span>}

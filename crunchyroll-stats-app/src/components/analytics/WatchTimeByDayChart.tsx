@@ -57,7 +57,7 @@ export function WatchTimeByDayChart({ data }: Props) {
               <Tooltip
                 contentStyle={{ backgroundColor: 'var(--chart-tooltip-bg)', border: '1px solid var(--chart-tooltip-border)', borderRadius: 8, color: 'var(--chart-tooltip-text)' }}
                 labelStyle={{ color: 'var(--chart-tooltip-text)' }}
-                formatter={(value?: number) => [`${(value ?? 0).toFixed(1)} hours`, 'Watch Time']}
+                formatter={(value) => [`${Number(value ?? 0).toFixed(1)} hours`, 'Watch Time']}
               />
               <Bar dataKey="hours" radius={[4, 4, 0, 0]} shape={(props: any) => {
                 const { x, y, width, height, payload } = props as { x: number; y: number; width: number; height: number; payload: { day: string } };

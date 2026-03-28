@@ -54,7 +54,7 @@ export function MonthlyTrendChart({ data }: Props) {
                 contentStyle={{ backgroundColor: 'var(--chart-tooltip-bg)', border: '1px solid var(--chart-tooltip-border)', borderRadius: 8, color: 'var(--chart-tooltip-text)' }}
                 labelStyle={{ color: 'var(--chart-tooltip-text)' }}
                 itemStyle={{ color: '#000000' }}
-                formatter={(value?: number) => [`${(value ?? 0).toFixed(1)} hours`, 'Watch Time']}
+                formatter={(value) => [`${Number(value ?? 0).toFixed(1)} hours`, 'Watch Time']}
               />
               <Line type="monotone" dataKey="hours" stroke="#f47521" strokeWidth={2.5} dot={{ r: 4, fill: '#f47521', stroke: '#ff863e', strokeWidth: 1 }} activeDot={{ r: 7, fill: '#ff5a8f', stroke: '#f47521', strokeWidth: 2 }} />
             </LineChart>

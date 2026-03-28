@@ -50,7 +50,7 @@ export function SeriesCompletionChart({ data }: Props) {
               <Tooltip
                 contentStyle={{ backgroundColor: 'var(--chart-tooltip-bg)', border: '1px solid var(--chart-tooltip-border)', borderRadius: 8, color: 'var(--chart-tooltip-text)' }}
                 labelStyle={{ color: 'var(--chart-tooltip-text)' }}
-                formatter={(value?: number) => [`${value ?? 0} episodes`, 'Watched']}
+                formatter={(value) => [`${value ?? 0} episodes`, 'Watched']}
               />
               <Bar dataKey="watched" radius={[0, 4, 4, 0]}>
                 {data.map((_, i) => (
