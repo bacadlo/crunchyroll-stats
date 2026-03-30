@@ -76,3 +76,57 @@ impl RateLimiter {
         entries.remove(&ip);
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::net::Ipv4Addr;
+
+    fn ip(a: u8) -> IpAddr {
+        IpAddr::V4(Ipv4Addr::new(127, 0, 0, a))
+    }
+
+    // RateLimiter::new() spawns a background cleanup task, so all tests need a tokio runtime.
+
+    #[tokio::test]
+    async fn new_ip_is_not_blocked() {
+        let limiter = RateLimiter::new();
+        assert!(!limiter.is_blocked(ip(1)).await);
+    }
+
+    #[tokio::test]
+    async fn not_blocked_before_max_failures() {
+        let limiter = RateLimiter::new();
+        for _ in 0..MAX_FAILURES - 1 {
+            limiter.record_failure(ip(2)).await;
+        }
+        assert!(!limiter.is_blocked(ip(2)).await);
+    }
+
+    #[tokio::test]
+    async fn blocked_after_max_failures() {
+        let limiter = RateLimiter::new();
+        for _ in 0..MAX_FAILURES {
+            limiter.record_failure(ip(3)).await;
+        }
+        assert!(limiter.is_blocked(ip(3)).await);
+    }
+
+    #[tokio::test]
+    async fn success_clears_block() {
+        let limiter = RateLimiter::new();
+        for _ in 0..MAX_FAILURES {
+            limiter.record_failure(ip(4)).await;
+        }
+        assert!(limiter.is_blocked(ip(4)).await);
+        limiter.record_success(ip(4)).await;
+        assert!(!limiter.is_blocked(ip(4)).await);
+    }
+
+    #[tokio::test]
+    async fn success_on_unknown_ip_does_not_panic() {
+        let limiter = RateLimiter::new();
+        limiter.record_success(ip(5)).await;
+        assert!(!limiter.is_blocked(ip(5)).await);
+    }
+}

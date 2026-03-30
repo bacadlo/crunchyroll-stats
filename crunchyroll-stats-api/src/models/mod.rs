@@ -31,3 +31,60 @@ pub struct HealthResponse {
     pub status: String,
     pub version: String,
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn valid_credentials_pass() {
+        let req = LoginRequest {
+            email: "user@example.com".to_string(),
+            password: "password123".to_string(),
+            force_refresh: false,
+        };
+        assert!(req.validate().is_ok());
+    }
+
+    #[test]
+    fn invalid_email_fails() {
+        let req = LoginRequest {
+            email: "not-an-email".to_string(),
+            password: "password123".to_string(),
+            force_refresh: false,
+        };
+        assert!(req.validate().is_err());
+    }
+
+    #[test]
+    fn empty_password_fails() {
+        let req = LoginRequest {
+            email: "user@example.com".to_string(),
+            password: "".to_string(),
+            force_refresh: false,
+        };
+        assert!(req.validate().is_err());
+    }
+
+    #[test]
+    fn password_too_long_fails() {
+        let req = LoginRequest {
+            email: "user@example.com".to_string(),
+            password: "a".repeat(129),
+            force_refresh: false,
+        };
+        assert!(req.validate().is_err());
+    }
+
+    #[test]
+    fn email_too_long_fails() {
+        // 255-char email: local part padded to push total over 254
+        let local = "a".repeat(244);
+        let req = LoginRequest {
+            email: format!("{}@x.com", local),
+            password: "password123".to_string(),
+            force_refresh: false,
+        };
+        assert!(req.validate().is_err());
+    }
+}
