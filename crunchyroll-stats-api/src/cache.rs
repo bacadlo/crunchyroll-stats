@@ -36,7 +36,7 @@ impl AppCache {
     }
 
     pub fn cache_key(email: &str) -> String {
-        use sha2::{Sha256, Digest};
+        use sha2::{Digest, Sha256};
         let mut hasher = Sha256::new();
         hasher.update(email.as_bytes());
         hex::encode(hasher.finalize())
@@ -126,7 +126,7 @@ mod tests {
     async fn set_and_get_history_returns_data() {
         let cache = AppCache::new();
         let data = vec![make_entry("item-0"), make_entry("item-1")];
-        cache.set_history("key1".to_string(), data.clone()).await;
+        cache.set_history("key1".to_string(), data).await;
 
         let result = cache.get_history("key1").await;
         assert!(result.is_some());

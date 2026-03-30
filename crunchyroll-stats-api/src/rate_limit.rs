@@ -86,8 +86,6 @@ mod tests {
         IpAddr::V4(Ipv4Addr::new(127, 0, 0, a))
     }
 
-    // RateLimiter::new() spawns a background cleanup task, so all tests need a tokio runtime.
-
     #[tokio::test]
     async fn new_ip_is_not_blocked() {
         let limiter = RateLimiter::new();

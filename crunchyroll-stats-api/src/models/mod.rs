@@ -35,6 +35,7 @@ pub struct HealthResponse {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use validator::Validate;
 
     #[test]
     fn valid_credentials_pass() {
@@ -78,7 +79,7 @@ mod tests {
 
     #[test]
     fn email_too_long_fails() {
-        // 255-char email: local part padded to push total over 254
+        // local part padded to push total over 254 chars
         let local = "a".repeat(244);
         let req = LoginRequest {
             email: format!("{}@x.com", local),
