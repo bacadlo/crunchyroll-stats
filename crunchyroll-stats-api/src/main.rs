@@ -165,35 +165,35 @@ async fn get_watch_history(
     tracing::info!(ip = %ip, event = "fetch_start");
     let limit = Some(100);
 
-    // Authenticate and fetch, then zero out credentials before processing result.
-    let result = fetch_watch_history(&login.email, &login.password, limit).await;
+    let client = CrunchyrollClient::new(&login.email, &login.password).await;
     login.zeroize();
+
+    let client = match client {
+        Ok(client) => {
+            limiter.record_success(ip).await;
+            client
+        }
+        Err(error) => {
+            tracing::warn!(ip = %ip, event = "auth_failed", error = %error);
+            limiter.record_failure(ip).await;
+            return Ok(HttpResponse::Unauthorized().json(ErrorResponse {
+                error: "Invalid credentials".to_string(),
+            }));
+        }
+    };
+    let result = history::History::new(&client).fetch_history(limit).await;
 
     match result {
         Ok(data) => {
             tracing::info!(ip = %ip, event = "fetch_success", items = data.len());
-            limiter.record_success(ip).await;
             cache.set_history(cache_key, data.clone()).await;
             Ok(HttpResponse::Ok().json(HistoryResponse { data }))
         }
         Err(e) => {
             tracing::error!(ip = %ip, event = "fetch_failed", error = %e);
-            limiter.record_failure(ip).await;
             Ok(HttpResponse::InternalServerError().json(ErrorResponse {
                 error: "Failed to fetch watch history".to_string(),
             }))
         }
     }
-}
- 
-async fn fetch_watch_history(
-    email: &str,
-    password: &str,
-    limit: Option<usize>,
-) -> anyhow::Result<Vec<models::HistoryEntry>> {
-    let client = CrunchyrollClient::new(email, password).await?;
-    let history = history::History::new(&client);
-    let items = history.fetch_history(limit).await?;
-    tracing::info!(event = "history_retrieved", items = items.len());
-    Ok(items)
 }

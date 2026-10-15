@@ -8,6 +8,16 @@ pub struct History<'a> {
     client: &'a CrunchyrollClient,
 }
 
+fn is_history_page_boundary(
+    kind: &crunchyroll_rs::error::ErrorKind,
+    message: Option<&str>,
+    entries_received: usize,
+) -> bool {
+    matches!(kind, crunchyroll_rs::error::ErrorKind::Request { status: Some(status) } if status.as_u16() == 400)
+        && entries_received > 0
+        && message == Some("content.get_watch_history_v2.format_validation_error: (content.get_watch_history_v2.invalid_value: {\"field\":\"page\"})")
+}
+
 impl<'a> History<'a> {
     pub fn new(client: &'a CrunchyrollClient) -> Self {
         Self { client }
@@ -25,8 +35,23 @@ impl<'a> History<'a> {
 
         let cutoff = Utc::now() - Duration::days(365);
         let mut index = 0usize;
+        let mut entries_received = 0usize;
         while let Some(entry) = pagination.next().await {
-            let entry = entry?;
+            let entry = match entry {
+                Ok(entry) => entry,
+                Err(error)
+                    if is_history_page_boundary(error.kind(), error.message(), entries_received) =>
+                {
+                    tracing::warn!(
+                        event = "history_page_boundary",
+                        entries_received,
+                        "Crunchyroll rejected the next history page; returning available history"
+                    );
+                    break;
+                }
+                Err(error) => return Err(error.into()),
+            };
+            entries_received += 1;
 
             if entry.date_played < cutoff {
                 break;
@@ -204,5 +229,44 @@ impl<'a> History<'a> {
         }
 
         Ok(history)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crunchyroll_rs::error::ErrorKind;
+
+    const PAGE_ERROR: &str = "content.get_watch_history_v2.format_validation_error: (content.get_watch_history_v2.invalid_value: {\"field\":\"page\"})";
+
+    #[test]
+    fn accepts_page_boundary_only_after_receiving_history() {
+        let kind = ErrorKind::Request {
+            status: Some(400.try_into().unwrap()),
+        };
+        assert!(is_history_page_boundary(&kind, Some(PAGE_ERROR), 1000));
+        assert!(!is_history_page_boundary(&kind, Some(PAGE_ERROR), 0));
+    }
+
+    #[test]
+    fn does_not_hide_other_upstream_errors() {
+        let bad_request = ErrorKind::Request {
+            status: Some(400.try_into().unwrap()),
+        };
+        let server_error = ErrorKind::Request {
+            status: Some(500.try_into().unwrap()),
+        };
+        assert!(!is_history_page_boundary(
+            &server_error, Some(PAGE_ERROR), 1000
+        ));
+        assert!(!is_history_page_boundary(
+            &ErrorKind::Authentication, Some(PAGE_ERROR), 1000
+        ));
+        assert!(!is_history_page_boundary(&bad_request, None, 1000));
+        assert!(!is_history_page_boundary(
+            &bad_request,
+            Some(&PAGE_ERROR.replace("\"page\"", "\"page_size\"")),
+            1000
+        ));
     }
 }
